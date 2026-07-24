@@ -49,6 +49,19 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 Group by `category`, `product` — เรียงตาม Discount% สูงสุด
 
+### มิติเพิ่มเติมสำหรับ Drilldown
+
+| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
+|-----------|--------|------------|-------------|
+| เกรดแฟชั่น | `Fashion_Grade_Desc` | Non-Repeat, Repeat, Re-Order | สินค้า Repeat/Re-Order ควรมี Margin ดีกว่า Non-Repeat — ถ้าไม่ใช่ = Discount สูงเกินไป |
+| ราคาตั้ง vs ราคาขายจริง | `Selling_Price` vs `PriceAfterDiscount_AVG` | 1595 vs 390 | Gap Analysis — ดูว่า Discount จริงห่างจากราคาตั้งเท่าไร |
+
+**การใช้งาน:**
+- ถ้า user ถาม "Discount ตามเกรดสินค้า" → GROUP BY `Fashion_Grade_Desc` ดู Discount% และ Margin% แต่ละเกรด
+- ถ้า user ถาม "ราคาป้าย vs ราคาขายจริง" → เปรียบเทียบ `AVG(Selling_Price)` กับ `AVG(PriceAfterDiscount_AVG)` ตาม category
+- สินค้า Re-Order ที่ Discount% สูง = สัญญาณว่าอาจ over-discount สินค้าที่ควรขายได้ full price
+- Cross: `Fashion_Grade_Desc` × `category` → หาว่า category ไหนที่สินค้า Repeat ถูก discount หนัก
+
 ---
 
 ## Step 4 — Problem Zone (Thresholds)

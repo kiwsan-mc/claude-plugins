@@ -75,6 +75,19 @@ Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, SQM>0, IS NOT NULL
 
 Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
+### มิติเพิ่มเติมสำหรับ Drilldown
+
+| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
+|-----------|--------|------------|-------------|
+| Cluster (กลุ่มสาขา) | `Cluster` | A1-A3, B2-B4, C2-C4, D3-D4, E3-E4, S1-S3 | เปรียบเทียบ Sales/Sqm ตาม Cluster — กลุ่ม A ควรมี efficiency สูงกว่า C |
+| ขนาดร้าน | `Space_Range` | XS, S, M, L, XL | ร้านเล็ก (XS/S) มี Sales/Sqm ดีกว่าร้านใหญ่ (L/XL) หรือไม่ |
+
+**การใช้งาน:**
+- ถ้า user ถาม "Sales per Sqm ตาม Cluster" → GROUP BY `Cluster` แสดง Avg Sales/Sqm ของแต่ละ Cluster
+- ถ้า user ถาม "ขนาดร้านไหนมี efficiency ดีสุด" → GROUP BY `Space_Range` เรียงตาม Sales/Sqm
+- Cross: Cluster × Space_Range → ดูว่าร้านใหญ่กลุ่ม A ทำได้ดีแค่ไหน
+- filter `Cluster IS NOT NULL` และ `Space_Range IS NOT NULL` เมื่อใช้ dimension เหล่านี้
+
 ---
 
 ## Step 7 — Response

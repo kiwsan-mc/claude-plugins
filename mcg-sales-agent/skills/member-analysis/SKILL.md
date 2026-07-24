@@ -61,6 +61,18 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 Group by `member_group` (Existing/New) และ `member_generation`
 
+### มิติเพิ่มเติมสำหรับ Drilldown
+
+| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
+|-----------|--------|------------|-------------|
+| เพศสมาชิก | `member_gender` | M (ชาย), F (หญิง), S (ไม่ระบุ), N (Non-Member), - | วิเคราะห์ ATV/UPT ตามเพศ — เพศไหนใช้จ่ายเฉลี่ยสูงกว่า |
+
+**การใช้งาน:**
+- ถ้า user ถาม "สมาชิกชาย vs หญิง" → GROUP BY `member_gender` WHERE member_type = 'Member'
+- ถ้า user ถาม "เพศไหนซื้อเยอะกว่า" → เปรียบเทียบ ATV/UPT ระหว่าง M กับ F
+- filter `member_gender IN ('M','F')` เมื่อวิเคราะห์เฉพาะสมาชิกที่ระบุเพศ (ตัด N, S, - ออก)
+- สามารถ cross กับ `member_generation` ได้ เช่น GEN Z หญิง vs GEN Z ชาย
+
 ---
 
 ## Step 4 — Channel Store Member%
