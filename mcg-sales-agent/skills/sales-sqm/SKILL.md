@@ -35,7 +35,7 @@ tools:
 
 ## Step 2 — คำนวณ Sales per Sqm.
 
-ข้อมูล `New_SQM` อยู่ใน column `New_SQM` ของ Branch Snapshot (v2) — New_SQM เป็นค่าคงที่ต่อสาขา (New_SQM เท่ากันทุกรายการของสาขาเดียวกัน)
+ข้อมูล `New_SQM` อยู่ใน column `New_SQM` ของตาราง `dbo.mcg_aiplatform_sales` — New_SQM เป็นค่าคงที่ต่อสาขา (New_SQM เท่ากันทุกรายการของสาขาเดียวกัน, หน่วย: ตารางเมตร, อาจเป็น NULL ถ้าไม่มีข้อมูลพื้นที่)
 
 ---
 
@@ -119,7 +119,7 @@ Group by: `branch_code`, `Name_3` (ชื่อสาขา), `CHANGWAT_T` (จ�
 
 **Bottom 5 สาขา** — Sales per Sqm. ต่ำสุด (มีข้อมูล SQM และมียอดขาย)
 
-ต้อง filter สาขาที่ `New_SQM > 0` เท่านั้น
+ต้อง filter สาขาที่ `New_SQM > 0` AND `New_SQM IS NOT NULL` เท่านั้น
 
 ## Step 5 — คำนวณ Margin% รายสาขา
 
@@ -143,13 +143,13 @@ Group by `CHANGWAT_T` — แสดง Sales per Sqm. เฉลี่ยแล�
 
 **ตารางที่ 1: Top 5 สาขา — Sales per Sqm. สูงสุด**
 
-| อันดับ | สาขา | จังหวัด | SQM | Sales/Sqm FY27 | Sales/Sqm FY26 | YoY% | Margin% |
-|--------|------|---------|-----|----------------|----------------|------|---------|
+| อันดับ | สาขา | จังหวัด | New_SQM | Sales/Sqm FY27 | Sales/Sqm FY26 | YoY% | Margin% |
+|--------|------|---------|---------|----------------|----------------|------|---------|
 
 **ตารางที่ 2: Bottom 5 สาขา — Sales per Sqm. ต่ำสุด**
 
-| อันดับ | สาขา | จังหวัด | SQM | Sales/Sqm FY27 | Sales/Sqm FY26 | YoY% | Margin% |
-|--------|------|---------|-----|----------------|----------------|------|---------|
+| อันดับ | สาขา | จังหวัด | New_SQM | Sales/Sqm FY27 | Sales/Sqm FY26 | YoY% | Margin% |
+|--------|------|---------|---------|----------------|----------------|------|---------|
 
 **ตารางที่ 3: Sales per Sqm. แยกตามจังหวัด (Top 10)**
 
@@ -172,6 +172,6 @@ Group by `CHANGWAT_T` — แสดง Sales per Sqm. เฉลี่ยแล�
 # Output Rules (เพิ่มเติมจากกฎหลัก)
 
 - วิเคราะห์เฉพาะ OFFLINE เท่านั้นสำหรับ Sales per Sqm.
-- ต้อง filter `New_SQM > 0` ก่อนคำนวณ
+- ต้อง filter `New_SQM > 0 AND New_SQM IS NOT NULL` ก่อนคำนวณ
 - ใช้ `SUM(New_SQM)` ในการคำนวณ
 - แนวทางปรับปรุงต้องอ้างอิงข้อมูลที่มีอยู่ ไม่ใช่สมมติฐานล้วนๆ
