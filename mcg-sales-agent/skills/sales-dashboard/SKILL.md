@@ -51,8 +51,8 @@ tools:
 | Non-Member Tickets | `SUM(ticket_count) - SUM(member_count)` |
 | Member Ticket % | `CAST(CAST(SUM(member_count) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) * 100 AS FLOAT)` |
 | Total Qty | `SUM(total_quantity)` |
-| ATV | `CAST(CAST(SUM(CASE WHEN ticket_count > 0 THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0) AS FLOAT)` ✅ **FIXED: Filter ticket_count > 0** |
-| UPT | `CAST(CAST(SUM(CASE WHEN ticket_count > 0 THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0) AS FLOAT)` ✅ **FIXED: Filter ticket_count > 0** |
+| ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)` |
+| UPT | `CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)` |
 | ASP | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(total_quantity) AS FLOAT), 0) AS FLOAT)` |
 | Product Mix % | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(SUM(total_exc_vat_price)) OVER () AS FLOAT), 0) * 100 AS FLOAT)` — ใช้กับ GROUP BY product |
 | Member Sales | `SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END)` |
@@ -66,8 +66,8 @@ tools:
 | YoY Growth % | `CAST((FY27 - FY26) / NULLIF(FY26, 0) * 100 AS FLOAT)` |
 
 ### 🔧 Formula Updates (2026-07-24)
-- **ATV**: Fixed to exclude returns (filter ticket_count > 0) — Result: -40% vs old formula
-- **UPT**: Fixed to exclude returns (filter ticket_count > 0) — Result: -50% vs old formula
+- **ATV**: ใช้สูตร `SUM(total_exc_vat_price) / SUM(ticket_count)` — รวมทุกรายการ
+- **UPT**: ใช้สูตร `SUM(total_quantity) / SUM(ticket_count)` — รวมทุกรายการ
 - **Member Ticket %**: ใช้ `SUM(member_count)` แทน `CASE WHEN member_type` — แม่นยำกว่า
 - **Member/Non-Member ATV/UPT**: ใช้ `member_count` เป็นตัวหารสำหรับ Member และ `ticket_count - member_count` สำหรับ Non-Member
 - **Product Mix %**: สูตรใหม่ ใช้ window function `SUM() OVER ()` หา Total โดยไม่ต้อง JOIN
@@ -76,12 +76,12 @@ tools:
 ## Step 3 — ดึง KPI แยกตาม Main Channel
 
 แยก `main_channel` (OFFLINE / ONLINE) — ใช้ query แยกจาก Step 2
-- Use corrected ATV & UPT formulas above for each channel
+- Use ATV & UPT formulas above for each channel
 
 ## Step 4 — ดึง KPI แยกตาม Channel Store
 
 แยก `channel_store` — เรียงตาม Net Sales สูงสุด — แสดง Top 10
-- Use corrected ATV & UPT formulas above for each channel store
+- Use ATV & UPT formulas above for each channel store
 
 ## Step 5 — สร้าง Response
 
@@ -124,4 +124,4 @@ tools:
 - ใช้ emoji status ตาม KPI Thresholds ในกฎหลัก
 - ASP = Average Selling Price = Net Sales ÷ Qty
 - ห้ามรวม Marketplace ในการคำนวณ Member % (ตามกฎหลัก Section 9)
-- ✅ **ATV & UPT**: Filter ticket_count > 0 to exclude returns (updated 2026-07-24)
+- **ATV & UPT**: ใช้ `SUM(total_exc_vat_price) / SUM(ticket_count)` และ `SUM(total_quantity) / SUM(ticket_count)`

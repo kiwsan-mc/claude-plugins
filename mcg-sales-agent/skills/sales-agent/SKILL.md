@@ -470,23 +470,19 @@ AS FLOAT)
 
 ### ATV — Average Transaction Value (ยอดขายเฉลี่ยต่อใบเสร็จ)
 
-**⚠️ ต้อง filter `ticket_count > 0` เพื่อไม่รวมรายการคืนสินค้า**
-
 ```sql
 CAST(
-    CAST(SUM(CASE WHEN ticket_count > 0 THEN total_exc_vat_price ELSE 0 END) AS FLOAT)
-    / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0)
+    CAST(SUM(total_exc_vat_price) AS FLOAT)
+    / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0)
 AS FLOAT)
 ```
 
 ### UPT — Units Per Transaction (จำนวนสินค้าเฉลี่ยต่อใบเสร็จ)
 
-**⚠️ ต้อง filter `ticket_count > 0` เพื่อไม่รวมรายการคืนสินค้า**
-
 ```sql
 CAST(
-    CAST(SUM(CASE WHEN ticket_count > 0 THEN total_quantity ELSE 0 END) AS FLOAT)
-    / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0)
+    CAST(SUM(total_quantity) AS FLOAT)
+    / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0)
 AS FLOAT)
 ```
 
