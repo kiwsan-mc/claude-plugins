@@ -623,7 +623,36 @@ AS FLOAT)
 
 ## Sales per Square Meter (SQM) KPIs
 
-### Net Sales Runrate — ประมาณการยอดขายเต็มเดือน
+### 🎯 การเลือกสูตรตามจุดประสงค์ของ User
+
+| User ถามว่า | ใช้สูตร |
+|-------------|---------|
+| "Sales per Sqm", "ยอดขายต่อตารางเมตร", "ประสิทธิภาพพื้นที่" | **Branch Sales per Sqm** |
+| "Runrate", "ประมาณการ", "คาดว่าจะได้เท่าไร", "เต็มเดือน" | **Net Sales Runrate** |
+| "Sales per Sqm Runrate", "ประมาณการต่อตารางเมตร" | **Sales per Sqm Runrate** |
+
+⚠️ **ถ้าผู้ใช้ถาม "Runrate" โดยไม่พูดถึง SQM → ใช้ Net Sales Runrate เท่านั้น ห้ามเอา SQM มาหาร**
+
+---
+
+### Branch Sales per Sqm (ยอดขายจริง ÷ พื้นที่ — ไม่มี Runrate)
+
+**ใช้เมื่อ:** ต้องการดูประสิทธิภาพพื้นที่จากยอดขายที่เกิดขึ้นจริงแล้ว
+
+```sql
+CAST(
+    CAST(SUM(total_exc_vat_price) AS FLOAT)
+    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
+AS FLOAT)
+```
+
+GROUP BY `branch_code` — SQM เป็นค่าคงที่ต่อสาขา (SQM เท่ากันทุกรายการของสาขาเดียวกัน)
+
+---
+
+### Net Sales Runrate (ประมาณการยอดขายเต็มเดือน — ไม่เกี่ยวกับ SQM)
+
+**ใช้เมื่อ:** ผู้ใช้ถาม "Runrate", "ประมาณการ", "คาดว่าเดือนนี้จะได้เท่าไร"
 
 ```
 Net Sales Runrate = (Net Sales MTD / จำนวนวันที่มีข้อมูล) × จำนวนวันเต็มเดือน
@@ -637,7 +666,11 @@ CAST(
 AS FLOAT)
 ```
 
-### Sales per Sqm — Runrate-based (ประมาณการเต็มเดือน ÷ พื้นที่ขาย)
+---
+
+### Sales per Sqm Runrate (ประมาณการเต็มเดือน ÷ พื้นที่ขาย)
+
+**ใช้เมื่อ:** ผู้ใช้ถามทั้ง "Runrate" และ "per Sqm" ในคำถามเดียวกัน
 
 ```sql
 CAST(
@@ -649,17 +682,6 @@ CAST(
     / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
 AS FLOAT)
 ```
-
-### Branch Sales per Sqm — Sales per Sqm รายสาขา
-
-```sql
-CAST(
-    CAST(SUM(total_exc_vat_price) AS FLOAT)
-    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
-AS FLOAT)
-```
-
-**หมายเหตุ**: GROUP BY `branch_code` — SQM เป็นค่าคงที่ต่อสาขา (SQM เท่ากันทุกรายการของสาขาเดียวกัน)
 
 ---
 
