@@ -147,6 +147,17 @@
       "category": "development",
       "source": "./skill-creator",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/skill-creator"
+    },
+    {
+      "name": "mcg-sales-agent",
+      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-sales-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-sales-agent"
     }
   ]
 }
