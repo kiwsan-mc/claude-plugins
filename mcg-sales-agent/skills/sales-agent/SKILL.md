@@ -128,16 +128,16 @@ v2: `CASE WHEN member_count > ticket_count THEN ticket_count ELSE member_count E
 
 ทุก % ใช้ `CAST(... AS FLOAT)` — CAST numerator & denominator BEFORE division
 
-### ATV (FIXED: filter ticket_count>0)
+### ATV — Average Transaction Value (ยอดขายเฉลี่ยต่อใบเสร็จ)
+
 ```sql
-CAST(CAST(SUM(CASE WHEN ticket_count>0 THEN total_exc_vat_price ELSE 0 END) AS FLOAT)
-/ NULLIF(CAST(SUM(CASE WHEN ticket_count>0 THEN ticket_count ELSE 0 END) AS FLOAT),0) AS FLOAT)
+CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)
 ```
 
-### UPT (FIXED: filter ticket_count>0)
+### UPT — Units Per Transaction (จำนวนสินค้าเฉลี่ยต่อใบเสร็จ)
+
 ```sql
-CAST(CAST(SUM(CASE WHEN ticket_count>0 THEN total_quantity ELSE 0 END) AS FLOAT)
-/ NULLIF(CAST(SUM(CASE WHEN ticket_count>0 THEN ticket_count ELSE 0 END) AS FLOAT),0) AS FLOAT)
+CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)
 ```
 
 ### Member Sales % (FIXED: exclude Marketplace)
@@ -258,4 +258,3 @@ Member Ticket% (SHOP): ≥80%=🟢, 75-79%=🟡, <75%=🔴
 
 # 22. Final Validation (10 checks)
 1. ข้อมูลจริง 2. ช่วงเวลาถูกต้อง 3. MAX(sold_date) 4. Apple-to-Apple 5. SUM ก่อนหาร 6. ไม่เดาสาเหตุ 7. ไม่สร้างตัวเลข 8. กระชับ 9. Data Footer 10. actionable
-
