@@ -1,0 +1,152 @@
+{
+  "name": "plugins",
+  "description": "Collection of Claude Code plugins including productivity tools, development skills, design, learning, and math problem-solving",
+  "owner": {
+    "name": "kiwsan-mc"
+  },
+  "plugins": [
+    {
+      "name": "claude-code-setup",
+      "description": "Analyze codebases and recommend tailored Claude Code automations such as hooks, skills, MCP servers, and subagents.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "productivity",
+      "source": "./claude-code-setup",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/claude-code-setup"
+    },
+    {
+      "name": "claude-md-management",
+      "description": "Tools to maintain and improve CLAUDE.md files - audit quality, capture session learnings, and keep project memory current.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "productivity",
+      "source": "./claude-md-management",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/claude-md-management"
+    },
+    {
+      "name": "example-plugin",
+      "description": "A comprehensive example plugin demonstrating all Claude Code extension options including commands, agents, skills, hooks, and MCP servers.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "development",
+      "source": "./example-plugin",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/example-plugin"
+    },
+    {
+      "name": "explanatory-output-style",
+      "description": "Adds educational insights about implementation choices and codebase patterns (mimics the deprecated Explanatory output style).",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "learning",
+      "source": "./explanatory-output-style",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/explanatory-output-style"
+    },
+    {
+      "name": "frontend-design",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Generates creative, polished code that avoids generic AI aesthetics.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "design",
+      "source": "./frontend-design",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/frontend-design"
+    },
+    {
+      "name": "learning-output-style",
+      "description": "Interactive learning mode that requests meaningful code contributions at decision points (mimics the unshipped Learning output style).",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "learning",
+      "source": "./learning-output-style",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/learning-output-style"
+    },
+    {
+      "name": "math-olympiad",
+      "description": "Solve competition math (IMO, Putnam, USAMO) with adversarial verification that catches what self-verification misses. Fresh-context verifiers attack proofs with specific failure patterns. Calibrated abstention over bluffing.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "math",
+      "source": "./math-olympiad",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/math-olympiad"
+    },
+    {
+      "name": "playground",
+      "description": "Creates interactive HTML playgrounds - self-contained single-file explorers with visual controls, live preview, and prompt output with copy button.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "development",
+      "source": "./playground",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/playground"
+    },
+    {
+      "name": "project-artifact",
+      "description": "Generate and publish a living project status page as a shareable claude.ai artifact backed by a per-project config, so refreshes re-gather live state, redeploy the same URL, and report only the delta.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "productivity",
+      "source": "./project-artifact",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/project-artifact"
+    },
+    {
+      "name": "ralph-loop",
+      "description": "Interactive self-referential AI loops for iterative development, implementing the Ralph Wiggum technique. Claude works on the same task repeatedly, seeing its previous work, until completion.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "development",
+      "source": "./ralph-loop",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/ralph-loop"
+    },
+    {
+      "name": "receipts",
+      "description": "A personal Claude Code impact report for justifying your usage to a manager or a self-review: what you shipped, which projects it went to, and each project's share of your usage.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "productivity",
+      "source": "./receipts",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/receipts"
+    },
+    {
+      "name": "session-report",
+      "description": "Generate an explorable HTML report of Claude Code session usage - tokens, cache efficiency, subagents, skills, and the most expensive prompts.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "productivity",
+      "source": "./session-report",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/session-report"
+    },
+    {
+      "name": "skill-creator",
+      "description": "Create new skills, improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, or benchmark skill performance with variance analysis.",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "category": "development",
+      "source": "./skill-creator",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/skill-creator"
+    }
+  ]
+}
