@@ -38,15 +38,17 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ### Formulas (v2 FIXED):
 
+🚫 **MANDATORY — ATV/UPT ห้ามใช้ CASE WHEN ticket_count > 0 — ใช้ SUM ตรง ๆ เท่านั้น**
+
 | KPI | สูตร |
 |-----|------|
 | Member Sales% (excl Mkt) | `CAST(CAST(SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
 | Non-Member Sales% (excl Mkt) | `CAST(CAST(SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
 | Member Ticket% | `CAST(CAST(SUM(member_count) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0)*100 AS FLOAT)` |
-| Member ATV | `CAST(CAST(SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| Non-Member ATV | ตัวหาร `SUM(ticket_count)-SUM(member_count)` |
-| Member UPT | ใช้ `member_count` เป็นตัวหาร |
-| Non-Member UPT | ตัวหาร `SUM(ticket_count)-SUM(member_count)` |
+| Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
+| Non-Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
+| Member UPT | `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
+| Non-Member UPT | `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
 
 ---
 
@@ -60,18 +62,6 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 ## Step 3 — Member Group & Generation
 
 Group by `member_group` (Existing/New) และ `member_generation`
-
-### มิติเพิ่มเติมสำหรับ Drilldown
-
-| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
-|-----------|--------|------------|-------------|
-| เพศสมาชิก | `member_gender` | M (ชาย), F (หญิง), S (ไม่ระบุ), N (Non-Member), - | วิเคราะห์ ATV/UPT ตามเพศ — เพศไหนใช้จ่ายเฉลี่ยสูงกว่า |
-
-**การใช้งาน:**
-- ถ้า user ถาม "สมาชิกชาย vs หญิง" → GROUP BY `member_gender` WHERE member_type = 'Member'
-- ถ้า user ถาม "เพศไหนซื้อเยอะกว่า" → เปรียบเทียบ ATV/UPT ระหว่าง M กับ F
-- filter `member_gender IN ('M','F')` เมื่อวิเคราะห์เฉพาะสมาชิกที่ระบุเพศ (ตัด N, S, - ออก)
-- สามารถ cross กับ `member_generation` ได้ เช่น GEN Z หญิง vs GEN Z ชาย
 
 ---
 

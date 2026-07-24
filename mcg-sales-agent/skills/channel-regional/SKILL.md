@@ -49,21 +49,6 @@ NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM(Regional_text
 
 ## Step 4 — Top 10 จังหวัด
 
-Group by `CHANGWAT_T` (ชื่อจังหวัดไทย) — ถ้า `CHANGWAT_T` เป็น NULL ให้ใช้ `Region_Analysis` แทน
-
-### มิติเพิ่มเติมสำหรับ Drilldown
-
-| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
-|-----------|--------|------------|-------------|
-| Sub Channel (ช่องทางย่อย) | `channel_store_Sub_2` | Lazada, Shopee, Tiktok, Central & Robinson, Tiktok WYN, Tiktok MCJ Sport | Drilldown Marketplace → แยก Lazada/Shopee/Tiktok |
-| กลุ่มภูมิภาค (ครบทุกแถว) | `Custgrp3_Desc` | Central, East, Greater Bangkok, North, North East, South, West | ใช้แทน Regional_text ได้ — มีค่าครบทุกแถว ไม่ NULL |
-
-**การใช้งาน:**
-- ถ้า user ถาม "แยก Marketplace เป็น Lazada/Shopee" → GROUP BY `channel_store_Sub_2` WHERE channel_store = 'Marketplace'
-- ถ้า user ถาม "Tiktok แยกร้าน" → filter `channel_store_Sub_2 LIKE 'Tiktok%'`
-- ถ้า user ถาม "ภูมิภาค" แต่ Regional_text เป็น NULL เยอะ → ใช้ `Custgrp3_Desc` แทน (มีค่าครบ 7 ภาค)
-- `Custgrp3_Desc` เหมาะสำหรับวิเคราะห์ OFFLINE แยกภาค เพราะครอบคลุมทุกสาขา
-
 ---
 
 ## Step 5 — Response

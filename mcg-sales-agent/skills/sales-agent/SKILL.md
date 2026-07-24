@@ -130,14 +130,38 @@ v2: `CASE WHEN member_count > ticket_count THEN ticket_count ELSE member_count E
 
 ### ATV — Average Transaction Value (ยอดขายเฉลี่ยต่อใบเสร็จ)
 
+🚫 **MANDATORY — ห้ามใช้ CASE WHEN ticket_count > 0 — ใช้ SUM ตรง ๆ เท่านั้น**
+
 ```sql
 CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)
 ```
 
 ### UPT — Units Per Transaction (จำนวนสินค้าเฉลี่ยต่อใบเสร็จ)
 
+🚫 **MANDATORY — ห้ามใช้ CASE WHEN ticket_count > 0 — ใช้ SUM ตรง ๆ เท่านั้น**
+
 ```sql
 CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)
+```
+
+### Member ATV
+```sql
+CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)
+```
+
+### Non-Member ATV
+```sql
+CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)
+```
+
+### Member UPT
+```sql
+CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)
+```
+
+### Non-Member UPT
+```sql
+CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)
 ```
 
 ### Member Sales % (FIXED: exclude Marketplace)

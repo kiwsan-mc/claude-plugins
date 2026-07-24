@@ -40,14 +40,14 @@ tools:
 | Discount% | `CAST(CAST(SUM(total_discount_amount) AS FLOAT)/NULLIF(CAST(SUM(price_sign) AS FLOAT),0)*100 AS FLOAT)` |
 | Margin% | `CAST((CAST(SUM(total_exc_vat_price) AS FLOAT)-CAST(SUM(cogs) AS FLOAT))/NULLIF(CAST(SUM(total_exc_vat_price) AS FLOAT),0)*100 AS FLOAT)` |
 | Tickets | `SUM(ticket_count)` |
-| **ATV** (FIXED) | `CAST(CAST(SUM(CASE WHEN ticket_count>0 THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN ticket_count>0 THEN ticket_count ELSE 0 END) AS FLOAT),0) AS FLOAT)` |
-| **UPT** (FIXED) | `CAST(CAST(SUM(CASE WHEN ticket_count>0 THEN total_quantity ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN ticket_count>0 THEN ticket_count ELSE 0 END) AS FLOAT),0) AS FLOAT)` |
+| **ATV** | 🚫 ห้ามใช้ CASE WHEN — `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0) AS FLOAT)` |
+| **UPT** | 🚫 ห้ามใช้ CASE WHEN — `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0) AS FLOAT)` |
 | ASP | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(total_quantity) AS FLOAT),0) AS FLOAT)` |
 | Member Ticket% | ใช้ `member_count` — `CAST(CAST(SUM(member_count) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0)*100 AS FLOAT)` |
 | **Member Sales%** (FIXED) | ไม่รวม Marketplace — `CAST(CAST(SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
 | Non-Member Sales% | `CAST(CAST(SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
-| Member ATV | ใช้ `member_count` เป็นตัวหาร |
-| Non-Member ATV | ตัวหาร `SUM(ticket_count)-SUM(member_count)` |
+| Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
+| Non-Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
 | YoY% | `CAST((FY27-FY26)/NULLIF(FY26,0)*100 AS FLOAT)` |
 
 ---
@@ -87,7 +87,7 @@ tools:
 - ≤3 ตาราง
 - CAST AS FLOAT ทุก KPI
 - 🟢🟡🔴 ตาม Thresholds
-- ATV/UPT filter ticket_count>0
+- ATV/UPT ใช้ SUM ตรง ๆ — 🚫 ห้ามใช้ CASE WHEN ticket_count > 0
 - Member% ไม่รวม Marketplace
 - ใช้ member_count สำหรับ Member tickets
 

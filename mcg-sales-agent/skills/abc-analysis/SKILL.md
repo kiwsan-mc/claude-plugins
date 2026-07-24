@@ -35,24 +35,6 @@ Group by `category`, `product` — v2: `COALESCE(product,'Unknown')`, `COALESCE(
 
 คำนวณ: Net Sales, Qty, Margin%, Discount% — เรียงตาม Net Sales
 
-### มิติเพิ่มเติมสำหรับ Drilldown
-
-หาก user ต้องการ drilldown ลึกขึ้น สามารถเพิ่ม dimension ต่อไปนี้:
-
-| Dimension | Column | ค่าตัวอย่าง | ใช้วิเคราะห์ |
-|-----------|--------|------------|-------------|
-| แบรนด์ | `Brand_Name` | MC, MCJ, Mc Lady, WYN | แยก ABC ตามแบรนด์ |
-| เกรดแฟชั่น | `Fashion_Grade_Desc` | Non-Repeat, Repeat, Re-Order | สินค้า Repeat ควรมี Margin ดีกว่า |
-| Aging สินค้า | `AgingColor_Text` | GREEN, YELLOW, RED, PURPLE | GREEN=สินค้าใหม่, PURPLE=ค้างสต็อกนาน |
-| Denim/Non-Denim | `Product_Group_Text_2` | Denim, Non-Denim | เปรียบเทียบ performance สองกลุ่มหลัก |
-| ปีซีซัน | `Season_Year` | 2020, 2023 | สินค้าซีซันเก่ายังขายดีหรือค้างสต็อก |
-
-**การใช้งาน:**
-- ถ้า user ถาม "ABC แยกตามแบรนด์" → GROUP BY `Brand_Name`, `category`, `product`
-- ถ้า user ถาม "สินค้าค้างสต็อก" หรือ "aging" → filter/group by `AgingColor_Text` (RED/PURPLE = ค้างนาน)
-- ถ้า user ถาม "Denim vs Non-Denim" → GROUP BY `Product_Group_Text_2`
-- ถ้า user ถาม "สินค้าซีซันเก่า" → filter `Season_Year < current_year - 2`
-
 ---
 
 ## Step 3 — ABC Classification
