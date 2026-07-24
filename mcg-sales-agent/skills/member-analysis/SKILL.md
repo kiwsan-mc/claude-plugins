@@ -59,21 +59,21 @@ Group by `member_type` (Member / Non-Member)
 | Member Tickets | `SUM(member_count)` ✅ **NEW: ใช้ member_count** |
 | Non-Member Tickets | `SUM(ticket_count) - SUM(member_count)` ✅ **NEW: คำนวณจากผลต่าง** |
 | Member Ticket % (ไม่รวม Marketplace) | `CAST(CAST(SUM(CASE WHEN channel_store <> 'Marketplace' THEN member_count ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(CASE WHEN channel_store <> 'Marketplace' THEN ticket_count ELSE 0 END) AS FLOAT), 0) * 100 AS FLOAT)` ✅ **NEW: ใช้ member_count** |
-| ATV (รวม) | `CAST(CAST(SUM(CASE WHEN ticket_count > 0 THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0) AS FLOAT)` ✅ **FIXED: Filter ticket_count > 0** |
-| Member ATV | `CAST(CAST(SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)` ✅ **NEW: ใช้ member_count** |
-| Non-Member ATV | `CAST(CAST(SUM(CASE WHEN member_type = 'Non-Member' THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)` ✅ **NEW: ใช้ ticket_count - member_count** |
-| UPT (รวม) | `CAST(CAST(SUM(CASE WHEN ticket_count > 0 THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(CASE WHEN ticket_count > 0 THEN ticket_count ELSE 0 END) AS FLOAT), 0) AS FLOAT)` ✅ **FIXED: Filter ticket_count > 0** |
-| Member UPT | `CAST(CAST(SUM(CASE WHEN member_type = 'Member' THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)` ✅ **NEW: ใช้ member_count** |
-| Non-Member UPT | `CAST(CAST(SUM(CASE WHEN member_type = 'Non-Member' THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)` ✅ **NEW: ใช้ ticket_count - member_count** |
+| ATV (รวม) | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)` |
+| Member ATV | `CAST(CAST(SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)` |
+| Non-Member ATV | `CAST(CAST(SUM(CASE WHEN member_type = 'Non-Member' THEN total_exc_vat_price ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)` |
+| UPT (รวม) | `CAST(CAST(SUM(total_quantity) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) AS FLOAT), 0) AS FLOAT)` |
+| Member UPT | `CAST(CAST(SUM(CASE WHEN member_type = 'Member' THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(member_count) AS FLOAT), 0) AS FLOAT)` |
+| Non-Member UPT | `CAST(CAST(SUM(CASE WHEN member_type = 'Non-Member' THEN total_quantity ELSE 0 END) AS FLOAT) / NULLIF(CAST(SUM(ticket_count) - SUM(member_count) AS FLOAT), 0) AS FLOAT)` |
 | ASP | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(SUM(total_quantity) AS FLOAT), 0) AS FLOAT)` |
 | Discount % | `CAST(CAST(SUM(total_discount_amount) AS FLOAT) / NULLIF(CAST(SUM(price_sign) AS FLOAT), 0) * 100 AS FLOAT)` |
 | Margin % | `CAST((CAST(SUM(total_exc_vat_price) AS FLOAT) - CAST(SUM(cogs) AS FLOAT)) / NULLIF(CAST(SUM(total_exc_vat_price) AS FLOAT), 0) * 100 AS FLOAT)` |
 
 ### 🔧 Formula Updates (2026-07-24)
+- **ATV**: ใช้สูตร `SUM(total_exc_vat_price) / SUM(ticket_count)` — รวมทุกรายการ
+- **UPT**: ใช้สูตร `SUM(total_quantity) / SUM(ticket_count)` — รวมทุกรายการ
 - **Sales Ratio %**: Fixed integer division bug — CAST numerator & denominator BEFORE division (was 0%, now ~82%)
 - **Ticket Ratio %**: Fixed integer division bug — CAST numerator & denominator BEFORE division
-- **ATV**: Fixed to exclude returns (filter ticket_count > 0) — Result: -40% vs old formula
-- **UPT**: Fixed to exclude returns (filter ticket_count > 0) — Result: -50% vs old formula
 - **Member Ticket %**: เปลี่ยนมาใช้ `SUM(member_count)` — แม่นยำกว่า `CASE WHEN member_type`
 - **Member/Non-Member ATV/UPT**: ใช้ `member_count` เป็นตัวหารสำหรับ Member และ `ticket_count - member_count` สำหรับ Non-Member
 - **Non-Member Sales %**: เพิ่มสูตรใหม่ แยกจาก Member Sales %
@@ -143,5 +143,5 @@ Group by `member_group` (Existing / New) และ `member_generation`
 - ระบุหมายเหตุว่า "ไม่รวม Marketplace" ในหัวตารางที่เกี่ยวข้อง
 - ใช้ `CAST(... AS FLOAT)` กับ KPI ทุกตัวที่เป็นทศนิยม — **CAST numerator & denominator BEFORE division**
 - Insight ต้องอ้างอิงตัวเลขจริง ไม่ใช่การอธิบายทั่วไป
-- ✅ **ATV & UPT**: Filter ticket_count > 0 to exclude returns (updated 2026-07-24)
+- ✅ **ATV & UPT**: ใช้ `SUM(total_exc_vat_price) / SUM(ticket_count)` และ `SUM(total_quantity) / SUM(ticket_count)` (updated 2026-07-25)
 - ✅ **Member% Formulas**: CAST AS FLOAT on both numerator & denominator (updated 2026-07-24)

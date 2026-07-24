@@ -35,7 +35,7 @@ tools:
 
 ## Step 2 — คำนวณ Sales per Sqm.
 
-ข้อมูล `SQM` อยู่ใน column `SQM` ของตารางหลัก — SQM เป็นค่าคงที่ต่อสาขา (SQM เท่ากันทุกรายการของสาขาเดียวกัน)
+ข้อมูล `New_SQM` อยู่ใน column `New_SQM` ของ Branch Snapshot (v2) — New_SQM เป็นค่าคงที่ต่อสาขา (New_SQM เท่ากันทุกรายการของสาขาเดียวกัน)
 
 ---
 
@@ -58,11 +58,11 @@ tools:
 ```sql
 CAST(
     CAST(SUM(total_exc_vat_price) AS FLOAT)
-    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
+    / NULLIF(CAST(SUM(New_SQM) AS FLOAT), 0)
 AS FLOAT)
 ```
 
-GROUP BY `branch_code` — ใช้ `SUM(SQM)` ได้โดยตรง
+GROUP BY `branch_code` — ใช้ `SUM(New_SQM)` ได้โดยตรง
 
 ---
 
@@ -97,17 +97,17 @@ CAST(
         / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0)
         * <days_in_full_month>
     )
-    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
+    / NULLIF(CAST(SUM(New_SQM) AS FLOAT), 0)
 AS FLOAT)
 ```
 
-⚠️ **ห้ามใช้ `DATEDIFF` และ `SUM(DISTINCT SQM)` อีกต่อไป** — ใช้ `COUNT(DISTINCT sold_date)` และ `SUM(SQM)` แทน
+⚠️ **ห้ามใช้ `DATEDIFF` และ `SUM(DISTINCT New_SQM)` อีกต่อไป** — ใช้ `COUNT(DISTINCT sold_date)` และ `SUM(New_SQM)` แทน
 
-สำหรับปีเต็ม ให้ใช้ `SUM(total_exc_vat_price) / NULLIF(SUM(SQM), 0)` เพื่อเปรียบเทียบ YoY
+สำหรับปีเต็ม ให้ใช้ `SUM(total_exc_vat_price) / NULLIF(SUM(New_SQM), 0)` เพื่อเปรียบเทียบ YoY
 
 ## Step 3 — แยกตามสาขาและจังหวัด
 
-Group by: `branch_code`, `Name_3` (ชื่อสาขา), `province_name`
+Group by: `branch_code`, `Name_3` (ชื่อสาขา), `CHANGWAT_T` (จังหวัด)
 
 เงื่อนไข: กรองเฉพาะ OFFLINE (`main_channel = 'OFFLINE'`) เนื่องจาก SQM เป็นของร้านค้าจริง
 
@@ -119,7 +119,7 @@ Group by: `branch_code`, `Name_3` (ชื่อสาขา), `province_name`
 
 **Bottom 5 สาขา** — Sales per Sqm. ต่ำสุด (มีข้อมูล SQM และมียอดขาย)
 
-ต้อง filter สาขาที่ `SQM > 0` เท่านั้น
+ต้อง filter สาขาที่ `New_SQM > 0` เท่านั้น
 
 ## Step 5 — คำนวณ Margin% รายสาขา
 
@@ -133,7 +133,7 @@ AS FLOAT)
 
 ## Step 6 — สรุปตามจังหวัด
 
-Group by `province_name` — แสดง Sales per Sqm. เฉลี่ยและ Margin%
+Group by `CHANGWAT_T` — แสดง Sales per Sqm. เฉลี่ยและ Margin%
 
 ## Step 7 — สร้าง Response
 
@@ -172,6 +172,6 @@ Group by `province_name` — แสดง Sales per Sqm. เฉลี่ยแ�
 # Output Rules (เพิ่มเติมจากกฎหลัก)
 
 - วิเคราะห์เฉพาะ OFFLINE เท่านั้นสำหรับ Sales per Sqm.
-- ต้อง filter `SQM > 0` ก่อนคำนวณ
-- ใช้ `SUM(DISTINCT SQM)` เพื่อหลีกเลี่ยงการนับ SQM ซ้ำ
+- ต้อง filter `New_SQM > 0` ก่อนคำนวณ
+- ใช้ `SUM(New_SQM)` ในการคำนวณ
 - แนวทางปรับปรุงต้องอ้างอิงข้อมูลที่มีอยู่ ไม่ใช่สมมติฐานล้วนๆ

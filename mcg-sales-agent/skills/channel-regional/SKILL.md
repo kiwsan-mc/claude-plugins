@@ -58,6 +58,8 @@ Group by Region + `main_channel` (OFFLINE / ONLINE)
 
 ## Step 4 — แยกตามจังหวัด (Top 10)
 
+Group by `CHANGWAT_T` (ชื่อจังหวัดไทย) — ถ้า `CHANGWAT_T` เป็น NULL ให้ใช้ `Region_Analysis` แทน
+
 เรียงตาม Net Sales จากสูงสุด แสดง Top 10 จังหวัด พร้อม Main Channel breakdown
 
 ## Step 5 — สร้าง Response

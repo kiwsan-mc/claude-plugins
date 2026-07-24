@@ -193,10 +193,20 @@ tools:
 
 ใช้คอลัมน์ที่มีอยู่แล้ว:
 
-* `FY_Month`
-* `[year]`
+* `[year]` — ปีปฏิทิน (calendar year) เช่น 2024, 2025, 2026
+* `[month]` — เดือนปฏิทิน (calendar month) 1-12
 
 แทนการคำนวณเดือนหรือปีจาก `sold_date`
+
+⚠️ **`[year]` และ `[month]` ไม่ใช่ FY Year / FY Month** — เป็นปี/เดือนปฏิทินเท่านั้น
+เมื่อต้องการ filter ตาม FY ให้แปลงจาก calendar year+month เป็น FY ตามกฎใน Section 7
+
+ตัวอย่างการ filter FY2027 (ก.ค. 2026 – มิ.ย. 2027):
+
+```sql
+WHERE ([year] = 2026 AND [month] >= 7)
+   OR ([year] = 2027 AND [month] <= 6)
+```
 
 ---
 
@@ -242,7 +252,7 @@ tools:
 * `DATEDIFF` ในเงื่อนไขกรองข้อมูล
 * `CROSS JOIN`
 * `DATENAME()`
-* `FY_Year IN (...) + MONTH(sold_date)`
+* `[year] IN (...) + [month]`
 * `CORR`
 * `STDEV`
 * `PERCENTILE_CONT`
@@ -269,6 +279,13 @@ END
 # 7. Fiscal Year
 
 ปีงบประมาณเริ่มวันที่ 1 กรกฎาคม และสิ้นสุดวันที่ 30 มิถุนายน
+
+⚠️ **ตารางไม่มี column FY_Year, FY_Month, FY_Quarter** — ต้องคำนวณ FY จาก `[year]` + `[month]` (calendar year/month) เสมอ
+
+สูตรแปลง:
+- **FY Year** = ถ้า `[month]` >= 7 → `[year]` + 1, ถ้า `[month]` <= 6 → `[year]`
+- **FY Month** = ถ้า `[month]` >= 7 → `[month]` - 6, ถ้า `[month]` <= 6 → `[month]` + 6
+- **FY Quarter** = CEILING(FY_Month / 3.0)
 
 ตัวอย่าง:
 
@@ -642,11 +659,11 @@ AS FLOAT)
 ```sql
 CAST(
     CAST(SUM(total_exc_vat_price) AS FLOAT)
-    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
+    / NULLIF(CAST(SUM(New_SQM) AS FLOAT), 0)
 AS FLOAT)
 ```
 
-GROUP BY `branch_code` — SQM เป็นค่าคงที่ต่อสาขา (SQM เท่ากันทุกรายการของสาขาเดียวกัน)
+GROUP BY `branch_code` — New_SQM เป็นค่าคงที่ต่อสาขา (New_SQM เท่ากันทุกรายการของสาขาเดียวกัน)
 
 ---
 
@@ -679,7 +696,7 @@ CAST(
         / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0)
         * <days_in_full_month>
     )
-    / NULLIF(CAST(SUM(SQM) AS FLOAT), 0)
+    / NULLIF(CAST(SUM(New_SQM) AS FLOAT), 0)
 AS FLOAT)
 ```
 
@@ -734,33 +751,142 @@ AS FLOAT)
 
 # 13. Key Columns
 
-| Column                  | Meaning                     |
-| ----------------------- | --------------------------- |
-| `sold_date`             | วันที่ขาย                   |
-| `total_exc_vat_price`   | รายได้ไม่รวมภาษีมูลค่าเพิ่ม |
-| `total_inc_vat_price`   | รายได้รวมภาษีมูลค่าเพิ่ม    |
-| `price_sign`            | ราคาป้ายก่อนส่วนลด          |
-| `cogs`                  | ต้นทุนสินค้า                |
-| `total_discount_amount` | มูลค่าส่วนลด                |
-| `total_quantity`        | จำนวนสินค้าที่ขาย           |
-| `ticket_count`          | จำนวนใบเสร็จ                |
-| `member_type`           | Member / Non-Member         |
-| `member_group`          | Existing / New              |
-| `member_generation`     | กลุ่มช่วงอายุสมาชิก         |
-| `main_channel`          | OFFLINE / ONLINE            |
-| `channel_store`         | ประเภทร้านหรือช่องทาง       |
-| `Regional_text`         | ชื่อภูมิภาค                 |
-| `Regional`              | รหัสภูมิภาค R1-R7           |
-| `category`              | หมวดสินค้า                  |
-| `product`               | ประเภทสินค้า                |
-| `Sub_Brand_Text`        | แบรนด์ย่อย                  |
-| `branch_code`           | รหัสสาขา                    |
-| `Name_3`                | ชื่อสาขา                    |
-| `province_name`         | จังหวัด                     |
-| `SQM`                   | พื้นที่ร้าน                 |
-| `FY_Year`               | ปีงบประมาณ                  |
-| `FY_Month`              | เดือนงบประมาณ               |
-| `FY_Quarter`            | ไตรมาสงบประมาณ              |
+ตาราง: `dbo.mcg_aiplatform_sales` (ตารางเดียว — JOIN สำเร็จแล้ว)
+
+| # | Column | Meaning | ตัวอย่างค่า |
+| --- | --- | --- | --- |
+| 1 | `sold_date` | วันที่ขาย | 2024-09-28 |
+| 2 | `year` | ปี ค.ศ. ของรายการขาย | 2024, 2025 |
+| 3 | `month` | เดือนของรายการขาย (1-12) | 9, 4 |
+| 4 | `branch_code` | รหัสสาขา | S161, P065, Y065 |
+| 5 | `branch_ref` | รหัสอ้างอิงสาขา (อาจเป็น NULL) | NULL |
+| 6 | `new_branch_ref` | รหัสอ้างอิงสาขาใหม่ | S161, P065 |
+| 7 | `Name_3` | ชื่อสาขา | Shop Mc Jeansแฮบปี้พล่าซ่า |
+| 8 | `CustGroup_Name` | ชื่อกลุ่มลูกค้า | SHOP, OUTSIDE PROMOTION, Mc outlet |
+| 9 | `Custgrp4_Desc` | คำอธิบายกลุ่มลูกค้าระดับ 4 | SHOP, PTT, OUTSIDE PROMOTION |
+| 10 | `Customer_Group_(S2)_Text` | กลุ่มลูกค้าระดับ S2 | OWN SHOP OTHER, OWN SHOP PTT, PROMOTION |
+| 11 | `sub_channel` | ช่องทางย่อย | NULL |
+| 12 | `main_channel` | ช่องทางหลัก | OFFLINE, ONLINE |
+| 13 | `channel_store` | ประเภทร้าน/ช่องทาง | SHOP, CHAIN, Mc outlet, Marketplace, Mcshop.com, MOBILE, LOCAL - CONSIGN, LOCAL - CREDIT, OUTSIDE PROMOTION |
+| 14 | `channel_store_3` | ช่องทางร้านระดับ 3 | SHOP, CS, Ecommerce, FGF, HO Tiktok, Pc Mcshop, Social Commerce |
+| 15 | `channel_store_Sub` | ช่องทางร้านย่อย | SHOP, Mc outlet |
+| 16 | `channel_store_Sub_2` | ช่องทางร้านย่อยระดับ 2 | SHOP, Mc outlet |
+| 17 | `channel_store_Sub_3` | ช่องทางร้านย่อยระดับ 3 | SHOP, Mc outlet |
+| 18 | `ticket_count` | จำนวนใบเสร็จ (บวก=ขาย, ลบ=คืน, 0=ไม่มี transaction) | 0, 1, 2 |
+| 19 | `member_count` | จำนวนใบเสร็จที่เป็นสมาชิก | 0, 1 |
+| 20 | `member_type` | ประเภทสมาชิก | Member, Non-Member |
+| 21 | `member_group` | กลุ่มสมาชิก | Existing, New, Non Member |
+| 22 | `member_gender` | เพศของสมาชิก | M, F, S, N, - |
+| 23 | `member_generation` | กลุ่มช่วงอายุสมาชิก | GEN Z, MILLENNIAL, GEN X, BOOMER, SILENT, OTHER, - |
+| 24 | `item_code` | รหัสสินค้า | XFMCCZ021200S |
+| 25 | `model_color` | รหัสรุ่น+สี | XFMCCZ02120 |
+| 26 | `model` | รหัสรุ่นสินค้า | XFMCCZ021 |
+| 27 | `gender` | เพศของสินค้า | FEMALE, MALE, UNISEX |
+| 28 | `product` | ประเภทสินค้า | TROUSERS, BASIC CARE, JEANS |
+| 29 | `category` | หมวดสินค้า | BOTTOM, TOP, ACCS, INNERWEAR, HOME, SKIN CARE, PACKAGING |
+| 30 | `total_exc_vat_price` | รายได้ไม่รวม VAT (Net Sales) | 364.49 |
+| 31 | `total_inc_vat_price` | รายได้รวม VAT | 390.00 |
+| 32 | `total_quantity` | จำนวนสินค้าที่ขาย | 1.00, 2.00 |
+| 33 | `price_sign` | ราคาป้ายก่อนส่วนลด (Gross Sales) | 1490.65 |
+| 34 | `cogs` | ต้นทุนสินค้า (Cost of Goods Sold) | 252.34 |
+| 35 | `standard_cost_adj` | ต้นทุนมาตรฐานปรับปรุง | 252.34 |
+| 36 | `total_discount_amount` | มูลค่าส่วนลดรวม | 1126.17 |
+| 37 | `discount_amount_join` | มูลค่าส่วนลดสำหรับ JOIN | 1205.00, -0.01 |
+| 38 | `PriceAfterDiscount_AVG` | ราคาเฉลี่ยหลังหักส่วนลด | 390.00 |
+| 39 | `utp_count` | จำนวน UTP (Unique Transaction per Product) | 0, 1, 2 |
+| 40 | `Customer` | รหัสลูกค้า/สาขา (= branch_code) | S161, P065 |
+| 41 | `Postal_Code` | รหัสไปรษณีย์ | 66000, 20000 |
+| 42 | `District_Desc` | ประเภทสาขา | Shop, Outside Pro, Others |
+| 43 | `Sales_Grp_Desc` | กลุ่มการขาย | Shop, PTT, Outside Pro, Other Sales |
+| 44 | `AcctAssgGr_Desc` | กลุ่มบัญชี | Shop, Consignment |
+| 45 | `Custgrp_1_Desc` | กลุ่มลูกค้าระดับ 1 | Others, PTT |
+| 46 | `Custgrp3_Desc` | กลุ่มลูกค้าระดับ 3 (ภูมิภาค) | Central, North East, East, Greater Bangkok |
+| 47 | `New_SQM` | พื้นที่ร้านค้า (ตารางเมตร) | 8120.00, 9000.00 (NULL=ไม่มีข้อมูล) |
+| 48 | `Area_Unit` | หน่วยพื้นที่ | M2, CM2 |
+| 49 | `Region_Analysis` | จังหวัดสำหรับวิเคราะห์ | จังหวัดพิจิตร, กรุงเทพมหานคร |
+| 50 | `Cluster` | กลุ่มสาขา (Performance+Size) | A1-A3, B2-B4, C2-C4, D3-D4, E3-E4, S1-S3 |
+| 51 | `Space_Range` | ช่วงขนาดพื้นที่ | XS, S, M, L, XL |
+| 52 | `Salesman` | รหัสพนักงานขาย | 000094, 002564 |
+| 53 | `SalesmanName` | ชื่อพนักงานขาย | ณภัทร รุ่งโรจน์ |
+| 54 | `Sales_Manager` | รหัสผู้จัดการฝ่ายขาย | 010990, 002407 |
+| 55 | `Sales_ManagerName` | ชื่อผู้จัดการฝ่ายขาย | อรวรรณ วัฒนาพร |
+| 56 | `Head_Sales` | รหัสหัวหน้าฝ่ายขาย | 012851, 006535 |
+| 57 | `Head_SalesName` | ชื่อหัวหน้าฝ่ายขาย | เฉลิมศิลป์ ปิ่นเพ็ชร์ |
+| 58 | `Group_Acc_Target` | กลุ่มเป้าหมายบัญชี | SHOP, Mc outlet, OUTSIDE PROMOTION |
+| 59 | `Closing_Date` | วันที่ปิดสาขา (NULL=ยังเปิดอยู่) | NULL |
+| 60 | `Status_Text` | สถานะสาขา | Active |
+| 61 | `Open_date` | วันที่เปิดสาขา | 2013-12-01, 2022-01-14 |
+| 62 | `LAT` | ละติจูด | NULL |
+| 63 | `LONG` | ลองจิจูด | NULL |
+| 64 | `TAMBON_ID` | รหัสตำบล | NULL |
+| 65 | `TAMBON_T` | ชื่อตำบล (ไทย) | NULL |
+| 66 | `TAMBON_E` | ชื่อตำบล (อังกฤษ) | NULL |
+| 67 | `AMPHOE_ID` | รหัสอำเภอ | NULL |
+| 68 | `AMPHOE_T` | ชื่ออำเภอ (ไทย) | NULL |
+| 69 | `AMPHOE_E` | ชื่ออำเภอ (อังกฤษ) | NULL |
+| 70 | `CHANGWAT_ID` | รหัสจังหวัด | NULL |
+| 71 | `CHANGWAT_T` | ชื่อจังหวัด (ไทย) | NULL |
+| 72 | `CHANGWAT_E` | ชื่อจังหวัด (อังกฤษ) | NULL |
+| 73 | `Regional` | รหัสภูมิภาค | NULL |
+| 74 | `Regional_text` | ชื่อภูมิภาค | NULL |
+| 75 | `Material` | รหัส Material (= item_code) | XFMCCZ021200S |
+| 76 | `Article_Description` | ชื่อ/คำอธิบายสินค้า | กางเกงทรงยาวญ., 20-ดำ, 0S |
+| 77 | `Article_Type` | รหัสประเภทสินค้า | ZFGP, ZSER, ZPRM |
+| 78 | `Article_type_descr` | คำอธิบายประเภทสินค้า | Finished Product, Service, Premium Items |
+| 79 | `Brand` | รหัสแบรนด์ | MC, MA |
+| 80 | `Brand_Name` | ชื่อแบรนด์ | MC, MCJ, Mc Lady, WYN, UP, Bison, M&C, The Blue Brothers, Mc Mc, Mc T |
+| 81 | `Fashion_Grade_Desc` | เกรดแฟชั่น (ระดับการผลิตซ้ำ) | Non-Repeat, Repeat, Re-Order |
+| 82 | `Season_Desc` | ซีซันที่วางขาย | ขายหน้าร้านเดือน 11 |
+| 83 | `Season_Year` | ปีของซีซัน | 2020, 2017 |
+| 84 | `LastChange` | วันที่แก้ไขข้อมูลล่าสุด (YYYYMMDD) | 20240822, 20250410 |
+| 85 | `MCL1Text` | Merchandise Category Level 1 | Fashion, Health & Beauty |
+| 86 | `MCL2Text` | Merchandise Category Level 2 (แบรนด์) | MC, M&C |
+| 87 | `MCL3Text` | Merchandise Category Level 3 (= category) | BOTTOM, SKIN CARE |
+| 88 | `MCL4Text` | Merchandise Category Level 4 (= product) | TROUSERS, BASIC CARE |
+| 89 | `MCL5Text` | Merchandise Category Level 5 | - |
+| 90 | `Product_Group_Text` | กลุ่มสินค้า | FG FASHION, HEALTH & BEAUTY |
+| 91 | `Sub_Brand_Text` | แบรนด์ย่อย | NULL |
+| 92 | `Gender_Text` | เพศของสินค้า (ข้อความ) | FEMALE, MALE, UNISEX |
+| 93 | `AgingColor_Text` | ระดับ Aging สินค้า (สีสัญญาณ) | GREEN, YELLOW, RED, PURPLE |
+| 94 | `Shape_1_Text` | ทรง/รูปแบบระดับ 1 | REGULAR, PERFUME |
+| 95 | `Shape_2_Text` | ทรง/รูปแบบระดับ 2 | MID WAIST, OTHERS |
+| 96 | `Shape_3_Text` | ทรง/รูปแบบระดับ 3 | OTHERS |
+| 97 | `Product_Group_Text_2` | กลุ่มสินค้า Denim/Non-Denim | Denim, Non-Denim |
+| 98 | `Product_Status_Text` | สถานะสินค้า | In-Active |
+| 99 | `SalesTypeDesc` | ประเภทการขาย | NORMAL |
+| 100 | `Color` | รหัสสี | 20 |
+| 101 | `Size` | ไซส์สินค้า | 0S, 1M |
+| 102 | `Model_BOINon_BOI` | รุ่นสินค้า BOI/Non-BOI | XFMCCZ021 |
+| 103 | `Model_Color_BOINon_BOI` | รุ่น+สี BOI/Non-BOI | NULL |
+| 104 | `Item_BOINon_BOI` | รายการสินค้า BOI/Non-BOI | XFMCCZ021200S |
+| 105 | `Grade` | เกรดสินค้า | NULL |
+| 106 | `Selling_Price` | ราคาขายตั้ง (ราคาป้าย) | 1595.00, 890.00 |
+| 107 | `Col_Name` | ชื่อสี (ไทย) | 20-ดำ, 00-สียีนส์ |
+| 108 | `ColTone` | โทนสี | NULL |
+| 109 | `Design_Text` | ดีไซน์ | Graphic Sport |
+| 110 | `Theme_Text` | ธีม | MC ACTIVE, LIGHT BLUE |
+| 111 | `New_Season_Text` | ซีซันใหม่ | ขายหน้าร้านเดือน 7 |
+| 112 | `New_Season_Yr` | ปีซีซันใหม่ | 2023, 2020 |
+| 113 | `Asset_Type` | ประเภท Asset (กลุ่มช่องทางจำหน่าย) | DS, E1, E2, G1-G8, SS, XX, F0, 00 |
+| 114 | `Asset_Type_Text` | คำอธิบาย Asset Type | E1_Outlet, E2_Online, G1_SAB&Online |
+| 115 | `SMPL` | รหัสตัวอย่าง (Sample) | NULL |
+| 116 | `Actual_on_floor_Text` | ช่วงเวลาที่วางขายจริง | ขายหน้าร้านเดือน 11 |
+| 117 | `Actual_on_floor_Year` | ปีที่วางขายจริง | 2020, 2017 |
+| 118 | `Actual_GR_date` | วันที่รับสินค้าจริง (Goods Receipt) | 2024-07-29 |
+| 119 | `Family_Text` | กลุ่มครอบครัวสินค้า | NULL |
+| 120 | `ArticleOnline` | รหัสสินค้าออนไลน์ (= item_code) | XFMCCZ021200S |
+| 121 | `Start_Aging` | วันที่เริ่มนับ Aging | 2021-07-01 |
+| 122 | `Start_AgingYear` | ปีที่เริ่ม Aging | 2021 |
+| 123 | `Start_AgingMonth` | เดือนที่เริ่ม Aging | 7 |
+| 124 | `Vendor_no` | รหัสผู้ผลิต/ซัพพลายเออร์ | 220007 |
+| 125 | `LASTGR` | วันที่รับสินค้าครั้งสุดท้าย | 2022-06-30 |
+| 126 | `Vendor_Name` | ชื่อผู้ผลิต/ซัพพลายเออร์ | บจก.อโรมาธิค แอ็คทีฟ |
+| 127 | `Date_Snapshot` | วันที่ Snapshot (วันแรกของเดือน) | 2024-09-01 |
+| 128 | `Date_SnapshotYear` | ปีของ Snapshot | 2024, 2025 |
+| 129 | `Date_SnapshotMonth` | เดือนของ Snapshot | 9, 4 |
+| 130 | `Collection_Group` | กลุ่มคอลเลกชัน | NULL |
+| 131 | `id` | Primary Key (auto-increment) | 115606, 117034 |
+| 132 | `etl_date` | วันที่ ETL โหลดข้อมูล | 2026-07-24T13:31:13 |
 
 ---
 
