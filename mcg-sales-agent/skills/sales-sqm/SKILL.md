@@ -29,61 +29,41 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ---
 
-## Step 2 — Branch Sales per Sqm (v2 FIXED)
+## Step 2 — SQM Formula (สูตรเดียว)
 
 ```sql
-CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(New_SQM) AS FLOAT),0) AS FLOAT)
+CAST(New_SQM AS FLOAT) / 100.0
 ```
 
-⚠️ **v2 FIXED**: `WHERE main_channel='OFFLINE' AND New_SQM > 0 AND New_SQM IS NOT NULL`
+⚠️ **สูตรเดียว**: `SQM = New_SQM / 100`
+
+⚠️ **เงื่อนไข**: `WHERE main_channel='OFFLINE' AND New_SQM > 0 AND New_SQM IS NOT NULL`
 
 ---
 
-## Step 3 — Net Sales Runrate
+## Step 3 — Sales per Sqm
 
 ```sql
-CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT),0)*<days_in_full_month> AS FLOAT)
-```
-
-⚠️ ใช้ `COUNT(DISTINCT sold_date)` — ห้ามใช้ `DATEDIFF`
-
----
-
-## Step 4 — Sales per Sqm Runrate
-
-```sql
-CAST((CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT),0)*<days_in_full_month>)/NULLIF(CAST(SUM(New_SQM) AS FLOAT),0) AS FLOAT)
+CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(SUM(CAST(New_SQM AS FLOAT) / 100.0), 0)
 ```
 
 ---
 
-## Step 5 — Formula Selection Guide
+## Step 4 — Top 5 / Bottom 5 + จังหวัด
 
-| User asks | Use |
-|-----------|-----|
-| "Sales per Sqm", "ยอดขายต่อตารางเมตร" | Branch Sales per Sqm |
-| "Runrate", "ประมาณการ" (no SQM mention) | Net Sales Runrate |
-| "Sales per Sqm Runrate" | Sales per Sqm Runrate |
-
-⚠️ Runrate without SQM → ห้ามเอา SQM มาหาร
-
----
-
-## Step 6 — Top 5 / Bottom 5 + จังหวัด
-
-Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, SQM>0, IS NOT NULL
+Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, New_SQM>0, IS NOT NULL
 
 Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
 ---
 
-## Step 7 — Response
+## Step 5 — Response
 
 **Headline** — Sales/Sqm เฉลี่ยองค์กร + YoY%
 
 **ตาราง 1: Top 5 สาขา**
 
-| # | สาขา | จังหวัด | SQM | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| # | สาขา | จังหวัด | SQM (New_SQM/100) | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
 
 **ตาราง 2: Bottom 5 สาขา**
 
@@ -100,7 +80,7 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 # Output Rules
 
 - OFFLINE เท่านั้น
-- SQM > 0 AND IS NOT NULL
-- COUNT(DISTINCT sold_date) — ไม่ใช้ DATEDIFF
+- SQM = New_SQM / 100 (สูตรเดียว)
+- New_SQM > 0 AND IS NOT NULL
 - แนวทางปรับปรุงอ้างอิงข้อมูลจริง
 
