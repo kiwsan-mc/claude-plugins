@@ -29,23 +29,47 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ---
 
-## Step 2 — SQM Formula (สูตรเดียว)
+## Step 2 — Master Formula
+
+**Sales/SQM = Net Sales_Runrate ÷ SQM**
+
+โดย:
+- **Net Sales_Runrate** = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
+- **SQM** = New_SQM / 100
+- **Net Sales MTD** = SUM(total_exc_vat_price)
+
+---
+
+## Step 3 — SQL Implementation
+
+### Net Sales MTD
+
+```sql
+CAST(SUM(total_exc_vat_price) AS FLOAT)
+```
+
+### Net Sales Runrate
+
+```sql
+CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0) * <days_in_full_month>
+```
+
+### SQM
 
 ```sql
 CAST(New_SQM AS FLOAT) / 100.0
 ```
 
-⚠️ **สูตรเดียว**: `SQM = New_SQM / 100`
+### Sales/SQM (สูตรรวม)
+
+```sql
+(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0) * <days_in_full_month>)
+/ NULLIF(SUM(CAST(New_SQM AS FLOAT) / 100.0), 0)
+```
 
 ⚠️ **เงื่อนไข**: `WHERE main_channel='OFFLINE' AND New_SQM > 0 AND New_SQM IS NOT NULL`
 
----
-
-## Step 3 — Sales per Sqm
-
-```sql
-CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(SUM(CAST(New_SQM AS FLOAT) / 100.0), 0)
-```
+⚠️ ใช้ `COUNT(DISTINCT sold_date)` เป็น "วันที่มีข้อมูล" — ห้ามใช้ DATEDIFF
 
 ---
 
@@ -80,7 +104,11 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 # Output Rules
 
 - OFFLINE เท่านั้น
-- SQM = New_SQM / 100 (สูตรเดียว)
+- Sales/SQM = Net Sales_Runrate ÷ SQM
+- Net Sales_Runrate = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
+- SQM = New_SQM / 100
+- Net Sales MTD = SUM(total_exc_vat_price)
 - New_SQM > 0 AND IS NOT NULL
+- COUNT(DISTINCT sold_date) — ไม่ใช้ DATEDIFF
 - แนวทางปรับปรุงอ้างอิงข้อมูลจริง
 
