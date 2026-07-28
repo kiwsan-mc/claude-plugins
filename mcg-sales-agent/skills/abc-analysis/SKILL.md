@@ -6,9 +6,9 @@ description: >
   "Inventory performance" "สินค้าขายดี"
   จัดกลุ่ม A(80%) B(15%) C(5%) ตาม Net Sales พร้อมวิเคราะห์ Margin%
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -84,6 +84,6 @@ Group by `category`, `product` — v2: `COALESCE(product,'Unknown')`, `COALESCE(
 - Cumulative% ของ Net Sales เท่านั้น — ห้าม PERCENTILE_CONT
 - Hero มาจากข้อมูลจริง
 - Slow-moving filter Qty > 0
-- CAST AS FLOAT ทุก KPI
+- `::float` ทุก KPI
 - v2: COALESCE NULL product/category → 'Unknown'
 

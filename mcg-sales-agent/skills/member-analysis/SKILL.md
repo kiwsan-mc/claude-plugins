@@ -5,9 +5,9 @@ description: >
   "Existing/New" "Generation" "ATV member" "UPT member" "สัดส่วนสมาชิก"
   เปรียบเทียบ Member vs Non-Member แยก Channel, Group, Generation
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -42,13 +42,13 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 | KPI | สูตร |
 |-----|------|
-| Member Sales% (excl Mkt) | `CAST(CAST(SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
-| Non-Member Sales% (excl Mkt) | `CAST(CAST(SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
-| Member Ticket% | `CAST(CAST(SUM(member_count) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0)*100 AS FLOAT)` |
-| Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| Non-Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| Member UPT | `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| Non-Member UPT | `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
+| Member Sales% (excl Mkt) | `SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
+| Non-Member Sales% (excl Mkt) | `SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
+| Member Ticket% | `SUM(member_count)::float / NULLIF(SUM(ticket_count)::float, 0) * 100` |
+| Member ATV | `SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member ATV | `SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
+| Member UPT | `SUM(total_quantity)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member UPT | `SUM(total_quantity)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
 
 ---
 
@@ -100,6 +100,6 @@ SHOP ≥80%=🟢, Mc Outlet ≥70%=🟢, Marketplace ≥20%=🟢, Others ≥60%=
 
 - ห้ามรวม Marketplace ใน Member%
 - ใช้ member_count สำหรับ Member tickets
-- CAST ก่อน DIV ทุก %
+- CAST ก่อน DIV ทุก % → ใช้ `::float`
 - ระบุ "ไม่รวม Marketplace" ในหัวตาราง
 

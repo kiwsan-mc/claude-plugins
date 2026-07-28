@@ -5,9 +5,9 @@ description: >
   ใช้เมื่อผู้ใช้ถาม: "ภาพรวม" "Dashboard" "KPI ทั้งหมด" "สรุปผู้บริหาร" "Overall performance"
   คำนวณ 12 KPI พร้อม 3 Key Takeaways
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -36,19 +36,19 @@ tools:
 
 | KPI | สูตร (v2) |
 |-----|----------|
-| Net Sales | `CAST(SUM(total_exc_vat_price) AS FLOAT)` |
-| Discount% | `CAST(CAST(SUM(total_discount_amount) AS FLOAT)/NULLIF(CAST(SUM(price_sign) AS FLOAT),0)*100 AS FLOAT)` |
-| Margin% | `CAST((CAST(SUM(total_exc_vat_price) AS FLOAT)-CAST(SUM(cogs) AS FLOAT))/NULLIF(CAST(SUM(total_exc_vat_price) AS FLOAT),0)*100 AS FLOAT)` |
+| Net Sales | `SUM(total_exc_vat_price)::float` |
+| Discount% | `SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100` |
+| Margin% | `(SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
 | Tickets | `SUM(ticket_count)` |
-| **ATV** | 🚫 ห้ามใช้ CASE WHEN — `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0) AS FLOAT)` |
-| **UPT** | 🚫 ห้ามใช้ CASE WHEN — `CAST(CAST(SUM(total_quantity) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0) AS FLOAT)` |
-| ASP | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(total_quantity) AS FLOAT),0) AS FLOAT)` |
-| Member Ticket% | ใช้ `member_count` — `CAST(CAST(SUM(member_count) AS FLOAT)/NULLIF(CAST(SUM(ticket_count) AS FLOAT),0)*100 AS FLOAT)` |
-| **Member Sales%** (FIXED) | ไม่รวม Marketplace — `CAST(CAST(SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
-| Non-Member Sales% | `CAST(CAST(SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT)/NULLIF(CAST(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END) AS FLOAT),0)*100 AS FLOAT)` |
-| Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| Non-Member ATV | `CAST(CAST(SUM(total_exc_vat_price) AS FLOAT)/NULLIF(CAST(SUM(ticket_count)-SUM(member_count) AS FLOAT),0) AS FLOAT)` |
-| YoY% | `CAST((FY27-FY26)/NULLIF(FY26,0)*100 AS FLOAT)` |
+| **ATV** | 🚫 ห้ามใช้ CASE WHEN — `SUM(total_exc_vat_price)::float / NULLIF(SUM(ticket_count)::float, 0)` |
+| **UPT** | 🚫 ห้ามใช้ CASE WHEN — `SUM(total_quantity)::float / NULLIF(SUM(ticket_count)::float, 0)` |
+| ASP | `SUM(total_exc_vat_price)::float / NULLIF(SUM(total_quantity)::float, 0)` |
+| Member Ticket% | ใช้ `member_count` — `SUM(member_count)::float / NULLIF(SUM(ticket_count)::float, 0) * 100` |
+| **Member Sales%** (FIXED) | ไม่รวม Marketplace — `SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
+| Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
+| Member ATV | `SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member ATV | `SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
+| YoY% | `(FY28 - FY27) / NULLIF(FY27, 0) * 100` |
 
 ---
 
@@ -85,7 +85,7 @@ tools:
 # Output Rules
 
 - ≤3 ตาราง
-- CAST AS FLOAT ทุก KPI
+- CAST AS FLOAT → ใช้ `::float` ทุก KPI
 - 🟢🟡🔴 ตาม Thresholds
 - ATV/UPT ใช้ SUM ตรง ๆ — 🚫 ห้ามใช้ CASE WHEN ticket_count > 0
 - Member% ไม่รวม Marketplace

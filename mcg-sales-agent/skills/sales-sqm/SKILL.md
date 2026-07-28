@@ -6,9 +6,9 @@ description: >
   "Top 5 สาขา" "Bottom 5 สาขา" "Runrate" "ประมาณการ"
   วิเคราะห์ Sales/Sqm แยกสาขา+จังหวัด FY27 vs FY26
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -45,29 +45,29 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 ### Net Sales MTD
 
 ```sql
-CAST(SUM(total_exc_vat_price) AS FLOAT)
+SUM(total_exc_vat_price)::float
 ```
 
 ### Net Sales Runrate
 
 ```sql
-CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0) * <days_in_full_month>
+SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * <days_in_full_month>
 ```
 
 ### SQM
 
 ```sql
-CAST(New_SQM AS FLOAT) / 100.0
+"New_SQM"::float / 100.0
 ```
 
 ### Sales/SQM (สูตรรวม)
 
 ```sql
-(CAST(SUM(total_exc_vat_price) AS FLOAT) / NULLIF(CAST(COUNT(DISTINCT sold_date) AS FLOAT), 0) * <days_in_full_month>)
-/ NULLIF(SUM(CAST(New_SQM AS FLOAT) / 100.0), 0)
+(SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * <days_in_full_month>)
+/ NULLIF(SUM("New_SQM"::float / 100.0), 0)
 ```
 
-⚠️ **เงื่อนไข**: `WHERE main_channel='OFFLINE' AND New_SQM > 0 AND New_SQM IS NOT NULL`
+⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE' AND "New_SQM" >= 50`
 
 ⚠️ ใช้ `COUNT(DISTINCT sold_date)` เป็น "วันที่มีข้อมูล" — ห้ามใช้ DATEDIFF
 

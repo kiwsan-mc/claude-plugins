@@ -5,9 +5,9 @@ description: >
   "สัดส่วนภูมิภาค" "Heatmap" "Heat map" "จังหวัด" ยอดขายแยกภาค วิเคราะห์ Regional x Channel
   พร้อมข้อเสนอแนะ Stock Allocation
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]

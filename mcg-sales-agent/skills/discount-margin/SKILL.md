@@ -5,9 +5,9 @@ description: >
   "Profitability" "High Risk" "ส่วนลดสูง" "กำไรต่ำ" "ควบคุมส่วนลด"
   วิเคราะห์ Discount% vs Margin% แยก Category/Product Type พร้อม Zone 🟢🟡🔴
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__execute_sql
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox__list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -32,9 +32,9 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 | KPI | สูตร (v2) |
 |-----|----------|
-| Net Sales | `CAST(SUM(total_exc_vat_price) AS FLOAT)` |
-| Discount% | `CAST(CAST(SUM(total_discount_amount) AS FLOAT)/NULLIF(CAST(SUM(price_sign) AS FLOAT),0)*100 AS FLOAT)` |
-| Margin% | `CAST((CAST(SUM(total_exc_vat_price) AS FLOAT)-CAST(SUM(cogs) AS FLOAT))/NULLIF(CAST(SUM(total_exc_vat_price) AS FLOAT),0)*100 AS FLOAT)` |
+| Net Sales | `SUM(total_exc_vat_price)::float` |
+| Discount% | `SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100` |
+| Margin% | `(SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
 
 ---
 
