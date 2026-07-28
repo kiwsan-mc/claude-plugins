@@ -55,8 +55,8 @@ tools:
 |--------|------------|
 | ยอดขาย / sales | เดือนปัจจุบันถึง MAX(sold_date) |
 | เทียบ / comparison | ช่วงเดียวกันของปีก่อน (Apple-to-Apple) |
-| ปีนี้ | FY2028 (FY_Year = '2028') |
-| ปีที่แล้ว | FY2027 (FY_Year = '2027') |
+| ปีนี้ | FY2028 (fy_year = '2028') |
+| ปีที่แล้ว | FY2027 (fy_year = '2027') |
 
 ---
 
@@ -77,9 +77,9 @@ tools:
 ## 5.1 Performance
 ใช้ `sold_date` สำหรับ date range filter — ห้ามใช้ฟังก์ชันบน `sold_date`
 
-FY filter (ใช้ column `"FY_Year"` ที่มีอยู่):
+FY filter (ใช้ column `fy_year` ที่มีอยู่):
 ```sql
-WHERE "FY_Year" = '2028'
+WHERE fy_year = '2028'
 ```
 
 Date range filter (Apple-to-Apple):
@@ -119,56 +119,32 @@ SELECT ... FROM fy28 JOIN fy27 ...
 
 ✅ ต้องมี `sold_date` filter เสมอ:
 ```sql
-SELECT DISTINCT "Region_Analysis"
+SELECT DISTINCT region_analysis
 FROM mcg_aiplatform_sales
 WHERE sold_date >= '2026-07-01'
-ORDER BY "Region_Analysis"
+ORDER BY region_analysis
 ```
 
-## 5.5 PostgreSQL Syntax Rules — Column Quoting (CRITICAL)
+## 5.5 PostgreSQL Syntax Rules — Column Names (POST-MIGRATION)
 
-⚠️ **MANDATORY** — PostgreSQL เป็น case-sensitive สำหรับ quoted identifiers:
-- ถ้าไม่ quote → PG แปลงเป็น lowercase อัตโนมัติ → **column not found error**
-- Column ที่มีตัวพิมพ์ใหญ่แม้ตัวเดียว **ต้อง quote ด้วย `"` เสมอ**
+✅ **ทุก column เป็น lowercase แล้ว** — ไม่ต้อง quote ด้วย `"` อีกต่อไป
 
-### Columns ที่ต้อง quote (มีตัวพิมพ์ใหญ่):
-```
-"FY_Year", "CustGroup_Name", "Custgrp4_Desc", "Customer_Group_(S2)_Text",
-"channel_store_Sub", "channel_store_Sub_2", "channel_store_Sub_3",
-"PriceAfterDiscount_AVG", "Date_snapshotMonth", "Date_snapshotYear",
-"Customer", "Name_3", "Postal_Code", "District_Desc", "Sales_Grp_Desc",
-"AcctAssgGr_Desc", "Custgrp_1_Desc", "Custgrp3_Desc", "New_SQM",
-"Area_Unit", "Region_Analysis", "Cluster", "Space_Range", "Salesman",
-"SalesmanName", "Sales_Manager", "Sales_ManagerName", "Head_Sales",
-"Head_SalesName", "Group_Acc_Target", "Closing_Date", "Status_Text",
-"Open_date", "LAT", "LONG", "TAMBON_ID", "TAMBON_T", "TAMBON_E",
-"AMPHOE_ID", "AMPHOE_T", "AMPHOE_E", "CHANGWAT_ID", "CHANGWAT_T",
-"CHANGWAT_E", "Regional", "Regional_text", "Material",
-"Article_Description", "Article_Type", "Article_type_descr", "Brand",
-"Brand_Name", "Fashion_Grade_Desc", "Season_Desc", "Season_Year",
-"LastChange", "MCL1Text", "MCL2Text", "MCL3Text", "MCL4Text",
-"MCL5Text", "Product_Group_Text", "Sub_Brand_Text", "Gender_Text",
-"AgingColor_Text", "Shape_1_Text", "Shape_2_Text", "Shape_3_Text",
-"Product_Group_Text_2", "Product_Status_Text", "SalesTypeDesc", "Color",
-"Size", "Model_BOINon_BOI", "Model_Color_BOINon_BOI", "Item_BOINon_BOI",
-"Grade", "Selling_Price", "Col_Name", "ColTone", "Design_Text",
-"Theme_Text", "New_Season_Text", "New_Season_Yr", "Asset_Type",
-"Asset_Type_Text", "SMPL", "Actual_on_floor_Text", "Actual_on_floor_Year",
-"Actual_GR_date", "Family_Text", "ArticleOnline", "Start_Aging",
-"Start_AgingYear", "Start_AgingMonth", "Vendor_no", "LASTGR",
-"Vendor_Name", "Date_Snapshot", "Collection_Group"
-```
+หลัง migration ทุก column ถูกเปลี่ยนเป็น lowercase ทั้งหมด:
+- ❌ ~~`"FY_Year"`~~ → ✅ `fy_year`
+- ❌ ~~`"Name_3"`~~ → ✅ `branch_name`
+- ❌ ~~`"New_SQM"`~~ → ✅ `new_sqm`
+- ❌ ~~`"Regional_text"`~~ → ✅ `regional_text`
+- ❌ ~~`"Regional"`~~ → ✅ `regional`
+- ❌ ~~`"Region_Analysis"`~~ → ✅ `region_analysis`
+- ❌ ~~`"CHANGWAT_T"`~~ → ✅ `changwat_t`
+- ❌ ~~`"Brand_Name"`~~ → ✅ `brand_name`
+- ❌ ~~`"Article_Description"`~~ → ✅ `article_description`
+- ❌ ~~`"Selling_Price"`~~ → ✅ `selling_price`
+- ❌ ~~`"Vendor_Name"`~~ → ✅ `vendor_name`
+- ❌ ~~`"AgingColor_Text"`~~ → ✅ `aging_color_text`
+- ❌ ~~`"Shape_1_Text"`~~ → ✅ `shape_1_text`
 
-### Columns ที่ไม่ต้อง quote (lowercase ทั้งหมด):
-```
-sold_date, year, month, branch_code, branch_ref, new_branch_ref,
-sub_channel, ticket_count, member_count, member_type, member_group,
-member_gender, member_generation, main_channel, channel_store,
-channel_store_3, item_code, model_color, model, gender, product,
-category, total_exc_vat_price, total_inc_vat_price, total_quantity,
-price_sign, cogs, standard_cost_adj, total_discount_amount,
-discount_amount_join, utp_count, etl_date, id
-```
+### กฎง่าย: เขียน column ตรงๆ ไม่ต้อง quote — ทุก column เป็น lowercase
 
 ### อื่นๆ:
 - ใช้ `::float` หรือ `CAST(... AS float)` สำหรับ division
@@ -178,9 +154,9 @@ discount_amount_join, utp_count, etl_date, id
 
 # 6. Regional Handling
 ```sql
-CASE WHEN "Regional_text" IS NULL AND branch_code LIKE 'E%' THEN 'Online'
-     WHEN "Regional_text" IS NULL THEN 'Other'
-     ELSE RTRIM("Regional_text") END
+CASE WHEN regional_text IS NULL AND branch_code LIKE 'E%' THEN 'Online'
+     WHEN regional_text IS NULL THEN 'Other'
+     ELSE RTRIM(regional_text) END
 ```
 
 ---
@@ -188,12 +164,12 @@ CASE WHEN "Regional_text" IS NULL AND branch_code LIKE 'E%' THEN 'Online'
 # 7. Fiscal Year
 FY = Jul 1 – Jun 30. FY2028 = Jul 2027 – Jun 2028.
 
-✅ มี column `"FY_Year"` — ใช้ได้ตรงๆ:
-- FY2026: `"FY_Year" = '2025'` (data: 1 Jul 2024 – 30 Jun 2025)
-- FY2027: `"FY_Year" = '2026'` (data: 1 Jul 2025 – 30 Jun 2026)
-- FY2028: `"FY_Year" = '2027'` (data: 1 Jul 2026 – current)
+✅ มี column `fy_year` — ใช้ได้ตรงๆ:
+- FY2026: `fy_year = '2025'` (data: 1 Jul 2024 – 30 Jun 2025)
+- FY2027: `fy_year = '2026'` (data: 1 Jul 2025 – 30 Jun 2026)
+- FY2028: `fy_year = '2027'` (data: 1 Jul 2026 – current)
 
-⚠️ **หมายเหตุ**: FY_Year ใช้ค่า calendar year ของเดือน ม.ค.-มิ.ย. (ปลาย FY) เช่น FY2028 ที่เริ่ม Jul 2027 จะมี FY_Year = '2027' (Jul-Dec) และ '2028' (Jan-Jun)
+⚠️ **หมายเหตุ**: fy_year ใช้ค่า calendar year ของเดือน ม.ค.-มิ.ย. (ปลาย FY) เช่น FY2028 ที่เริ่ม Jul 2027 จะมี fy_year = '2027' (Jul-Dec) และ '2028' (Jan-Jun)
 → **ใช้ sold_date range filter แทนเมื่อต้องการ Apple-to-Apple ที่แม่นยำ**
 
 Data: 3 FY (FY26 เต็มปี, FY27 เต็มปี, FY28 กำลังดำเนินอยู่)
@@ -274,10 +250,10 @@ SUM(CASE WHEN member_type = 'Member' AND channel_store <> 'Marketplace' THEN tot
 / NULLIF(SUM(CASE WHEN channel_store <> 'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100
 ```
 
-### Branch Sales per Sqm (FIXED: filter New_SQM >= 50)
+### Branch Sales per Sqm (FIXED: filter new_sqm >= 50)
 ```sql
-SUM(total_exc_vat_price)::float / NULLIF(SUM("New_SQM")::float, 0)
--- WHERE main_channel = 'OFFLINE' AND "New_SQM" >= 50
+SUM(total_exc_vat_price)::float / NULLIF(SUM(new_sqm)::float, 0)
+-- WHERE main_channel = 'OFFLINE' AND new_sqm >= 50
 ```
 
 ### YoY Growth
@@ -297,38 +273,38 @@ Member Ticket% (SHOP): ≥80%=🟢, 75-79%=🟡, <75%=🔴
 
 ตาราง: `mcg_aiplatform_sales` (ตารางเดียว — PostgreSQL)
 
-| # | Column | Meaning | ตัวอย่างค่า | Quote? |
-| --- | --- | --- | --- | --- |
-| 1 | `sold_date` | วันที่ขาย | 2024-09-28 | ไม่ |
-| 2 | `year` | ปี ค.ศ. ของรายการขาย | 2024, 2025 | ไม่ |
-| 3 | `month` | เดือนของรายการขาย (1-12) | 9, 4 | ไม่ |
-| 4 | `"FY_Year"` | ปีงบประมาณ | 2025, 2026, 2027 | ✅ |
-| 5 | `branch_code` | รหัสสาขา | S161, P065, Y065 | ไม่ |
-| 6 | `"Name_3"` | ชื่อสาขา | Shop Mc Jeansแฮบปี้พล่าซ่า | ✅ |
-| 7 | `main_channel` | ช่องทางหลัก | OFFLINE, ONLINE | ไม่ |
-| 8 | `channel_store` | ประเภทร้าน/ช่องทาง | SHOP, CHAIN, Mc outlet, Marketplace | ไม่ |
-| 9 | `ticket_count` | จำนวนใบเสร็จ | 0, 1, 2 | ไม่ |
-| 10 | `member_count` | จำนวนใบเสร็จที่เป็นสมาชิก | 0, 1 | ไม่ |
-| 11 | `member_type` | ประเภทสมาชิก | Member, Non-Member | ไม่ |
-| 12 | `member_group` | กลุ่มสมาชิก | Existing, New, Non Member | ไม่ |
-| 13 | `member_generation` | กลุ่มช่วงอายุสมาชิก | GEN Y, GEN X, GEN Z, BABY BOOMER | ไม่ |
-| 14 | `item_code` | รหัสสินค้า | XFMCCZ021200S | ไม่ |
-| 15 | `product` | ประเภทสินค้า | TROUSERS, BASIC CARE, JEANS | ไม่ |
-| 16 | `category` | หมวดสินค้า | BOTTOM, TOP, ACCS, INNERWEAR | ไม่ |
-| 17 | `total_exc_vat_price` | รายได้ไม่รวม VAT (Net Sales) | 364.49 | ไม่ |
-| 18 | `total_inc_vat_price` | รายได้รวม VAT | 390.00 | ไม่ |
-| 19 | `total_quantity` | จำนวนสินค้าที่ขาย | 1.00, 2.00 | ไม่ |
-| 20 | `price_sign` | ราคาป้ายก่อนส่วนลด (Gross Sales) | 1490.65 | ไม่ |
-| 21 | `cogs` | ต้นทุนสินค้า (Cost of Goods Sold) | 252.34 | ไม่ |
-| 22 | `total_discount_amount` | มูลค่าส่วนลดรวม | 1126.17 | ไม่ |
-| 23 | `"New_SQM"` | พื้นที่ร้านค้า — NULL=ไม่มีข้อมูล | 8120.00, 9000.00 | ✅ |
-| 24 | `"Region_Analysis"` | จังหวัดสำหรับวิเคราะห์ | จังหวัดพิจิตร, กรุงเทพมหานคร | ✅ |
-| 25 | `"Regional_text"` | ชื่อภูมิภาค (อาจเป็น NULL) | Northeast, South, BKK + GT BKK | ✅ |
-| 26 | `"Article_Description"` | ชื่อ/คำอธิบายสินค้า | กางเกงทรงยาวญ. | ✅ |
-| 27 | `"Brand_Name"` | ชื่อแบรนด์ | MC, MCJ, Mc Lady, WYN, UP | ✅ |
-| 28 | `"CHANGWAT_T"` | ชื่อจังหวัด | กรุงเทพมหานคร, จ. ชลบุรี | ✅ |
-| 29 | `"Selling_Price"` | ราคาขายตั้ง (ราคาป้าย) | 1595.00, 890.00 | ✅ |
-| 30 | `"Vendor_Name"` | ชื่อผู้ผลิต/ซัพพลายเออร์ | บจก.อโรมาธิค แอ็คทีฟ | ✅ |
+| # | Column | Meaning | ตัวอย่างค่า |
+| --- | --- | --- | --- |
+| 1 | `sold_date` | วันที่ขาย | 2024-09-28 |
+| 2 | `year` | ปี ค.ศ. ของรายการขาย | 2024, 2025 |
+| 3 | `month` | เดือนของรายการขาย (1-12) | 9, 4 |
+| 4 | `fy_year` | ปีงบประมาณ | 2025, 2026, 2027 |
+| 5 | `branch_code` | รหัสสาขา | S161, P065, Y065 |
+| 6 | `branch_name` | ชื่อสาขา | Shop Mc Jeansแฮบปี้พล่าซ่า |
+| 7 | `main_channel` | ช่องทางหลัก | OFFLINE, ONLINE |
+| 8 | `channel_store` | ประเภทร้าน/ช่องทาง | SHOP, CHAIN, Mc outlet, Marketplace |
+| 9 | `ticket_count` | จำนวนใบเสร็จ | 0, 1, 2 |
+| 10 | `member_count` | จำนวนใบเสร็จที่เป็นสมาชิก | 0, 1 |
+| 11 | `member_type` | ประเภทสมาชิก | Member, Non-Member |
+| 12 | `member_group` | กลุ่มสมาชิก | Existing, New, Non Member |
+| 13 | `member_generation` | กลุ่มช่วงอายุสมาชิก | GEN Y, GEN X, GEN Z, BABY BOOMER |
+| 14 | `item_code` | รหัสสินค้า | XFMCCZ021200S |
+| 15 | `product` | ประเภทสินค้า | TROUSERS, BASIC CARE, JEANS |
+| 16 | `category` | หมวดสินค้า | BOTTOM, TOP, ACCS, INNERWEAR |
+| 17 | `total_exc_vat_price` | รายได้ไม่รวม VAT (Net Sales) | 364.49 |
+| 18 | `total_inc_vat_price` | รายได้รวม VAT | 390.00 |
+| 19 | `total_quantity` | จำนวนสินค้าที่ขาย | 1.00, 2.00 |
+| 20 | `price_sign` | ราคาป้ายก่อนส่วนลด (Gross Sales) | 1490.65 |
+| 21 | `cogs` | ต้นทุนสินค้า (Cost of Goods Sold) | 252.34 |
+| 22 | `total_discount_amount` | มูลค่าส่วนลดรวม | 1126.17 |
+| 23 | `new_sqm` | พื้นที่ร้านค้า — NULL=ไม่มีข้อมูล | 8120.00, 9000.00 |
+| 24 | `region_analysis` | จังหวัดสำหรับวิเคราะห์ | จังหวัดพิจิตร, กรุงเทพมหานคร |
+| 25 | `regional_text` | ชื่อภูมิภาค (อาจเป็น NULL) | Northeast, South, BKK + GT BKK |
+| 26 | `article_description` | ชื่อ/คำอธิบายสินค้า | กางเกงทรงยาวญ. |
+| 27 | `brand_name` | ชื่อแบรนด์ | MC, MCJ, Mc Lady, WYN, UP |
+| 28 | `changwat_t` | ชื่อจังหวัด | กรุงเทพมหานคร, จ. ชลบุรี |
+| 29 | `selling_price` | ราคาขายตั้ง (ราคาป้าย) | 1595.00, 890.00 |
+| 30 | `vendor_name` | ชื่อผู้ผลิต/ซัพพลายเออร์ | บจก.อโรมาธิค แอ็คทีฟ |
 
 ---
 

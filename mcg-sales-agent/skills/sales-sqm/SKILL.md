@@ -35,7 +35,7 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 โดย:
 - **Net Sales_Runrate** = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
-- **SQM** = "New_SQM" / 100
+- **SQM** = new_sqm / 100
 - **Net Sales MTD** = SUM(total_exc_vat_price)
 
 ---
@@ -57,17 +57,17 @@ SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * 
 ### SQM
 
 ```sql
-"New_SQM"::float / 100.0
+new_sqm::float / 100.0
 ```
 
 ### Sales/SQM (สูตรรวม)
 
 ```sql
 (SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * <days_in_full_month>)
-/ NULLIF(SUM("New_SQM"::float / 100.0), 0)
+/ NULLIF(SUM(new_sqm::float / 100.0), 0)
 ```
 
-⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE' AND "New_SQM" >= 50`
+⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE' AND new_sqm >= 50`
 
 ⚠️ ใช้ `COUNT(DISTINCT sold_date)` เป็น "วันที่มีข้อมูล" — ห้ามใช้ DATEDIFF
 
@@ -75,7 +75,7 @@ SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * 
 
 ## Step 4 — Top 5 / Bottom 5 + จังหวัด
 
-Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, "New_SQM" >= 50
+Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, new_sqm >= 50
 
 Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
@@ -87,7 +87,7 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
 **ตาราง 1: Top 5 สาขา**
 
-| # | สาขา | จังหวัด | SQM (New_SQM/100) | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| # | สาขา | จังหวัด | SQM (new_sqm/100) | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
 
 **ตาราง 2: Bottom 5 สาขา**
 
@@ -106,9 +106,9 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 - OFFLINE เท่านั้น
 - Sales/SQM = Net Sales_Runrate ÷ SQM
 - Net Sales_Runrate = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
-- SQM = "New_SQM" / 100
+- SQM = new_sqm / 100
 - Net Sales MTD = SUM(total_exc_vat_price)
-- `"New_SQM" >= 50` (filter ค่าผิดปกติ)
+- `new_sqm >= 50` (filter ค่าผิดปกติ)
 - COUNT(DISTINCT sold_date) — ไม่ใช้ DATEDIFF
 - แนวทางปรับปรุงอ้างอิงข้อมูลจริง
 

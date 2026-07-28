@@ -1,7 +1,7 @@
 ---
 name: channel-regional
 description: >
-  Sales Ratio by Channel & Regional v2 — Regional_text (R1-R7) + Region_Analysis — ใช้เมื่อผู้ใช้ถาม: "ภูมิภาค" "Regional" "ภาคเหนือ/ใต้/อีสาน/กลาง"
+  Sales Ratio by Channel & Regional v2 — regional_text (R1-R7) + region_analysis — ใช้เมื่อผู้ใช้ถาม: "ภูมิภาค" "Regional" "ภาคเหนือ/ใต้/อีสาน/กลาง"
   "สัดส่วนภูมิภาค" "Heatmap" "Heat map" "จังหวัด" ยอดขายแยกภาค วิเคราะห์ Regional x Channel
   พร้อมข้อเสนอแนะ Stock Allocation
 tools:
@@ -30,12 +30,12 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 
 ### Regional Mapping (v2)
-ใช้ Regional_text (R1-R7) และ Region_Analysis (ชื่อจังหวัด) — ไม่มี column ภาคโดยตรง
-NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM("Regional_text")
+ใช้ regional_text (R1-R7) และ region_analysis (ชื่อจังหวัด) — ไม่มี column ภาคโดยตรง
+NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM(regional_text)
 
 ## Step 2 — Regional x Main Channel
 
-ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM("Regional_text")
+ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM(regional_text)
 
 ⚠️ **Performance Rule — YoY ใน query เดียว (ห้าม CTE แยก FY)**:
 ```sql
