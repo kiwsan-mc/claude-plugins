@@ -114,6 +114,17 @@ SELECT ... FROM fy28 JOIN fy27 ...
 
 ## 5.4 Forbidden: NOW(), AGE(), CROSS JOIN, PERCENTILE_CONT
 
+## 5.4.1 Anti-Pattern: DISTINCT without WHERE (CRITICAL)
+⚠️ **ห้ามใช้ `SELECT DISTINCT <column> FROM mcg_aiplatform_sales` โดยไม่มี WHERE** — scan 20GB ทุกครั้ง
+
+✅ ต้องมี `sold_date` filter เสมอ:
+```sql
+SELECT DISTINCT "Region_Analysis"
+FROM mcg_aiplatform_sales
+WHERE sold_date >= '2026-07-01'
+ORDER BY "Region_Analysis"
+```
+
 ## 5.5 PostgreSQL Syntax Rules — Column Quoting (CRITICAL)
 
 ⚠️ **MANDATORY** — PostgreSQL เป็น case-sensitive สำหรับ quoted identifiers:
