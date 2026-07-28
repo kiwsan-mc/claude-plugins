@@ -2,14 +2,22 @@
 
 MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
-ถามข้อมูลยอดขาย Retail/Fashion ด้วยภาษาธรรมชาติ (Thai/English) ผ่าน MCP tools ที่เชื่อมต่อ MSSQL 2016.
+ถามข้อมูลยอดขาย Retail/Fashion ด้วยภาษาธรรมชาติ (Thai/English) ผ่าน MCP tools ที่เชื่อมต่อ PostgreSQL (pgvector).
+
+## Version
+
+**v3.0.0** — Migrated from MSSQL to PostgreSQL (pgvector-enabled)
+
+### Changelog
+- **v3.0.0**: Migrated to PostgreSQL + pgvector. New tools: `pg_execute_sql`, `pg_describe_table`, `pg_list_tables`. SQL syntax updated to PostgreSQL. Added `FY_Year` column support. SQM threshold ≥50.
+- **v2.2.5**: MSSQL version (deprecated)
 
 ## Skills
 
 | Skill | Role | หน้าที่ |
 |-------|------|---------|
 | `sales-agent` | MC Group Sales Agent | กฎ สูตร KPI และ SQL rules หลัก (shared foundation) |
-| `sales-dashboard` | Data Analyst | สรุปภาพรวม Sales Performance FY27 vs FY26 แยก Channel |
+| `sales-dashboard` | Data Analyst | สรุปภาพรวม Sales Performance FY28 vs FY27 แยก Channel |
 | `sales-sqm` | Retail Operations Expert | วิเคราะห์ Sales per Sqm. แยกสาขา/จังหวัด Top 5 / Bottom 5 |
 | `discount-margin` | Financial & Planning Analyst | วิเคราะห์ Discount% vs Margin% แยก Category/Product |
 | `member-analysis` | CRM & Sales Strategy Analyst | สัดส่วน Member vs Non-Member, ATV, UPT |
@@ -31,13 +39,20 @@ skills/
 
 แต่ละ skill ย่อย include กฎหลักผ่าน `#[[file:...]]` — ไม่ซ้ำซ้อน แก้ที่เดียวมีผลทุก role.
 
-## MCP Tools
+## MCP Tools (PostgreSQL)
 
 | Tool | Description |
 |------|-------------|
-| `execute_sql` | Execute T-SQL SELECT queries |
-| `describe_table` | Get table schema |
-| `list_tables` | List approved tables |
+| `pg_execute_sql` | Execute PostgreSQL SELECT queries |
+| `pg_describe_table` | Get table schema |
+| `pg_list_tables` | List approved tables |
+
+## Database
+
+- **Engine**: PostgreSQL 16 (Azure Flexible Server)
+- **Table**: `mcg_aiplatform_sales` (~13M rows, 20GB)
+- **Features**: pgvector extension enabled
+- **Connection**: Via MCP Toolbox v1.8.0
 
 ## Usage
 
