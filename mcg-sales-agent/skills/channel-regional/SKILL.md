@@ -31,11 +31,11 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ### Regional Mapping (v2)
 ใช้ Regional_text (R1-R7) และ Region_Analysis (ชื่อจังหวัด) — ไม่มี column ภาคโดยตรง
-NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM(Regional_text)
+NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM("Regional_text")
 
 ## Step 2 — Regional x Main Channel
 
-ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM(Regional_text)
+ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM("Regional_text")
 
 คำนวณ: Net Sales, Sales Ratio%, Tickets, Margin%
 
