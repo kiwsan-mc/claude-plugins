@@ -37,15 +37,24 @@ NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM(regional_text
 
 ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM(regional_text)
 
-⚠️ **Performance Rule — YoY ใน query เดียว (ห้าม CTE แยก FY)**:
+⚠️ **Performance Rule — ห้ามใช้ CTE — เขียน query ตรงๆ**:
 ```sql
--- ใช้ conditional SUM ใน query เดียว — ห้ามแยก CTE per FY
-WHERE sold_date BETWEEN '<fy_prev_start>' AND '<fy_curr_end>'
-GROUP BY regional_mapping, main_channel
-
--- FY28 vs FY27:
-SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28
-SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+-- ใช้ conditional SUM + CASE WHEN regional mapping ใน query เดียว
+SELECT
+  CASE WHEN regional_text IS NULL AND main_channel = 'ONLINE' THEN 'Online'
+       WHEN regional_text IS NULL AND main_channel = 'OFFLINE' THEN 'Other'
+       ELSE RTRIM(regional_text) END AS regional,
+  main_channel,
+  SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
+  SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+FROM mcg_aiplatform_sales
+WHERE sold_date BETWEEN '2025-07-01' AND '<max_date>'
+GROUP BY
+  CASE WHEN regional_text IS NULL AND main_channel = 'ONLINE' THEN 'Online'
+       WHEN regional_text IS NULL AND main_channel = 'OFFLINE' THEN 'Other'
+       ELSE RTRIM(regional_text) END,
+  main_channel
+ORDER BY ns_fy28 DESC
 ```
 
 คำนวณ: Net Sales, Sales Ratio%, Tickets, Margin%

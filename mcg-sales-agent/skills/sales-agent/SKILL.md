@@ -94,18 +94,25 @@ v2: `COALESCE(product, 'Unknown')`, `COALESCE(category, 'Unknown')` ใน GROUP
 ## 5.3 Query Size: ≤30 lines — แยกมิติ ห้าม UNION ALL
 
 ## 5.3.1 YoY Performance Rule (CRITICAL)
-⚠️ **ห้ามใช้ CTE แยก FY แล้ว JOIN** — ช้ามาก (scan table หลายรอบ)
+⚠️ **ห้ามใช้ CTE (WITH ... AS) ทุกกรณี** — ช้ามาก (PG materialize CTE → scan table หลายรอบ)
 
-✅ ใช้ **conditional SUM ใน query เดียว**:
+✅ ใช้ **conditional SUM ใน query เดียว ไม่มี CTE**:
 ```sql
+SELECT
+  <dimension_columns>,
+  SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '2026-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
+  SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '2025-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '<earliest_start>' AND '<latest_end>'
--- แล้วแยก FY ด้วย CASE WHEN:
-SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '2026-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
-SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '2025-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+GROUP BY <dimension_columns>
 ```
 
 ❌ ห้าม:
 ```sql
+-- ห้าม! CTE ทำให้ PG materialize ข้อมูลก่อน aggregate → ช้า
+WITH base AS (SELECT ... FROM mcg_aiplatform_sales WHERE ...)
+SELECT ... FROM base GROUP BY ...
+
 -- ห้าม! CTE per FY + JOIN = scan table 2+ ครั้ง
 WITH fy28 AS (SELECT ... WHERE sold_date BETWEEN ...),
      fy27 AS (SELECT ... WHERE sold_date BETWEEN ...)
