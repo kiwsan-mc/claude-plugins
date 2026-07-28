@@ -22,6 +22,12 @@ tools:
 
 # Task: Sales Performance Dashboard Overview
 
+## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+
+เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
+
+---
+
 ## Step 1 — ตรวจสอบช่วงเวลา (Apple-to-Apple บังคับ)
 
 1. ตรวจสอบ `MAX(sold_date)` จากข้อมูลจริง

@@ -22,6 +22,12 @@ tools:
 
 # Task: Sales Ratio by Channel & Regional
 
+## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+
+เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
+
+---
+
 ## Step 1 — Apple-to-Apple
 
 MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
