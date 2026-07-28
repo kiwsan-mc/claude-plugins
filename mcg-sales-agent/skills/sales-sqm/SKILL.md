@@ -35,7 +35,7 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 โดย:
 - **Net Sales_Runrate** = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
-- **SQM** = new_sqm / 100
+- **SQM** = new_sqm (ค่าเป็น ตร.ม. จริงแล้ว ไม่ต้องหาร 100)
 - **Net Sales MTD** = SUM(total_exc_vat_price)
 
 ---
@@ -57,14 +57,14 @@ SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * 
 ### SQM
 
 ```sql
-new_sqm::float / 100.0
+new_sqm::float
 ```
 
 ### Sales/SQM (สูตรรวม)
 
 ```sql
 (SUM(total_exc_vat_price)::float / NULLIF(COUNT(DISTINCT sold_date)::float, 0) * <days_in_full_month>)
-/ NULLIF(SUM(new_sqm::float / 100.0), 0)
+/ NULLIF(SUM(new_sqm::float), 0)
 ```
 
 ⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE' AND new_sqm >= 50`
@@ -87,7 +87,7 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
 **ตาราง 1: Top 5 สาขา**
 
-| # | สาขา | จังหวัด | SQM (new_sqm/100) | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| # | สาขา | จังหวัด | SQM | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
 
 **ตาราง 2: Bottom 5 สาขา**
 
@@ -106,7 +106,7 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 - OFFLINE เท่านั้น
 - Sales/SQM = Net Sales_Runrate ÷ SQM
 - Net Sales_Runrate = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
-- SQM = new_sqm / 100
+- SQM = new_sqm (ค่าจริง ไม่ต้องหาร)
 - Net Sales MTD = SUM(total_exc_vat_price)
 - `new_sqm >= 50` (filter ค่าผิดปกติ)
 - COUNT(DISTINCT sold_date) — ไม่ใช้ DATEDIFF
