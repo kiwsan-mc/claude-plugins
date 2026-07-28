@@ -220,7 +220,39 @@ WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27'
 **SUM ก่อนหารเสมอ** — `SUM(A) / NULLIF(SUM(B), 0)`
 v2: `COALESCE(product, 'Unknown')`, `COALESCE(category, 'Unknown')` ใน GROUP BY
 
-## 5.3 Query Size: ≤30 lines — แยกมิติ ห้าม UNION ALL
+## 5.3 Query Size: ≤15 lines ต่อ query — แยกเป็น query ย่อยๆ หลาย call
+
+⚠️ **MANDATORY — ห้าม query ใหญ่เด็ดขาด**
+
+✅ **แยก query เป็นชิ้นเล็กๆ แล้วประกอบคำตอบ:**
+- Query 1: MAX(sold_date) + fy_year
+- Query 2: KPI รวม (Net Sales, Tickets, Margin)
+- Query 3: แยก dimension (เช่น GROUP BY main_channel)
+
+❌ **ห้าม:**
+- Query เดียวที่มี 10+ columns ใน SELECT
+- Query ที่ GROUP BY หลาย dimension พร้อมกัน
+- Query ที่คำนวณ YoY + KPI + dimension ในคราวเดียว
+- Query เกิน 15 บรรทัด
+
+### ตัวอย่าง — ถูก:
+```
+Call 1: SELECT MAX(sold_date) AS last_data FROM mcg_aiplatform_sales
+Call 2: SELECT SUM(total_exc_vat_price)::float AS ns, SUM(ticket_count) AS tkt FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27'
+Call 3: SELECT main_channel, SUM(total_exc_vat_price)::float AS ns FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27' GROUP BY main_channel
+```
+
+### ตัวอย่าง — ผิด:
+```
+-- ห้าม! Query ใหญ่ รวมทุกอย่างในครั้งเดียว
+SELECT main_channel, SUM(...) AS ns_curr, SUM(...) AS ns_prev, SUM(...) AS tickets, SUM(...)/NULLIF(...) AS atv, SUM(...)/NULLIF(...) AS upt, (SUM(...)-SUM(...))/NULLIF(...) AS margin, ...
+FROM ... WHERE ... GROUP BY ...
+```
+
+### กฎ:
+- **Max 3-5 calls** ต่อคำถาม (ไม่ใช่ 1 call ใหญ่)
+- แต่ละ call ≤15 บรรทัด, ≤5 columns ใน SELECT
+- ประกอบคำตอบจากผลลัพธ์หลาย call ด้วยการคำนวณเอง
 
 ## 5.3.1 YoY Performance Rule (CRITICAL)
 ⚠️ **ห้ามใช้ CTE (WITH ... AS) ทุกกรณี** — ช้ามาก (PG materialize CTE → scan table หลายรอบ)
@@ -352,10 +384,15 @@ WHERE sold_date BETWEEN '<fy_start>' AND '<max_date>'
 WHERE sold_date BETWEEN '<prev_fy_start>' AND '<same_day_prev_year>'
 ```
 
-### ตัวอย่าง (ณ วันนี้):
-- MAX(sold_date) = 2026-07-27, current_fy = '2027'
-- FY27 (ปีนี้): 2026-07-01 ถึง 2026-07-27
-- FY26 (ปีก่อน Apple-to-Apple): 2025-07-01 ถึง 2025-07-27
+### FY Naming Rule:
+**FY = ปี ค.ศ. ที่ FY สิ้นสุด** (ไม่ใช่ปีที่เริ่ม):
+- FY27 = เริ่ม 1 Jul **2026** → จบ 30 Jun **2027** → fy_year = '2027'
+- FY26 = เริ่ม 1 Jul **2025** → จบ 30 Jun **2026** → fy_year = '2026'
+
+### คำนวณวันเริ่ม FY:
+- **วันเริ่ม FY = (fy_year::int - 1) ปี, วันที่ 1 กรกฎาคม**
+  - fy_year '2027' → เริ่ม 1 Jul 2026
+  - fy_year '2026' → เริ่ม 1 Jul 2025
 
 ⚠️ **ห้าม hardcode ปี FY** — ต้อง query MAX(sold_date) ทุกครั้ง เพราะข้อมูลเปลี่ยนทุกวัน
 
