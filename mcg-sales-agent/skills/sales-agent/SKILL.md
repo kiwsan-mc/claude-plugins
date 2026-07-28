@@ -93,11 +93,73 @@ v2: `COALESCE(product, 'Unknown')`, `COALESCE(category, 'Unknown')` ใน GROUP
 
 ## 5.3 Query Size: ≤30 lines — แยกมิติ ห้าม UNION ALL
 
+## 5.3.1 YoY Performance Rule (CRITICAL)
+⚠️ **ห้ามใช้ CTE แยก FY แล้ว JOIN** — ช้ามาก (scan table หลายรอบ)
+
+✅ ใช้ **conditional SUM ใน query เดียว**:
+```sql
+WHERE sold_date BETWEEN '<earliest_start>' AND '<latest_end>'
+-- แล้วแยก FY ด้วย CASE WHEN:
+SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '2026-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
+SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '2025-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+```
+
+❌ ห้าม:
+```sql
+-- ห้าม! CTE per FY + JOIN = scan table 2+ ครั้ง
+WITH fy28 AS (SELECT ... WHERE sold_date BETWEEN ...),
+     fy27 AS (SELECT ... WHERE sold_date BETWEEN ...)
+SELECT ... FROM fy28 JOIN fy27 ...
+```
+
 ## 5.4 Forbidden: NOW(), AGE(), CROSS JOIN, PERCENTILE_CONT
 
-## 5.5 PostgreSQL Syntax Rules
-- ใช้ `"double_quotes"` สำหรับ column ที่มีตัวพิมพ์ใหญ่ เช่น `"FY_Year"`, `"Brand_Name"`, `"New_SQM"`, `"CHANGWAT_T"`, `"Regional_text"`, `"Name_3"`, `"Region_Analysis"`
-- Column ที่เป็น lowercase ทั้งหมดไม่ต้อง quote เช่น `sold_date`, `main_channel`, `category`, `product`
+## 5.5 PostgreSQL Syntax Rules — Column Quoting (CRITICAL)
+
+⚠️ **MANDATORY** — PostgreSQL เป็น case-sensitive สำหรับ quoted identifiers:
+- ถ้าไม่ quote → PG แปลงเป็น lowercase อัตโนมัติ → **column not found error**
+- Column ที่มีตัวพิมพ์ใหญ่แม้ตัวเดียว **ต้อง quote ด้วย `"` เสมอ**
+
+### Columns ที่ต้อง quote (มีตัวพิมพ์ใหญ่):
+```
+"FY_Year", "CustGroup_Name", "Custgrp4_Desc", "Customer_Group_(S2)_Text",
+"channel_store_Sub", "channel_store_Sub_2", "channel_store_Sub_3",
+"PriceAfterDiscount_AVG", "Date_snapshotMonth", "Date_snapshotYear",
+"Customer", "Name_3", "Postal_Code", "District_Desc", "Sales_Grp_Desc",
+"AcctAssgGr_Desc", "Custgrp_1_Desc", "Custgrp3_Desc", "New_SQM",
+"Area_Unit", "Region_Analysis", "Cluster", "Space_Range", "Salesman",
+"SalesmanName", "Sales_Manager", "Sales_ManagerName", "Head_Sales",
+"Head_SalesName", "Group_Acc_Target", "Closing_Date", "Status_Text",
+"Open_date", "LAT", "LONG", "TAMBON_ID", "TAMBON_T", "TAMBON_E",
+"AMPHOE_ID", "AMPHOE_T", "AMPHOE_E", "CHANGWAT_ID", "CHANGWAT_T",
+"CHANGWAT_E", "Regional", "Regional_text", "Material",
+"Article_Description", "Article_Type", "Article_type_descr", "Brand",
+"Brand_Name", "Fashion_Grade_Desc", "Season_Desc", "Season_Year",
+"LastChange", "MCL1Text", "MCL2Text", "MCL3Text", "MCL4Text",
+"MCL5Text", "Product_Group_Text", "Sub_Brand_Text", "Gender_Text",
+"AgingColor_Text", "Shape_1_Text", "Shape_2_Text", "Shape_3_Text",
+"Product_Group_Text_2", "Product_Status_Text", "SalesTypeDesc", "Color",
+"Size", "Model_BOINon_BOI", "Model_Color_BOINon_BOI", "Item_BOINon_BOI",
+"Grade", "Selling_Price", "Col_Name", "ColTone", "Design_Text",
+"Theme_Text", "New_Season_Text", "New_Season_Yr", "Asset_Type",
+"Asset_Type_Text", "SMPL", "Actual_on_floor_Text", "Actual_on_floor_Year",
+"Actual_GR_date", "Family_Text", "ArticleOnline", "Start_Aging",
+"Start_AgingYear", "Start_AgingMonth", "Vendor_no", "LASTGR",
+"Vendor_Name", "Date_Snapshot", "Collection_Group"
+```
+
+### Columns ที่ไม่ต้อง quote (lowercase ทั้งหมด):
+```
+sold_date, year, month, branch_code, branch_ref, new_branch_ref,
+sub_channel, ticket_count, member_count, member_type, member_group,
+member_gender, member_generation, main_channel, channel_store,
+channel_store_3, item_code, model_color, model, gender, product,
+category, total_exc_vat_price, total_inc_vat_price, total_quantity,
+price_sign, cogs, standard_cost_adj, total_discount_amount,
+discount_amount_join, utp_count, etl_date, id
+```
+
+### อื่นๆ:
 - ใช้ `::float` หรือ `CAST(... AS float)` สำหรับ division
 - ใช้ `LIMIT N` ไม่ใช่ `TOP N`
 

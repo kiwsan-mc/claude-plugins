@@ -37,6 +37,17 @@ NULL+E% branch → Online | NULL+non-E% → Other | Else → RTRIM("Regional_tex
 
 ใช้ Regional mapping: NULL+E%=Online, NULL+Other=Other, else RTRIM("Regional_text")
 
+⚠️ **Performance Rule — YoY ใน query เดียว (ห้าม CTE แยก FY)**:
+```sql
+-- ใช้ conditional SUM ใน query เดียว — ห้ามแยก CTE per FY
+WHERE sold_date BETWEEN '<fy_prev_start>' AND '<fy_curr_end>'
+GROUP BY regional_mapping, main_channel
+
+-- FY28 vs FY27:
+SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28
+SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+```
+
 คำนวณ: Net Sales, Sales Ratio%, Tickets, Margin%
 
 ---
