@@ -259,6 +259,10 @@ ORDER BY region_analysis
 
 เรียก `pg_describe_table` กับ table `mcg_aiplatform_sales` จะได้ column_name, data_type, is_nullable ทั้งหมด
 
+```
+pg_describe_table(table="mcg_aiplatform_sales")
+```
+
 ### Columns ที่ใช้บ่อย (จำให้ได้):
 
 **Measures (numeric — ใช้ SUM):**
