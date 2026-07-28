@@ -53,6 +53,7 @@ LIMIT 10
 ```sql
 SELECT
   vendor_name,
+  SUM(cogs)::float AS total_cogs,
   SUM(cogs)::float / NULLIF(SUM(total_quantity)::float, 0) AS avg_cost_per_unit,
   SUM(standard_cost_adj)::float / NULLIF(SUM(total_quantity)::float, 0) AS avg_std_cost,
   (SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100 AS margin_pct

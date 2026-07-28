@@ -174,8 +174,8 @@ Step 1: replace placeholders
 |--------|------------|
 | ยอดขาย / sales | เดือนปัจจุบันถึง MAX(sold_date) |
 | เทียบ / comparison | ช่วงเดียวกันของปีก่อน (Apple-to-Apple) |
-| ปีนี้ | FY2028 (fy_year = '2028') |
-| ปีที่แล้ว | FY2027 (fy_year = '2027') |
+| ปีนี้ | FY28 (fy_year = '2027') — เริ่ม 1 Jul 2026 |
+| ปีที่แล้ว | FY27 (fy_year = '2026') — 1 Jul 2025 ถึง 30 Jun 2026 |
 
 ---
 
@@ -198,7 +198,7 @@ Step 1: replace placeholders
 
 FY filter (ใช้ column `fy_year` ที่มีอยู่):
 ```sql
-WHERE fy_year = '2028'
+WHERE fy_year = '2027'
 ```
 
 Date range filter (Apple-to-Apple):
@@ -319,14 +319,16 @@ CASE WHEN regional_text IS NULL AND branch_code LIKE 'E%' THEN 'Online'
 ---
 
 # 7. Fiscal Year
-FY = Jul 1 – Jun 30. FY2028 = Jul 2027 – Jun 2028.
+FY = Jul 1 – Jun 30. FY28 = Jul 2026 – Jun 2027.
 
-✅ มี column `fy_year` — ใช้ได้ตรงๆ:
-- FY2026: `fy_year = '2025'` (data: 1 Jul 2024 – 30 Jun 2025)
-- FY2027: `fy_year = '2026'` (data: 1 Jul 2025 – 30 Jun 2026)
-- FY2028: `fy_year = '2027'` (data: 1 Jul 2026 – current)
+✅ มี column `fy_year` — mapping:
+- FY26: `fy_year = '2025'` (data: 1 Jul 2024 – 30 Jun 2025)
+- FY27: `fy_year = '2026'` (data: 1 Jul 2025 – 30 Jun 2026)
+- FY28: `fy_year = '2027'` (data: 1 Jul 2026 – current)
 
-⚠️ **หมายเหตุ**: fy_year ใช้ค่า calendar year ของเดือน ม.ค.-มิ.ย. (ปลาย FY) เช่น FY2028 ที่เริ่ม Jul 2027 จะมี fy_year = '2027' (Jul-Dec) และ '2028' (Jan-Jun)
+⚠️ **fy_year = ปี ค.ศ. ที่ FY สิ้นสุด** (ไม่ใช่ปีที่เริ่ม)
+- FY28 เริ่ม Jul 2026 จบ Jun 2027 → fy_year = '2027'
+
 → **ใช้ sold_date range filter แทนเมื่อต้องการ Apple-to-Apple ที่แม่นยำ**
 
 Data: 3 FY (FY26 เต็มปี, FY27 เต็มปี, FY28 กำลังดำเนินอยู่)

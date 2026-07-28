@@ -4,7 +4,7 @@ description: >
   Sales per Sqm Analysis v2 — ใช้เมื่อผู้ใช้ถาม: "ตารางเมตร" "SQM" "Sales per Sqm"
   "พื้นที่ขาย" "สาขาเล็ก/ใหญ่" "ประสิทธิภาพพื้นที่" "Sales per square meter"
   "Top 5 สาขา" "Bottom 5 สาขา" "Runrate" "ประมาณการ"
-  วิเคราะห์ Sales/Sqm แยกสาขา+จังหวัด FY27 vs FY26
+  วิเคราะห์ Sales/Sqm แยกสาขา+จังหวัด FY28 vs FY27
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
@@ -25,7 +25,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+MAX(sold_date) → FY28: 1 Jul – MAX day → FY27: same days
 
 ---
 
@@ -87,13 +87,13 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
 **ตาราง 1: Top 5 สาขา**
 
-| # | สาขา | จังหวัด | SQM | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| # | สาขา | จังหวัด | SQM | Sales/Sqm FY28 | FY27 | YoY% | Margin% |
 
 **ตาราง 2: Bottom 5 สาขา**
 
 **ตาราง 3: จังหวัด Top 10**
 
-| จังหวัด | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| จังหวัด | Sales/Sqm FY28 | FY27 | YoY% | Margin% |
 
 **แนวทางปรับปรุง Bottom 5** — อ้างอิงข้อมูลจริง
 

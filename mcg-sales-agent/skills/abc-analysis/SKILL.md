@@ -25,7 +25,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY27: 1 Jul – MAX day
+MAX(sold_date) → FY28: 1 Jul – MAX day
 
 ---
 

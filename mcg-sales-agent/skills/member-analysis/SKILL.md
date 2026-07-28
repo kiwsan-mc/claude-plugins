@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+MAX(sold_date) → FY28: 1 Jul – MAX day → FY27: same days
 
 ---
 
@@ -80,11 +80,11 @@ SHOP ≥80%=🟢, Mc Outlet ≥70%=🟢, Marketplace ≥20%=🟢, Others ≥60%=
 
 **ตาราง 1: Member vs Non-Member Summary (ไม่รวม Marketplace)**
 
-| กลุ่ม | Net Sales FY27 | Sales% | Tickets | Ticket% | ATV | UPT | ASP | Margin% |
+| กลุ่ม | Net Sales FY28 | Sales% | Tickets | Ticket% | ATV | UPT | ASP | Margin% |
 
 **ตาราง 2: Member% แยก Channel Store**
 
-| Channel Store | Member% FY27 | Member% FY26 | Change | Zone |
+| Channel Store | Member% FY28 | Member% FY27 | Change | Zone |
 
 **ตาราง 3: Member Group & Generation**
 
