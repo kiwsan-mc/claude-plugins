@@ -26,6 +26,10 @@ tools:
 
 เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
 
+⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
+- ใช้ pg_execute_sql หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
+- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
+
 ---
 
 ## Step 1 — ตรวจสอบช่วงเวลา (Apple-to-Apple บังคับ)
