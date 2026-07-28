@@ -255,22 +255,49 @@ ORDER BY region_analysis
 
 ✅ **ทุก column เป็น lowercase แล้ว** — ไม่ต้อง quote ด้วย `"` อีกต่อไป
 
-หลัง migration ทุก column ถูกเปลี่ยนเป็น lowercase ทั้งหมด:
-- ❌ ~~`"FY_Year"`~~ → ✅ `fy_year`
-- ❌ ~~`"Name_3"`~~ → ✅ `branch_name`
-- ❌ ~~`"New_SQM"`~~ → ✅ `new_sqm`
-- ❌ ~~`"Regional_text"`~~ → ✅ `regional_text`
-- ❌ ~~`"Regional"`~~ → ✅ `regional`
-- ❌ ~~`"Region_Analysis"`~~ → ✅ `region_analysis`
-- ❌ ~~`"CHANGWAT_T"`~~ → ✅ `changwat_t`
-- ❌ ~~`"Brand_Name"`~~ → ✅ `brand_name`
-- ❌ ~~`"Article_Description"`~~ → ✅ `article_description`
-- ❌ ~~`"Selling_Price"`~~ → ✅ `selling_price`
-- ❌ ~~`"Vendor_Name"`~~ → ✅ `vendor_name`
-- ❌ ~~`"AgingColor_Text"`~~ → ✅ `aging_color_text`
-- ❌ ~~`"Shape_1_Text"`~~ → ✅ `shape_1_text`
+### ⚠️ MANDATORY: ถ้าไม่แน่ใจชื่อ column หรือ data type → ใช้ pg_describe_table ก่อนเสมอ
 
-### กฎง่าย: เขียน column ตรงๆ ไม่ต้อง quote — ทุก column เป็น lowercase
+เรียก `pg_describe_table` กับ table `mcg_aiplatform_sales` จะได้ column_name, data_type, is_nullable ทั้งหมด
+
+### Columns ที่ใช้บ่อย (จำให้ได้):
+
+**Measures (numeric — ใช้ SUM):**
+- `total_exc_vat_price` = Net Sales (ยอดขาย)
+- `total_quantity` = จำนวนชิ้น
+- `ticket_count` = จำนวนใบเสร็จ (integer)
+- `member_count` = ใบเสร็จสมาชิก (integer)
+- `cogs` = ต้นทุน
+- `price_sign` = ราคาป้าย (Gross Sales)
+- `total_discount_amount` = ส่วนลด
+- `new_sqm` = พื้นที่ ตร.ม.
+- `selling_price` = ราคาขายตั้ง
+
+**Dimensions (varchar — ใช้ GROUP BY):**
+- `sold_date` (date), `year` (int), `month` (int), `fy_year` (varchar)
+- `main_channel`, `channel_store`, `channel_store_sub_2`, `channel_store_sub_3`
+- `category`, `product`, `brand_name`
+- `branch_code`, `branch_name`, `region_analysis`, `changwat_t`
+- `regional_text` (NULL = Online/Other)
+- `member_type`, `member_group`, `member_generation`
+- `salesman`, `salesman_name`, `sales_manager_name`, `head_sales_name`
+- `aging_color_text`, `fashion_grade_desc`
+- `item_code`, `model`, `model_color`
+- `vendor_no`, `vendor_name`
+- `size`, `color`, `col_name`, `col_tone`
+- `design_text`, `shape_1_text`, `theme_text`
+- `sales_type_desc`, `sub_brand_text`
+- `mcl1_text`, `mcl2_text`, `mcl3_text`, `mcl4_text`, `mcl5_text`
+- `product_group_text`, `product_group_text_2`
+- `amphoe_t`, `tambon_t`, `district_desc`, `postal_code`
+- `cluster`, `space_range`, `status_text`, `open_date`, `closing_date`
+
+### กฎง่าย: ทุก column เป็น lowercase — เขียนตรงๆ ไม่ต้อง quote
+
+### Data Type Rules:
+- numeric columns → ใช้ `::float` เมื่อหาร
+- integer columns (ticket_count, member_count) → cast `::float` ก่อนหาร
+- varchar columns → เปรียบเทียบด้วย `=` หรือ `ILIKE`
+- date columns → ใช้ `BETWEEN` filter
 
 ### อื่นๆ:
 - ใช้ `::float` หรือ `CAST(... AS float)` สำหรับ division
