@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day → FY27: same days
+MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ---
 
@@ -65,7 +65,7 @@ Group by `category`, `product` — เรียงตาม Discount% สูง�
 
 ## Step 5 — YoY Comparison
 
-Discount% FY28 vs FY27, Margin% FY27 vs FY26 รายหมวด — ระบุ Sensitivity Alert
+Discount% FY27 vs FY26, Margin% FY26 vs FY26 รายหมวด — ระบุ Sensitivity Alert
 
 ---
 
@@ -73,9 +73,9 @@ Discount% FY28 vs FY27, Margin% FY27 vs FY26 รายหมวด — ระบ
 
 **Headline** — จำนวน Category ใน High Risk Zone
 
-**ตาราง 1: Category Discount & Margin FY28 vs FY27**
+**ตาราง 1: Category Discount & Margin FY27 vs FY26**
 
-| Category | Net Sales | Discount% FY28 | FY27 | Margin% FY28 | FY27 | Zone |
+| Category | Net Sales | Discount% FY27 | FY26 | Margin% FY27 | FY26 | Zone |
 
 **ตาราง 2: Product Type — Discount สูงสุด Top 10**
 

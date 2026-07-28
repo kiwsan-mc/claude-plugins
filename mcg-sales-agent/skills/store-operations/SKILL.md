@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day
+MAX(sold_date) → FY27: 1 Jul – MAX day
 
 ---
 
@@ -91,7 +91,7 @@ ORDER BY net_sales DESC
 **ตาราง 1: Store Status**
 | Status | Branches | Net Sales |
 
-**ตาราง 2: New Stores (FY28)**
+**ตาราง 2: New Stores (FY27)**
 | # | สาขา | จังหวัด | Open Date | SQM | Net Sales | Active Days |
 
 **ตาราง 3: Cluster Performance**

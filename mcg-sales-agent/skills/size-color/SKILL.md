@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day
+MAX(sold_date) → FY27: 1 Jul – MAX day
 
 ---
 
@@ -93,7 +93,7 @@ LIMIT 10
 | Category | Size | Qty | Share% |
 
 **ตาราง 2: Top 15 Colors**
-| Color | Tone | Net Sales FY28 | YoY% | Qty |
+| Color | Tone | Net Sales FY27 | YoY% | Qty |
 
 **ตาราง 3: Design x Shape**
 | Design | Shape | Net Sales | Qty | ASP |

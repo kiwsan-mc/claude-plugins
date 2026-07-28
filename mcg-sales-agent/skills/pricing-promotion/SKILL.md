@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day → FY27: same days
+MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ---
 
@@ -91,7 +91,7 @@ ORDER BY qty_curr DESC
 | Category | List Price | Actual ASP | Markdown% |
 
 **ตาราง 3: Discount vs Qty (Elasticity)**
-| Category | Disc% FY28 | Disc% FY27 | Qty FY28 | Qty FY27 |
+| Category | Disc% FY27 | Disc% FY26 | Qty FY27 | Qty FY26 |
 
 **Key Insights** — Over-discounted categories, pricing power
 

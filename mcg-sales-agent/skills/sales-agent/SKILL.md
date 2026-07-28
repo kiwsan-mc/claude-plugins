@@ -174,8 +174,8 @@ Step 1: replace placeholders
 |--------|------------|
 | ยอดขาย / sales | เดือนปัจจุบันถึง MAX(sold_date) |
 | เทียบ / comparison | ช่วงเดียวกันของปีก่อน (Apple-to-Apple) |
-| ปีนี้ | FY28 (fy_year = '2027') — เริ่ม 1 Jul 2026 |
-| ปีที่แล้ว | FY27 (fy_year = '2026') — 1 Jul 2025 ถึง 30 Jun 2026 |
+| ปีนี้ | FY ปัจจุบัน — ดูจาก MAX(sold_date) |
+| ปีที่แล้ว | FY ก่อนหน้า (Apple-to-Apple: จำนวนวันเท่ากัน) |
 
 ---
 
@@ -319,19 +319,35 @@ CASE WHEN regional_text IS NULL AND branch_code LIKE 'E%' THEN 'Online'
 ---
 
 # 7. Fiscal Year
-FY = Jul 1 – Jun 30. FY28 = Jul 2026 – Jun 2027.
+FY = Jul 1 – Jun 30. fy_year = ชื่อ FY ตรงๆ (เช่น FY27 → fy_year = '2027')
 
-✅ มี column `fy_year` — mapping:
-- FY26: `fy_year = '2025'` (data: 1 Jul 2024 – 30 Jun 2025)
-- FY27: `fy_year = '2026'` (data: 1 Jul 2025 – 30 Jun 2026)
-- FY28: `fy_year = '2027'` (data: 1 Jul 2026 – current)
+### วิธีหา FY ปัจจุบัน (Dynamic — ไม่ต้อง hardcode)
 
-⚠️ **fy_year = ปี ค.ศ. ที่ FY สิ้นสุด** (ไม่ใช่ปีที่เริ่ม)
-- FY28 เริ่ม Jul 2026 จบ Jun 2027 → fy_year = '2027'
+**Step 1:** Query MAX(sold_date) เสมอก่อนวิเคราะห์:
+```sql
+SELECT MAX(sold_date) AS last_data, MAX(fy_year) AS current_fy FROM mcg_aiplatform_sales
+```
 
-→ **ใช้ sold_date range filter แทนเมื่อต้องการ Apple-to-Apple ที่แม่นยำ**
+**Step 2:** จาก current_fy กำหนดช่วงเวลา:
+- fy_year ปัจจุบัน = `current_fy` (จาก query)
+- fy_year ก่อนหน้า = `current_fy::int - 1` (เช่น '2027'→'2026')
+- วันเริ่ม FY ปัจจุบัน = `(current_fy::int - 1) || '-07-01'` (เช่น '2026-07-01')
+- วัน Apple-to-Apple ปีก่อน = เดียวกันแต่ปีก่อน
 
-Data: 3 FY (FY26 เต็มปี, FY27 เต็มปี, FY28 กำลังดำเนินอยู่)
+**Step 3:** ใช้ sold_date range filter (แม่นยำที่สุด):
+```sql
+-- FY ปัจจุบัน
+WHERE sold_date BETWEEN '<fy_start>' AND '<max_date>'
+-- FY ก่อนหน้า (Apple-to-Apple)
+WHERE sold_date BETWEEN '<prev_fy_start>' AND '<same_day_prev_year>'
+```
+
+### ตัวอย่าง (ณ วันนี้):
+- MAX(sold_date) = 2026-07-27, current_fy = '2027'
+- FY27 (ปีนี้): 2026-07-01 ถึง 2026-07-27
+- FY26 (ปีก่อน Apple-to-Apple): 2025-07-01 ถึง 2025-07-27
+
+⚠️ **ห้าม hardcode ปี FY** — ต้อง query MAX(sold_date) ทุกครั้ง เพราะข้อมูลเปลี่ยนทุกวัน
 
 ---
 
@@ -416,7 +432,7 @@ SUM(total_exc_vat_price)::float / NULLIF(SUM(new_sqm)::float, 0)
 ```
 
 ### YoY Growth
-`(FY28 - FY27) / NULLIF(FY27, 0) * 100`
+`(FY27 - FY26) / NULLIF(FY26, 0) * 100`
 
 ---
 

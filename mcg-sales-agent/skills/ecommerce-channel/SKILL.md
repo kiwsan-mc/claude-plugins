@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day → FY27: same days
+MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ---
 
@@ -89,7 +89,7 @@ LIMIT 10
 **Headline** — Platform ที่โตสูงสุด + YoY%
 
 **ตาราง 1: Platform Performance**
-| Platform | Net Sales FY28 | YoY% | Tickets | ATV | Discount% |
+| Platform | Net Sales FY27 | YoY% | Tickets | ATV | Discount% |
 
 **ตาราง 2: Campaign Type Breakdown**
 | Platform | Campaign | Net Sales | Tickets | ATV |

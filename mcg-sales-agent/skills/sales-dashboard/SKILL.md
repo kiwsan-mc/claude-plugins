@@ -25,10 +25,10 @@ tools:
 ## Step 1 — ตรวจสอบช่วงเวลา (Apple-to-Apple บังคับ)
 
 1. ตรวจสอบ `MAX(sold_date)` จากข้อมูลจริง
-2. กำหนดช่วง FY28: `2026-07-01` ถึง `<= MAX(sold_date)`
-3. กำหนดช่วง FY27 ให้ตรงวันเดียวกัน
+2. กำหนดช่วง FY27: `2026-07-01` ถึง `<= MAX(sold_date)`
+3. กำหนดช่วง FY26 ให้ตรงวันเดียวกัน
 
-**ห้ามใช้ FY27 เต็มปีเปรียบเทียบกับ FY28**
+**ห้ามใช้ FY26 เต็มปีเปรียบเทียบกับ FY27**
 
 ---
 
@@ -48,7 +48,7 @@ tools:
 | Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
 | Member ATV | `SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)` |
 | Non-Member ATV | `SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
-| YoY% | `(FY28 - FY27) / NULLIF(FY27, 0) * 100` |
+| YoY% | `(FY27 - FY26) / NULLIF(FY26, 0) * 100` |
 
 ---
 
@@ -64,15 +64,15 @@ tools:
 
 **ตารางที่ 1: KPI Summary (Organization)**
 
-| KPI | FY28 | FY27 | Change |
+| KPI | FY27 | FY26 | Change |
 
 **ตารางที่ 2: KPI by Main Channel**
 
-| Channel | Net Sales FY28 | YoY% | Discount% | Margin% | ATV | UPT |
+| Channel | Net Sales FY27 | YoY% | Discount% | Margin% | ATV | UPT |
 
 **ตารางที่ 3: Net Sales by Channel Store (Top 10)**
 
-| Channel Store | Net Sales FY28 | YoY% | Margin% |
+| Channel Store | Net Sales FY27 | YoY% | Margin% |
 
 **3 Key Takeaways** (actionable, data-backed)
 

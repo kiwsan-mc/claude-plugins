@@ -24,7 +24,7 @@ tools:
 
 ## Step 1 — Apple-to-Apple
 
-MAX(sold_date) → FY28: 1 Jul – MAX day
+MAX(sold_date) → FY27: 1 Jul – MAX day
 
 ---
 
@@ -94,7 +94,7 @@ ORDER BY net_sales DESC
 | L1 | L2 | L3 | L4 | Net Sales | Qty | SKU |
 
 **ตาราง 2: Product Group + YoY**
-| Group | Sub Group | Sub Brand | Net Sales FY28 | YoY% | SKU |
+| Group | Sub Group | Sub Brand | Net Sales FY27 | YoY% | SKU |
 
 **ตาราง 3: Sub Brand Mix**
 | Sub Brand | Net Sales | Qty | Margin% | Discount% |
