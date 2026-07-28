@@ -130,6 +130,36 @@ Step 1: replace placeholders
 | "ตารางเมตร" "SQM" "พื้นที่ขาย" "Sales per Sqm" | **sales-sqm** | Sales/Sqm แยกสาขา+จังหวัด, Runrate |
 | "ภูมิภาค" "Regional" "ภาค" "Heatmap" | **channel-regional** | Regional x Channel Heatmap, Stock Allocation |
 | "ภาพรวม" "Dashboard" "KPI ทั้งหมด" | **sales-dashboard** | 12 KPI, 3 ตาราง, 3 Key Takeaways |
+| "Aging" "สินค้าเก่า" "สต็อกจม" "GREEN/RED/PURPLE" | **product-aging** | Aging Zone, Fashion Grade, Clearance opportunity |
+| "พนักงานขาย" "Salesman" "ทีมขาย" "Manager" | **sales-team** | Ranking พนักงาน/ทีม, Head Sales summary |
+| "Shopee" "Lazada" "TikTok" "Marketplace แยก" "E-commerce" | **ecommerce-channel** | Platform breakdown, Organic vs Ads, product-platform fit |
+| "ราคา" "Pricing" "markdown" "ราคาป้าย" "promotion" | **pricing-promotion** | Sales type, markdown depth, price elasticity |
+| "ไซส์" "Size" "สี" "Color" "โทนสี" "ทรง" | **size-color** | Size distribution, color trend, design performance |
+| "Vendor" "ผู้ผลิต" "ซัพพลายเออร์" "ต้นทุน vendor" | **vendor-analysis** | Vendor ranking, cost structure |
+| "อำเภอ" "ตำบล" "เขต" "รหัสไปรษณีย์" "GPS" | **geo-deepdive** | District level, branch density, expansion |
+| "ร้านใหม่" "ร้านปิด" "store lifecycle" "cluster" | **store-operations** | New store ramp-up, cluster comparison |
+| "MCL" "hierarchy" "product group" "sub brand" "assortment" | **category-hierarchy** | MCL drill-down, product group, sub brand mix |
+
+### Skill Selection Guide (สรุปสำหรับ routing)
+
+| Skill | ใช้เมื่อ |
+|-------|---------|
+| sales-dashboard | สรุปภาพรวมยอดขาย ตัวชี้วัดหลัก และแยกตามช่องทางการขาย |
+| sales-sqm | วิเคราะห์ยอดขายต่อตารางเมตร แยกสาขาหรือจังหวัด |
+| discount-margin | วิเคราะห์ส่วนลดเทียบกับอัตรากำไร แยกหมวดหมู่หรือสินค้า |
+| member-analysis | วิเคราะห์สัดส่วนสมาชิกเทียบกับลูกค้าทั่วไป มูลค่าซื้อต่อบิล และจำนวนชิ้นต่อบิล |
+| channel-regional | วิเคราะห์สัดส่วนยอดขายแยกภูมิภาคและช่องทางการขาย |
+| abc-analysis | วิเคราะห์สินค้าแบบ ABC เพื่อแยกสินค้าขายดีและสินค้าที่มีความเสี่ยงด้านสต็อก |
+| product-aging | วิเคราะห์อายุสินค้า Aging Zone (GREEN/YELLOW/RED/PURPLE) และ clearance opportunity |
+| sales-team | วิเคราะห์ performance พนักงานขาย/ผู้จัดการ/ทีม ranking |
+| ecommerce-channel | วิเคราะห์แยก platform (Shopee/Lazada/TikTok) และประเภท campaign (Organic/Ads) |
+| pricing-promotion | วิเคราะห์ราคา markdown depth, sales type, price elasticity |
+| size-color | วิเคราะห์ไซส์ที่ขายดี/ค้าง, สีที่กำลังมาแรง, ทรง/ดีไซน์ |
+| vendor-analysis | วิเคราะห์ performance ผู้ผลิต/ซัพพลายเออร์ และโครงสร้างต้นทุน |
+| geo-deepdive | วิเคราะห์ภูมิศาสตร์ระดับอำเภอ/ตำบล, branch density, expansion opportunity |
+| store-operations | วิเคราะห์ร้านใหม่ ramp-up, store lifecycle, cluster comparison |
+| category-hierarchy | วิเคราะห์ MCL hierarchy drill-down, product group, sub brand mix |
+| sales-agent | ใช้สำหรับคำถามทั่วไปเกี่ยวกับยอดขายที่ไม่ตรงกับ Skill เฉพาะด้านข้างต้น |
 
 ### Template ตอบ:
 💡 คำถามนี้เหมาะกับ **[ชื่อ skill]** ซึ่งให้การวิเคราะห์เชิงลึกในด้าน **[specific area]**. ต้องการให้ผมวิเคราะห์ด้วย [ชื่อ skill] ไหมครับ? หรือให้ตอบเบื้องต้นก่อน?
