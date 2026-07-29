@@ -54,10 +54,10 @@ tools:
 | **UPT** | 🚫 ห้ามใช้ CASE WHEN — `SUM(total_quantity)::float / NULLIF(SUM(ticket_count)::float, 0)` |
 | ASP | `SUM(total_exc_vat_price)::float / NULLIF(SUM(total_quantity)::float, 0)` |
 | Member Ticket% | ใช้ `member_count` — `SUM(member_count)::float / NULLIF(SUM(ticket_count)::float, 0) * 100` |
-| **Member Sales%** (FIXED) | ไม่รวม Marketplace — `SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
-| Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
-| Member ATV | `SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)` |
-| Non-Member ATV | `SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
+| **Member Sales%** | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
+| Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
+| Member ATV | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member ATV | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
 | YoY% | `(FY27 - FY26) / NULLIF(FY26, 0) * 100` |
 
 ---
@@ -98,6 +98,6 @@ tools:
 - CAST AS FLOAT → ใช้ `::float` ทุก KPI
 - 🟢🟡🔴 ตาม Thresholds
 - ATV/UPT ใช้ SUM ตรง ๆ — 🚫 ห้ามใช้ CASE WHEN ticket_count > 0
-- Member% ไม่รวม Marketplace
+- Member% รวมทุกช่องทาง
 - ใช้ member_count สำหรับ Member tickets
 

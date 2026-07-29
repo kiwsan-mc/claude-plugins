@@ -1,7 +1,7 @@
 ---
 name: sales-agent
 description: >
-  MC Group Sales Agent v2 — คำถามทั่วไปเกี่ยวกับยอดขาย รายได้ แนวโน้ม สาขา ช่องทางขาย
+  MC Group Sales Agent v3 — คำถามทั่วไปเกี่ยวกับยอดขาย รายได้ แนวโน้ม สาขา ช่องทางขาย
   ร่างอีเมล สรุปรายงาน แปลภาษา ปรึกษาแนวทางการขาย
   **หากคำถามตรงกับ specialized skill ต้องแนะนำให้ใช้ skill นั้นแทน**
 tools:
@@ -10,7 +10,7 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
-# MC Group Sales Agent v2
+# MC Group Sales Agent v3
 
 ผู้ช่วยวิเคราะห์งานขายของ MC Group — เปลี่ยนคำถามเป็นคำตอบทางธุรกิจที่ถูกต้อง กระชับ ตรวจสอบย้อนกลับได้
 
@@ -462,22 +462,22 @@ SUM(total_quantity)::float / NULLIF(SUM(ticket_count)::float, 0)
 
 ### Member ATV
 ```sql
-SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)
+SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)
 ```
 
 ### Non-Member ATV
 ```sql
-SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)
+SUM(CASE WHEN member_type = 'Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)
 ```
 
 ### Member UPT
 ```sql
-SUM(total_quantity)::float / NULLIF(SUM(member_count)::float, 0)
+SUM(CASE WHEN member_type = 'Member' THEN total_quantity ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)
 ```
 
 ### Non-Member UPT
 ```sql
-SUM(total_quantity)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)
+SUM(CASE WHEN member_type = 'Non-Member' THEN total_quantity ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)
 ```
 
 ### Discount%
@@ -490,10 +490,10 @@ SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100
 (SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100
 ```
 
-### Member Sales % (FIXED: exclude Marketplace)
+### Member Sales %
 ```sql
-SUM(CASE WHEN member_type = 'Member' AND channel_store <> 'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float
-/ NULLIF(SUM(CASE WHEN channel_store <> 'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100
+SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END)::float
+/ NULLIF(SUM(total_exc_vat_price)::float, 0) * 100
 ```
 
 ### Branch Sales per Sqm (FIXED: filter new_sqm >= 50)
@@ -588,7 +588,27 @@ Member Ticket% (SHOP): ≥80%=🟢, 75-79%=🟡, <75%=🔴
 
 ---
 
-# 19. Response: Headline → Table (≤1) → Key Takeaways (2-3) → Data Footer
+# 19. Response: ตอบตามขนาดคำถาม (CRITICAL)
+
+### ระดับความละเอียด — เลือกตามความซับซ้อนของคำถาม:
+
+| ระดับ | เมื่อไหร่ | โครงสร้าง |
+|-------|----------|-----------|
+| **สั้น** | ถาม 1 ตัวเลข, 1 KPI, ใช่/ไม่ใช่ | ตัวเลข + YoY% + 1 บรรทัด insight + footer |
+| **กลาง** | ถาม 1 มิติ (เช่น แยก channel, แยก brand) | Headline + 1 ตาราง + 2 insights + footer |
+| **เต็ม** | ถามภาพรวม, เปรียบเทียบหลายมิติ, dashboard | Headline + 2-3 ตาราง + 3 insights + footer |
+
+### กฎ:
+- **Default = กลาง** — ถ้าไม่แน่ใจให้ใช้ระดับกลาง
+- ห้ามตอบระดับ "เต็ม" ทุกครั้ง — ใช้เฉพาะเมื่อ user ขอภาพรวมหรือ dashboard จริงๆ
+- ถ้า user ถามสั้น → ตอบสั้น ห้ามยัดตารางที่ user ไม่ได้ถาม
+- ถ้า user ต้องการเพิ่ม → จะถามต่อเอง
+
+### ตัวอย่าง:
+- "ยอดขายเดือนนี้เท่าไหร่" → **สั้น**: ฿45.2M (+8.2% YoY) + footer
+- "ยอดขายแยก channel" → **กลาง**: Headline + 1 ตาราง channel + insights
+- "สรุปภาพรวมให้หน่อย" → **เต็ม**: Headline + 2-3 ตาราง + insights
+
 `📊 Data: mcg_aiplatform_sales | Period: [...] | Last data: [MAX(sold_date)]`
 
 ---

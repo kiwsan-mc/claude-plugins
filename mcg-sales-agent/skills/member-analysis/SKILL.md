@@ -40,7 +40,7 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 ## Step 2 — KPI แยก Member/Non-Member
 
-⚠️ **v2: Member% ไม่รวม Marketplace** — `WHERE channel_store <> 'Marketplace'`
+⚠️ **v2: Member% รวมทุกช่องทาง**
 
 ⚠️ **v2: ใช้ member_count** (ไม่ใช้ CASE WHEN member_type) สำหรับ Member Ticket %
 
@@ -52,13 +52,13 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 | KPI | สูตร |
 |-----|------|
-| Member Sales% (excl Mkt) | `SUM(CASE WHEN member_type='Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
-| Non-Member Sales% (excl Mkt) | `SUM(CASE WHEN member_type='Non-Member' AND channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(CASE WHEN channel_store<>'Marketplace' THEN total_exc_vat_price ELSE 0 END)::float, 0) * 100` |
+| Member Sales% | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
+| Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
 | Member Ticket% | `SUM(member_count)::float / NULLIF(SUM(ticket_count)::float, 0) * 100` |
-| Member ATV | `SUM(total_exc_vat_price)::float / NULLIF(SUM(member_count)::float, 0)` |
-| Non-Member ATV | `SUM(total_exc_vat_price)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
-| Member UPT | `SUM(total_quantity)::float / NULLIF(SUM(member_count)::float, 0)` |
-| Non-Member UPT | `SUM(total_quantity)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
+| Member ATV | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member ATV | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
+| Member UPT | `SUM(CASE WHEN member_type='Member' THEN total_quantity ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)` |
+| Non-Member UPT | `SUM(CASE WHEN member_type='Non-Member' THEN total_quantity ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
 
 ---
 
@@ -67,7 +67,7 @@ MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
 
 - **member_count > ticket_count**: ข้อมูลผิดปกติ (พบ 2,835 rows ใน Jul 2026) → ใช้ CASE WHEN member_count > ticket_count THEN ticket_count ELSE member_count END เพื่อป้องกัน Member% > 100%
 - **product/category IS NULL**: ใช้ COALESCE(product, 'Unknown') ใน GROUP BY
-- **Marketplace**: ห้ามรวมในการคำนวณ Member% ภาพรวม (ใช้ WHERE channel_store <> 'Marketplace')
+- **Marketplace**: รวมในการคำนวณ Member% ภาพรวม
 
 ## Step 3 — Member Group & Generation
 
@@ -80,15 +80,13 @@ Group by `member_group` (Existing/New) และ `member_generation`
 Member Ticket% แยกตาม channel_store — ใช้ Thresholds:
 SHOP ≥80%=🟢, Mc Outlet ≥70%=🟢, Marketplace ≥20%=🟢, Others ≥60%=🟢
 
-ยกเว้น Marketplace จากเกณฑ์หลัก (ไม่รวมใน Member% ภาพรวม)
-
 ---
 
 ## Step 5 — Response
 
-**Headline** — Member Sales% (excl Marketplace) + YoY
+**Headline** — Member Sales% + YoY
 
-**ตาราง 1: Member vs Non-Member Summary (ไม่รวม Marketplace)**
+**ตาราง 1: Member vs Non-Member Summary**
 
 | กลุ่ม | Net Sales FY27 | Sales% | Tickets | Ticket% | ATV | UPT | ASP | Margin% |
 
@@ -108,8 +106,8 @@ SHOP ≥80%=🟢, Mc Outlet ≥70%=🟢, Marketplace ≥20%=🟢, Others ≥60%=
 
 # Output Rules
 
-- ห้ามรวม Marketplace ใน Member%
+- รวมทุกช่องทางใน Member%
 - ใช้ member_count สำหรับ Member tickets
 - CAST ก่อน DIV ทุก % → ใช้ `::float`
-- ระบุ "ไม่รวม Marketplace" ในหัวตาราง
+- Member% รวมทุกช่องทาง
 
