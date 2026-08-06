@@ -232,6 +232,7 @@ Step 1: replace placeholders
 
 FY filter (ใช้ column `fy_year` ที่มีอยู่):
 ```sql
+-- ⚠️ fy_year เก็บเป็นปี ค.ศ. 4 หลัก เช่น '2027' ไม่ใช่ 'FY27'
 WHERE fy_year = '2027'
 ```
 
@@ -385,7 +386,12 @@ CASE WHEN regional_text IS NULL AND branch_code LIKE 'E%' THEN 'Online'
 ---
 
 # 7. Fiscal Year
-FY = Jul 1 – Jun 30. fy_year = ชื่อ FY ตรงๆ (เช่น FY27 → fy_year = '2027')
+FY = Jul 1 – Jun 30. fy_year = ปี ค.ศ. ที่ FY สิ้นสุด (4 หลัก)
+
+⚠️ **CRITICAL — fy_year เก็บเป็นปี ค.ศ. 4 หลัก ไม่ใช่ชื่อ FY**
+- ✅ `fy_year = '2027'`
+- ❌ `fy_year = 'FY27'` ← **ผิด! ห้ามใช้**
+- ❌ `fy_year = '27'` ← **ผิด!**
 
 ### วิธีหา FY ปัจจุบัน (Dynamic — ไม่ต้อง hardcode)
 
