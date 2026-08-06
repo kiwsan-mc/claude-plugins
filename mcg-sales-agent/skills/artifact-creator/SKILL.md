@@ -1,9 +1,9 @@
 ---
-name: "artifact-creator"
-description: "Use this skill whenever the user wants to create a live monitoring dashboard artifact (HTML artifact with MCP data fetching, localStorage cache, Chart.js charts, and pull-to-refresh button). Triggers when the user mentions \"create artifact\", \"monitor\", \"dashboard\", \"live artifact\", \"artifact creator\", or wants to create a persisted data dashboard in Cowork sidebar. For MC Group sales data, always use mcg-sales-agent skills first to get correct KPI formulas and business rules before building the artifact."
+name: "artifact-creator-v2"
+description: "[v2] Use this skill whenever creating Cowork artifacts for MC Group sales dashboards. Mandatory localStorage cache pattern prevents unwanted permission popups. Includes complete code templates for all 11 sections: callMcpWithTimeout, query splitting (FY27/FY26 separate), dateKey cache, Chart.js, CSS, debug box, and troubleshooting table."
 ---
 
-# Artifact Creator - Technical Patterns
+# Artifact Creator - Technical Patterns (v2)
 
 Build live monitoring dashboards as Cowork artifacts with MCP data fetching, localStorage caching, and Chart.js charts. This skill contains proven patterns from real production artifacts.
 
@@ -205,6 +205,26 @@ CRITICAL - large queries cause silent timeout in sandbox (~20-25s)
 - Use simplest GROUP BY - no nested CASE WHEN in GROUP BY
 - Maximum 4 queries per artifact - more than that = artifact too big, should split
 
+**Pattern for comparing FY27 vs FY26 — split into separate queries, merge in JS:**
+
+```javascript
+// WRONG: 1 query scanning 13 months with CASE WHEN
+"SELECT ... SUM(CASE WHEN fy27 THEN ... WHEN fy26 THEN ...) FROM ... WHERE sold_date BETWEEN '2025-07-01' AND '2026-08-05'"
+
+// RIGHT: 2 small queries, each scanning ~1 month, merge in JS
+"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '2026-07-01' AND '2026-08-05'"  // FY27
+"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '2025-07-01' AND '2025-08-05'"  // FY26
+
+// Then merge in JavaScript:
+var fy26Map = {};
+for (var i = 0; i < dataFy26.length; i++) {
+  fy26Map[dataFy26[i].key] = dataFy26[i].ns || 0;
+}
+for (var j = 0; j < dataFy27.length; j++) {
+  dataFy27[j].ns_fy26 = fy26Map[dataFy27[j].key] || 0;
+}
+```
+
 Never use Promise.all - Sequential + per-query try/catch + error accumulation
 
 ---
@@ -250,62 +270,218 @@ function formatDate(d) {
 
 ## 5. Number Formatting
 
-fmt(n): if >=1e6 show X.XXM, if >=1e3 show X.XK, else locale string
-pctStr(a,b): if !b return '-', else ((a-b)/b)*100 to 1 decimal + '%'
+```javascript
+function fmt(n) {
+  if (n == null || isNaN(n)) return '-';
+  if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return Number(n).toLocaleString('en-US', {maximumFractionDigits: 0});
+}
+
+function pctStr(a, b) {
+  if (!b || b === 0) return '-';
+  return ((a - b) / b * 100).toFixed(1) + '%';
+}
+
+function yoyPct(a, b) {
+  if (!b || b === 0) return {v:'-', cls:'yoy-flat'};
+  var p = (a - b) / b * 100;
+  return {v: (p >= 0 ? '+' : '') + p.toFixed(1) + '%', cls: p > 0 ? 'yoy-up' : p < 0 ? 'yoy-down' : 'yoy-flat'};
+}
+```
 
 ---
 
 ## 6. Chart.js - Destroy Before Recreate
 
+```javascript
 var barInst = null, doughInst = null;
-if (barInst) barInst.destroy();
-barInst = new Chart(ctx, { ... });
-Create charts in setTimeout(function() {...}, 200) after innerHTML
+
+// In render function, before creating chart:
+setTimeout(function() {
+  if (barInst) barInst.destroy();
+  var ctx = document.getElementById('chartId').getContext('2d');
+  barInst = new Chart(ctx, { type: 'bar', data: {...}, options: {...} });
+}, 200);
+```
+
+Create charts in setTimeout(function() {...}, 200) after innerHTML — DOM must exist before Chart.js binds.
 
 ---
 
-## 7. localStorage Cache + Auto-Invalidation (CRITICAL)
+## 7. localStorage Cache + Auto-Invalidation (CRITICAL — MANDATORY)
 
-Use dateKey fingerprint - cross-day cache is auto-invalidated
+**Every artifact MUST implement this exact pattern. No exceptions.**
+
+Without proper cache, Cowork's artifact framework may auto-trigger `callMcpTool` on page open to revalidate — causing unwanted permission popups. This pattern prevents that by rendering from cache immediately when data is already fresh.
+
+### Required functions (paste these into EVERY artifact):
+
+```javascript
+var CACHE_KEY = 'your-artifact-id-v1';  // unique per artifact
+
+function getDateKey() {
+  var d = new Date();
+  return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+}
+
+function tryLoadCache() {
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    var cache = JSON.parse(raw);
+    if (cache.dateKey === getDateKey() && cache.data) {
+      dlog('Cache hit: ' + cache.dateKey);
+      return cache.data;
+    }
+    dlog('Cache stale, clearing');
+    localStorage.removeItem(CACHE_KEY);
+    return null;
+  } catch(e) { dlog('Cache error: ' + e.message); return null; }
+}
+
+function saveCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({dateKey: getDateKey(), data: data}));
+    dlog('Cache saved: ' + getDateKey());
+  } catch(e) { dlog('Cache write error: ' + e.message); }
+}
+```
+
+### Required in loadData() — save BEFORE render:
+
+```javascript
+function loadData() {
+  var btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  fetchData().then(function(results) {
+    saveCache(results);       // <-- MUST call saveCache BEFORE renderAll
+    renderAll(results);       // renderAll modifies data in-place (adds calculated fields)
+    btn.disabled = false;
+    btn.textContent = 'Refresh Data';
+  }).catch(function(err) {
+    dlog('ERROR: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Refresh Data';
+  });
+}
+```
+
+### Required init block — try cache first, NEVER auto-call MCP:
+
+```javascript
+// INIT — MUST be at bottom of <script> tag, replacing any window.addEventListener('load', ...)
+// Try cache first → if fresh, render instantly (zero MCP calls)
+// If stale/missing → show placeholder, user must click Refresh
+dlog('Init — checking cache...');
+var cached = tryLoadCache();
+if (cached) {
+  dlog('Rendering from cache');
+  document.getElementById('refreshBtn').textContent = 'Refresh Data (cached)';
+  renderAll(cached);
+} else {
+  // Show placeholder — DO NOT call loadData() or any MCP tool here
+  document.getElementById('YOUR_MAIN_CONTAINER').innerHTML = '<div style="text-align:center;padding:40px;color:#95a5a6;">Click <strong>Refresh Data</strong> to load</div>';
+  document.getElementById('periodInfo').textContent = 'Ready to load';
+}
+```
+
+### Cache rules:
+
+| Rule | Why |
+|------|-----|
+| **NEVER call `loadData()` on page open** | No `window.addEventListener('load', loadData)`, no `<body onload>`, no auto-execute — prevents unwanted permission popups |
+| **CACHE_KEY unique per artifact** | Use pattern `sales-{topic}-v1` — prevents cache collision |
+| **`saveCache(results)` BEFORE `renderAll(results)`** | renderAll modifies data in-place (adds `margin`, `abc`, `cumPct` fields) — cache raw query results |
+| **Same-day cache = instant render** | Zero MCP calls, zero permission popups, zero network requests |
+| **Cross-day cache auto-invalidates** | dateKey changes → localStorage cleared → placeholder shown → user clicks Refresh |
+| **`tryLoadCache()` returns null on any error** | Try/catch guards against corrupted localStorage |
 
 ---
 
 ## 8. Debug Box (MANDATORY)
 
-Always include div.debug-box#debugBox + dlog() function
+Always include for troubleshooting:
+
+```html
+<div class="debug-box" id="debugBox"></div>
+```
+
+```css
+.debug-box { margin-top:16px; padding:12px; background:#f8f9fa; border-radius:8px; font-size:11px; color:#666; max-height:200px; overflow-y:auto; font-family:monospace; display:none; }
+```
+
+```javascript
+function dlog(msg) {
+  var db = document.getElementById('debugBox');
+  db.style.display = 'block';
+  db.innerHTML += '[' + new Date().toLocaleTimeString() + '] ' + msg + '<br>';
+  db.scrollTop = db.scrollHeight;
+}
+```
 
 ---
 
-## 9-13. (CSS, UI Button, Scheduled Task, No Path, ES5)
+## 9. CSS Base Template
 
-Standard patterns as previously defined
+```css
+:root { color-scheme: light; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Tahoma, sans-serif; background: #f5f6fa; color: #2c3e50; padding: 20px; }
+.header { background: linear-gradient(135deg, #2c3e50, #34495e); color: #fff; padding: 24px 30px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 22px; font-weight: 700; }
+.header .period { font-size: 14px; opacity: 0.85; }
+.btn { background: #3498db; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.btn:hover { background: #2980b9; }
+.btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+.section { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.section h2 { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #ecf0f1; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #dee2e6; }
+td { padding: 10px 12px; border-bottom: 1px solid #ecf0f1; }
+tr:hover td { background: #f8f9fa; }
+.text-right { text-align: right; }
+.chart-wrap { height: 320px; position: relative; }
+.footer { font-size: 12px; color: #95a5a6; text-align: center; padding: 16px 0; }
+.yoy-up { color: #27ae60; }
+.yoy-down { color: #e74c3c; }
+.yoy-flat { color: #95a5a6; }
+```
 
 ---
 
-## Known Issues and Troubleshooting Flow
+## 10. Known Issues and Troubleshooting Flow
 
-5-step troubleshooting flow
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| Popup on open without clicking Refresh | Missing localStorage cache pattern → framework auto-revalidates | Implement Section 7 cache pattern |
+| Silent timeout (>25s, no response) | Query scanning >3 months of data | Split FY27/FY26 into separate queries, each scanning ~1 month |
+| "T00:00:00Z" in date displays | PostgreSQL date cast without formatting | Use `formatDate()` function from Section 4 |
+| Chart not rendering | Chart created before DOM ready | Use `setTimeout(function(){...}, 200)` after `innerHTML` |
+| "window.cowork.callMcpTool not available" | Artifact opened outside Cowork | Show friendly message, artifact only works in Cowork sidebar |
+| Cache not saving | `saveCache()` called AFTER `renderAll()` which modified data | Move `saveCache(results)` BEFORE `renderAll(results)` |
 
 ---
 
-## Checklist: Building a New Artifact (19 items)
+## 11. Checklist: Building a New Artifact (19 items)
 
 1. Step 0: AskUserQuestion - ask chat reply or artifact first
 2. Step 0B: Clarify if needed - if request ambiguous, ask more
 3. Step 0C: Complexity Gate - check >=4 dimensions? >=3 skills? >=5 queries? -> split artifacts
 4. Pick right mcg-sales-agent skill - get KPI formulas + business rules
 5. Dynamic date range - getDateRange() never hard-code
-6. Split queries small - <=1 month scope per query - JS merge
+6. Split queries small - <=1 month scope per query - JS merge (especially FY27/FY26 separate)
 7. Max 4 queries per artifact - more = split
 8. callMcpWithTimeout - Promise.race 25s - never Promise.all
-9. cache dateKey - auto-invalidate cross-day
+9. localStorage cache (Section 7) - **MANDATORY**: CACHE_KEY, getDateKey, tryLoadCache, saveCache, cache-init block, NO auto-load, saveCache BEFORE renderAll
 10. Debug box - dlog() every step
 11. ES5 only - var + function - never const/let/arrow
 12. callSql() - structuredContent, JSON array, NDJSON
-13. fmt() / pctStr() / formatDate()
+13. fmt() / pctStr() / yoyPct() / formatDate()
 14. Chart.js - destroy -> setTimeout 200ms -> recreate
-15. CSS - align-items: start + min-height
-16. Refresh button - disabled while loading
-17. Cache init - validate field + dateKey
-18. Never share file path - artifact only
+15. CSS - Section 9 base template
+16. Refresh button - disabled while loading, show "(cached)" label when from cache
+17. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
+18. Never share file path inside artifact - artifact only
 19. Naming convention - if multiple artifacts, use consistent prefix
