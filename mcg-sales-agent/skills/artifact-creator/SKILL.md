@@ -259,24 +259,24 @@ function getDateRange() {
 
 | Data Type | Format Pattern | Example Output | Use Case |
 |-----------|---------------|----------------|----------|
-| Date only | `DD MMM YYYY (BE)` | `05 Aug 2569` | Report dates, sold_date, period labels |
-| Date short | `DD MMM YY` | `05 Aug 69` | Table cells where space is tight |
-| DateTime | `DD MMM YYYY HH:mm` | `05 Aug 2569 14:30` | Last updated, timestamp displays |
-| DateTime with seconds | `DD MMM YYYY HH:mm:ss` | `05 Aug 2569 14:30:45` | Debug log, precise timestamps |
-| Period/Month | `MMM YYYY (BE)` | `Aug 2569` | Monthly charts, period headers |
+| Date only | `DD MMM YYYY` | `05 Aug 2026` | Report dates, sold_date, period labels |
+| Date short | `DD MMM YY` | `05 Aug 26` | Table cells where space is tight |
+| DateTime | `DD MMM YYYY HH:mm` | `05 Aug 2026 14:30` | Last updated, timestamp displays |
+| DateTime with seconds | `DD MMM YYYY HH:mm:ss` | `05 Aug 2026 14:30:45` | Debug log, precise timestamps |
+| Period/Month | `MMM YYYY` | `Aug 2026` | Monthly charts, period headers |
 | Period/FY | `FY{YY}` | `FY27` | Fiscal year labels |
 
 ### Required Functions:
 
 ```javascript
-// Format date (date only) — Thai Buddhist Era
+// Format date (date only) — Gregorian (ค.ศ.)
 function formatDate(d) {
     if (!d) return '-';
     var s = String(d).replace('T00:00:00Z','').replace('T00:00:00','');
     var parts = s.split('-');
     if (parts.length === 3) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
     }
     return s;
 }
@@ -288,13 +288,13 @@ function formatDateShort(d) {
     var parts = s.split('-');
     if (parts.length === 3) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var beYear = String(parseInt(parts[0]) + 543).slice(-2);
-      return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + beYear;
+      var shortYear = String(parts[0]).slice(-2);
+      return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + shortYear;
     }
     return s;
 }
 
-// Format datetime — Thai Buddhist Era + time (HH:mm)
+// Format datetime — Gregorian (ค.ศ.) + time (HH:mm)
 function formatDateTime(d) {
     if (!d) return '-';
     var s = String(d);
@@ -307,7 +307,7 @@ function formatDateTime(d) {
     var parts = datePart.split('-');
     if (parts.length === 3) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
       if (timePart) formatted += ' ' + timePart;
       return formatted;
     }
@@ -327,7 +327,7 @@ function formatDateTimeFull(d) {
     var parts = datePart.split('-');
     if (parts.length === 3) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + parts[0];
       if (timePart) formatted += ' ' + timePart;
       return formatted;
     }
@@ -341,18 +341,18 @@ function formatPeriod(yearMonth) {
     var parts = String(yearMonth).split('-');
     if (parts.length >= 2) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      return months[parseInt(parts[1])-1] + ' ' + parts[0];
     }
     return String(yearMonth);
 }
 
-// Format "last updated" — human-friendly relative + absolute
+// Format "last updated" — human-friendly absolute
 function formatLastUpdated() {
     var now = new Date();
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     var day = ('0' + now.getDate()).slice(-2);
     var mon = months[now.getMonth()];
-    var year = now.getFullYear() + 543;
+    var year = now.getFullYear();
     var hh = ('0' + now.getHours()).slice(-2);
     var mm = ('0' + now.getMinutes()).slice(-2);
     return day + ' ' + mon + ' ' + year + ' ' + hh + ':' + mm;
@@ -363,24 +363,24 @@ function formatLastUpdated() {
 
 | Where | Use Function | Example |
 |-------|-------------|---------|
-| Table column "วันที่ขาย" | `formatDate(row.sold_date)` | `05 Aug 2569` |
-| Table column with tight space | `formatDateShort(row.sold_date)` | `05 Aug 69` |
-| Header "Last Updated" | `formatLastUpdated()` | `05 Aug 2569 14:30` |
-| Header "Data Period" | `formatDate(dr.fy27Start) + ' - ' + formatDate(dr.fy27End)` | `01 Jul 2569 - 04 Aug 2569` |
-| Chart X-axis (monthly) | `formatPeriod(row.month)` | `Aug 2569` |
-| Debug log timestamps | `formatDateTimeFull(row.created_at)` | `05 Aug 2569 14:30:45` |
-| Footer "ข้อมูล ณ วันที่" | `formatLastUpdated()` | `05 Aug 2569 14:30` |
+| Table column "วันที่ขาย" | `formatDate(row.sold_date)` | `05 Aug 2026` |
+| Table column with tight space | `formatDateShort(row.sold_date)` | `05 Aug 26` |
+| Header "Last Updated" | `formatLastUpdated()` | `05 Aug 2026 14:30` |
+| Header "Data Period" | `formatDate(dr.fy27Start) + ' - ' + formatDate(dr.fy27End)` | `01 Jul 2026 - 04 Aug 2026` |
+| Chart X-axis (monthly) | `formatPeriod(row.month)` | `Aug 2026` |
+| Debug log timestamps | `formatDateTimeFull(row.created_at)` | `05 Aug 2026 14:30:45` |
+| Footer "ข้อมูล ณ วันที่" | `formatLastUpdated()` | `05 Aug 2026 14:30` |
 
 ### NEVER show to end user:
 
 | Bad (raw) | Good (formatted) |
 |-----------|------------------|
-| `2026-08-05` | `05 Aug 2569` |
-| `2026-07-02T00:00:00Z` | `02 Jul 2569` |
-| `2026-08-05T14:30:00Z` | `05 Aug 2569 14:30` |
-| `2026-08-05T14:30:00.000Z` | `05 Aug 2569 14:30` |
-| `2026-08` | `Aug 2569` |
-| `1722849000000` (epoch) | `05 Aug 2569 14:30` |
+| `2026-08-05` | `05 Aug 2026` |
+| `2026-07-02T00:00:00Z` | `02 Jul 2026` |
+| `2026-08-05T14:30:00Z` | `05 Aug 2026 14:30` |
+| `2026-08-05T14:30:00.000Z` | `05 Aug 2026 14:30` |
+| `2026-08` | `Aug 2026` |
+| `1722849000000` (epoch) | `05 Aug 2026 14:30` |
 
 ### Rendering Guard (CRITICAL — #1 cause of raw date leaks)
 
@@ -612,8 +612,8 @@ tr:hover td { background: #f8f9fa; }
 | Silent timeout (>25s, no response) | Query scanning >3 months of data | Split FY27/FY26 into separate queries, each scanning ~1 month |
 | "T00:00:00Z" in date displays | PostgreSQL date cast without formatting | Use `formatDate()` function from Section 4 |
 | Raw ISO date like "2026-08-05" shown | Date not formatted before display | Use `formatDate()` for date, `formatDateTime()` for datetime |
-| Raw datetime like "2026-08-05T14:30:00Z" | Datetime not formatted | Use `formatDateTime()` — shows `05 Aug 2569 14:30` |
-| Month shown as "2026-08" | Period not formatted | Use `formatPeriod()` — shows `Aug 2569` |
+| Raw datetime like "2026-08-05T14:30:00Z" | Datetime not formatted | Use `formatDateTime()` — shows `05 Aug 2026 14:30` |
+| Month shown as "2026-08" | Period not formatted | Use `formatPeriod()` — shows `Aug 2026` |
 | Chart not rendering | Chart created before DOM ready | Use `setTimeout(function(){...}, 200)` after `innerHTML` |
 | "window.cowork.callMcpTool not available" | Artifact opened outside Cowork | Show friendly message, artifact only works in Cowork sidebar |
 | Cache not saving | `saveCache()` called AFTER `renderAll()` which modified data | Move `saveCache(results)` BEFORE `renderAll(results)` |
@@ -635,7 +635,7 @@ tr:hover td { background: #f8f9fa; }
 11. ES5 only - var + function - never const/let/arrow
 12. callSql() - structuredContent, JSON array, NDJSON
 13. fmt() / pctStr() / yoyPct() / formatDate() / formatDateTime() / formatPeriod() / formatLastUpdated()
-14. **Date/DateTime formatting (Section 4)** — NEVER show raw ISO dates to user, always Buddhist Era format
+14. **Date/DateTime formatting (Section 4)** — NEVER show raw ISO dates to user, always use formatted Gregorian (ค.ศ.) year
 15. Chart.js - destroy -> setTimeout 200ms -> recreate
 16. CSS - Section 9 base template
 17. Refresh button - disabled while loading, show "(cached)" label when from cache
