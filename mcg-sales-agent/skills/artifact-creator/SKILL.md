@@ -1,9 +1,9 @@
 ---
-name: "artifact-creator-v2"
-description: "[v2] Use this skill whenever creating Cowork artifacts for MC Group sales dashboards. Mandatory localStorage cache pattern prevents unwanted permission popups. Includes complete code templates for all 11 sections: callMcpWithTimeout, query splitting (FY27/FY26 separate), dateKey cache, Chart.js, CSS, debug box, and troubleshooting table."
+name: "artifact-creator-v3"
+description: "[v3] Use this skill whenever creating Cowork artifacts for MC Group sales dashboards. Mandatory localStorage cache pattern prevents unwanted permission popups. Includes E2E validation step (Step 12) that verifies artifact integrity before and after create_artifact. Covers all 11 technical sections + validation checklist."
 ---
 
-# Artifact Creator - Technical Patterns (v2)
+# Artifact Creator - Technical Patterns (v3)
 
 Build live monitoring dashboards as Cowork artifacts with MCP data fetching, localStorage caching, and Chart.js charts. This skill contains proven patterns from real production artifacts.
 
@@ -485,3 +485,234 @@ tr:hover td { background: #f8f9fa; }
 17. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
 18. Never share file path inside artifact - artifact only
 19. Naming convention - if multiple artifacts, use consistent prefix
+
+
+---
+
+## 12. E2E Validation (MANDATORY — before AND after create_artifact)
+
+**Run validation TWICE: once before `create_artifact` and once after. Never skip.**
+
+This step catches the bugs that would otherwise surface as runtime errors in the user's browser:
+- Wrong MCP parameter names (`query` instead of `sql`)
+- Missing required functions or DOM elements
+- ES6 syntax leaking into ES5-only sandbox
+- Cache ordering bugs (save after render)
+- Chart.js init timing issues
+
+### 12A — Pre-Create Validation (before `create_artifact`)
+
+After writing the HTML file but BEFORE calling `create_artifact`, run this bash validation script:
+
+```bash
+python3 << 'VALIDEOF'
+import re, sys
+
+with open('ARTIFACT_PATH', 'r') as f:
+    html = f.read()
+
+errors = []
+warnings = []
+
+# === 1. STRUCTURE CHECKS ===
+if '<!DOCTYPE html>' not in html:
+    errors.append('MISSING: <!DOCTYPE html>')
+if '</html>' not in html:
+    errors.append('MISSING: closing </html>')
+if '<script>' not in html or '</script>' not in html:
+    errors.append('MISSING: <script> tags')
+
+# === 2. REQUIRED DOM ELEMENTS ===
+required_ids = ['refreshBtn', 'periodInfo', 'debugBox', 'summaryGrid', 'tablesArea']
+for rid in required_ids:
+    if f'id="{rid}"' not in html and f"id='{rid}"' not in html:
+        errors.append(f'MISSING DOM element: id="{rid}"')
+
+# === 3. REQUIRED JS FUNCTIONS (check function signatures) ===
+required_funcs = [
+    'function dlog(', 'function getDateKey(', 'function tryLoadCache(',
+    'function saveCache(', 'function fmt(', 'function yoyPct(',
+    'function callMcpWithTimeout(', 'function callSql(', 'function getDateRange(',
+    'function loadData(', 'function renderAll(', 'function fetchData('
+]
+for func in required_funcs:
+    if func not in html:
+        errors.append(f'MISSING function: {func}')
+
+# === 4. ES5 COMPLIANCE (no const/let/arrow) ===
+script_match = re.search(r'<script>(.*?)</script>', html, re.DOTALL)
+if script_match:
+    script = script_match.group(1)
+    const_matches = re.findall(r'\bconst\s+\w+\s*=', script)
+    let_matches = re.findall(r'\blet\s+\w+\s*=', script)
+    arrow_matches = re.findall(r'=>\s*\{', script)
+    if const_matches:
+        errors.append(f'ES6 const found ({len(const_matches)} instances): {const_matches[:3]}')
+    if let_matches:
+        errors.append(f'ES6 let found ({len(let_matches)} instances): {let_matches[:3]}')
+    if arrow_matches:
+        errors.append(f'ES6 arrow functions found ({len(arrow_matches)} instances)')
+else:
+    errors.append('Cannot extract <script> content for ES5 check')
+
+# === 5. callSql PARAMETER NAME (CRITICAL — must be {sql: ...} not {query: ...}) ===
+if script_match:
+    query_params = re.findall(r'callSql\([^,]+,\s*\{\s*query\s*:', script)
+    if query_params:
+        errors.append(f'CRITICAL: Found {{query: ...}} instead of {{sql: ...}} in callSql ({len(query_params)} instances). This will cause runtime error.')
+
+# === 6. localStorage CACHE_KEY (must be unique, must exist) ===
+if 'var CACHE_KEY' not in html:
+    errors.append('MISSING: var CACHE_KEY declaration')
+
+# === 7. CACHE INIT BLOCK (NO auto-call loadData) ===
+if 'window.addEventListener(' in html and 'load' in html:
+    errors.append('FORBIDDEN: window.addEventListener with load — will auto-call MCP')
+if '<body onload=' in html.lower():
+    errors.append('FORBIDDEN: body onload — will auto-call MCP')
+
+# Check that init block loads cache, does NOT call loadData()
+if not re.search(r"dlog\('Init.*checking cache", html):
+    errors.append('MISSING: cache init block (dlog Init...checking cache)')
+if re.search(r"var cached = tryLoadCache\(\);\s*if\s*\(\s*cached\s*\)", html):
+    pass
+else:
+    warnings.append('Cache init block may be missing or malformed — verify tryLoadCache then renderAll pattern')
+
+# === 8. saveCache BEFORE renderAll in loadData ===
+if script_match:
+    save_pos = script.find('saveCache(')
+    render_pos = script.find('renderAll(')
+    if save_pos < 0:
+        errors.append('MISSING: saveCache() call in loadData')
+    elif render_pos < 0:
+        errors.append('MISSING: renderAll() call')
+    elif save_pos > render_pos:
+        errors.append('ORDER: saveCache() must be called BEFORE renderAll() in loadData')
+
+# === 9. CHART CDN (if using charts) ===
+if 'Chart' in html and 'new Chart(' in html:
+    if 'chart.js@' not in html.lower():
+        errors.append('MISSING: Chart.js CDN script tag (but new Chart() found in JS)')
+    if 'getContext(' not in html:
+        warnings.append('Chart declared but getContext not found — chart may not render')
+
+# === 10. DEBUG BOX CSS ===
+if '.debug-box' not in html:
+    errors.append('MISSING: .debug-box CSS rule')
+if 'function dlog(' not in html:
+    errors.append('MISSING: dlog() function')
+
+# === 11. CSS light mode ===
+if 'color-scheme: light' not in html:
+    warnings.append('MISSING: :root { color-scheme: light } — artifact may render in dark mode')
+
+# === 12. MCP TOOLS referenced correctly ===
+mcp_calls = re.findall(r"callMcpWithTimeout\('([^']+)'", script) if script_match else []
+mcp_calls += re.findall(r'callMcpWithTimeout\("([^"]+)"', script) if script_match else []
+if mcp_calls:
+    for call in mcp_calls:
+        if not call.startswith('mcp__'):
+            errors.append(f'INVALID MCP tool name: {call}')
+
+# === 13. SQL injection check (dates must use dynamic vars, not hard-coded) ===
+if script_match:
+    hardcoded_dates = re.findall(r"BETWEEN\s+'20\\d\\d-\\d\\d-\\d\\d'\\s+AND\\s+'20\\d\\d-\\d\\d-\\d\\d'", script)
+    if hardcoded_dates:
+        errors.append(f'HARDCODED dates in SQL ({len(hardcoded_dates)} instances) — must use getDateRange()')
+
+# === RESULTS ===
+print("=" * 60)
+print("ARTIFACT VALIDATION REPORT")
+print("=" * 60)
+print(f"Errors: {len(errors)}")
+print(f"Warnings: {len(warnings)}")
+print()
+
+if errors:
+    print("ERRORS (must fix before create_artifact):")
+    for i, e in enumerate(errors, 1):
+        print(f"  {i}. {e}")
+    print()
+
+if warnings:
+    print("WARNINGS (review before create_artifact):")
+    for i, w in enumerate(warnings, 1):
+        print(f"  {i}. {w}")
+    print()
+
+if not errors and not warnings:
+    print("ALL CHECKS PASSED — artifact is ready for create_artifact")
+elif not errors:
+    print("No critical errors — artifact can proceed with create_artifact")
+else:
+    print("BLOCKED: Fix errors before calling create_artifact")
+    sys.exit(1)
+VALIDEOF
+```
+
+**Replace `ARTIFACT_PATH` with the actual file path** (Linux VM path, e.g. `/sessions/relaxed-jolly-cannon/mnt/Workspace/sales-overview-dashboard.html`).
+
+### 12B — Validation Decision Table
+
+| Result | Action |
+|--------|--------|
+| 0 errors, 0 warnings | Proceed to `create_artifact` immediately |
+| 0 errors, N warnings | Review warnings, fix if relevant, then proceed |
+| 1+ errors | Fix ALL errors before calling `create_artifact`. Show the error list to the user. |
+
+### 12C — Post-Create Verification (after `create_artifact`)
+
+After `create_artifact` returns success, run a quick smoke check:
+
+```bash
+# Verify artifact HTML file still exists and is > 5KB
+python3 -c "
+import os
+path = 'ARTIFACT_PATH'
+size = os.path.getsize(path)
+if size < 5000:
+    print(f'WARNING: Artifact file is only {size} bytes — may be truncated')
+else:
+    print(f'OK: Artifact file OK: {size} bytes')
+"
+```
+
+### 12D — Common Validation Failures and Fixes
+
+| Error Pattern | Root Cause | Fix |
+|---------------|------------|-----|
+| `{query: ...}` in callSql | Subagent or manual error used wrong param name | Replace `{query: q1}` with `{sql: q1}` everywhere |
+| Missing `tryLoadCache()` | Section 7 cache not implemented | Copy the 3 cache functions from Section 7 |
+| `saveCache()` after `renderAll()` | Order reversed | Swap the two lines in `loadData()` |
+| `const` / `let` found | ES6 syntax leaked in | Replace with `var` |
+| Missing `id="debugBox"` | Debug box HTML omitted | Add `<div class="debug-box" id="debugBox"></div>` |
+| Hard-coded dates in SQL | Static dates instead of `getDateRange()` | Use `dr.fy27Start` / `dr.fy27End` variables |
+| `window.addEventListener` with load | Auto-execute pattern from template | Remove, use cache-init block pattern |
+
+---
+
+## 13. Updated Checklist (22 items — was 19, added 3 validation items)
+
+1. Step 0: AskUserQuestion - ask chat reply or artifact first
+2. Step 0B: Clarify if needed - if request ambiguous, ask more
+3. Step 0C: Complexity Gate - check >=4 dimensions? >=3 skills? >=5 queries? -> split artifacts
+4. Pick right mcg-sales-agent skill - get KPI formulas + business rules
+5. Dynamic date range - getDateRange() never hard-code
+6. Split queries small - <=1 month scope per query - JS merge (especially FY27/FY26 separate)
+7. Max 4 queries per artifact - more = split
+8. callMcpWithTimeout - Promise.race 25s - never Promise.all
+9. localStorage cache (Section 7) - **MANDATORY**: CACHE_KEY, getDateKey, tryLoadCache, saveCache, cache-init block, NO auto-load, saveCache BEFORE renderAll
+10. Debug box - dlog() every step
+11. ES5 only - var + function - never const/let/arrow
+12. callSql() - structuredContent, JSON array, NDJSON
+13. fmt() / pctStr() / yoyPct() / formatDate()
+14. Chart.js - destroy -> setTimeout 200ms -> recreate
+15. CSS - Section 9 base template
+16. Refresh button - disabled while loading, show "(cached)" label when from cache
+17. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
+18. Never share file path inside artifact - artifact only
+19. Naming convention - if multiple artifacts, use consistent prefix
+20. **NEW: Pre-Create Validation (Step 12A)** — run validation script, fix ALL errors before create_artifact
+21. **NEW: Post-Create Verification (Step 12C)** — verify file size > 5KB, confirm artifact registered
+22. **NEW: MCP param check** — verify `{sql: ...}` not `{query: ...}` in callSql calls
