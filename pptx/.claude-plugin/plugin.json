@@ -1,0 +1,9 @@
+{
+  "name": "pptx",
+  "description": "Create, edit, and analyze PowerPoint presentations (.pptx/.potx). Supports slide creation with pptxgenjs, template-based editing, thumbnails, and validation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

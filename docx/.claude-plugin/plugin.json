@@ -1,0 +1,9 @@
+{
+  "name": "docx",
+  "description": "Create, read, edit, or manipulate Word documents (.docx/.dotx files). Supports formatting, tables of contents, tracked changes, find-and-replace, and image insertion.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

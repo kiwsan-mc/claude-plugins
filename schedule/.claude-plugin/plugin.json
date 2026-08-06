@@ -1,0 +1,9 @@
+{
+  "name": "schedule",
+  "description": "Create or update scheduled tasks that run automatically. Supports cron-like scheduling — \"every day\", \"each morning\", \"remind me in an hour\", etc.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

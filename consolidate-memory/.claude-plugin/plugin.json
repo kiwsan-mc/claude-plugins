@@ -1,0 +1,9 @@
+{
+  "name": "consolidate-memory",
+  "description": "Reflective pass over your memory files — merge duplicates, fix stale facts, prune the index.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "explain-usage",
+  "description": "Explain where this session's tokens went, with one simple chart in plain language. Use when asked for usage breakdown or token analysis.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

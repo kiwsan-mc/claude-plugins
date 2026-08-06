@@ -1,0 +1,9 @@
+{
+  "name": "pdf",
+  "description": "Full PDF processing — read, merge, split, rotate, watermark, create, fill forms, encrypt/decrypt, extract images, and OCR scanned PDFs.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

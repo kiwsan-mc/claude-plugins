@@ -1,0 +1,9 @@
+{
+  "name": "pdf-reading",
+  "description": "Read, inspect, and extract content from PDF files — text extraction, page rasterization, embedded images/tables/form-fields, and choosing the right strategy for different document types.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

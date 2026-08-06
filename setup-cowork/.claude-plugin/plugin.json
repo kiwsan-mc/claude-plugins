@@ -1,0 +1,9 @@
+{
+  "name": "setup-cowork",
+  "description": "Guided Cowork setup — install a matching plugin, try a skill, connect tools. Walks through role selection, plugin installation, and connector configuration.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}

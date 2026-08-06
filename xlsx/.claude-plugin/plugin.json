@@ -1,0 +1,9 @@
+{
+  "name": "xlsx",
+  "description": "Create, read, edit spreadsheet files (.xlsx/.xlsm/.csv/.tsv). Supports formulas, formatting, charting, data cleaning, and conversion between tabular formats.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anthropic",
+    "email": "support@anthropic.com"
+  }
+}
