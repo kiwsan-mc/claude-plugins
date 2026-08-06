@@ -150,7 +150,7 @@
     },
     {
       "name": "mcg-sales-agent",
-      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group",
+      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group. รวม skills: artifact-creator, email-digest, email-template",
       "author": {
         "name": "MC Group AI Platform",
         "email": "ai-platform@mcjeans.com"
@@ -158,6 +158,105 @@
       "category": "productivity",
       "source": "./mcg-sales-agent",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-sales-agent"
+    },
+    {
+      "name": "consolidate-memory",
+      "description": "Reflective pass over your memory files — merge duplicates, fix stale facts, prune the index.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./consolidate-memory",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/consolidate-memory"
+    },
+    {
+      "name": "docx",
+      "description": "Create, read, edit, or manipulate Word documents (.docx/.dotx files). Supports formatting, tables of contents, tracked changes, find-and-replace, and image insertion.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./docx",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/docx"
+    },
+    {
+      "name": "explain-usage",
+      "description": "Explain where this session's tokens went, with one simple chart in plain language. Use when asked for usage breakdown or token analysis.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./explain-usage",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/explain-usage"
+    },
+    {
+      "name": "pdf",
+      "description": "Full PDF processing — read, merge, split, rotate, watermark, create, fill forms, encrypt/decrypt, extract images, and OCR scanned PDFs.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./pdf",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pdf"
+    },
+    {
+      "name": "pdf-reading",
+      "description": "Read, inspect, and extract content from PDF files — text extraction, page rasterization, embedded images/tables/form-fields, and choosing the right strategy for different document types.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./pdf-reading",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pdf-reading"
+    },
+    {
+      "name": "pptx",
+      "description": "Create, edit, and analyze PowerPoint presentations (.pptx/.potx). Supports slide creation with pptxgenjs, template-based editing, thumbnails, and validation.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./pptx",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pptx"
+    },
+    {
+      "name": "xlsx",
+      "description": "Create, read, edit spreadsheet files (.xlsx/.xlsm/.csv/.tsv). Supports formulas, formatting, charting, data cleaning, and conversion between tabular formats.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./xlsx",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/xlsx"
+    },
+    {
+      "name": "schedule",
+      "description": "Create or update scheduled tasks that run automatically. Supports cron-like scheduling — \"every day\", \"each morning\", \"remind me in an hour\", etc.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./schedule",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/schedule"
+    },
+    {
+      "name": "setup-cowork",
+      "description": "Guided Cowork setup — install a matching plugin, try a skill, connect tools. Walks through role selection, plugin installation, and connector configuration.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./setup-cowork",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/setup-cowork"
     }
   ]
 }
