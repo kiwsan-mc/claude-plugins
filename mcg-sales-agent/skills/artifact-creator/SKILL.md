@@ -251,9 +251,25 @@ function getDateRange() {
 
 ---
 
-## 4. Date Formatting (Thai Buddhist Era)
+## 4. Date & DateTime Formatting (MANDATORY — End-User Readability)
+
+**All dates/datetimes shown to the user MUST be formatted for readability. Never show raw ISO strings like `2026-08-05T14:30:00Z` or `2026-08-05`.**
+
+### Standard Formats:
+
+| Data Type | Format Pattern | Example Output | Use Case |
+|-----------|---------------|----------------|----------|
+| Date only | `DD MMM YYYY (BE)` | `05 Aug 2569` | Report dates, sold_date, period labels |
+| Date short | `DD MMM YY` | `05 Aug 69` | Table cells where space is tight |
+| DateTime | `DD MMM YYYY HH:mm` | `05 Aug 2569 14:30` | Last updated, timestamp displays |
+| DateTime with seconds | `DD MMM YYYY HH:mm:ss` | `05 Aug 2569 14:30:45` | Debug log, precise timestamps |
+| Period/Month | `MMM YYYY (BE)` | `Aug 2569` | Monthly charts, period headers |
+| Period/FY | `FY{YY}` | `FY27` | Fiscal year labels |
+
+### Required Functions:
 
 ```javascript
+// Format date (date only) — Thai Buddhist Era
 function formatDate(d) {
     if (!d) return '-';
     var s = String(d).replace('T00:00:00Z','').replace('T00:00:00','');
@@ -264,7 +280,144 @@ function formatDate(d) {
     }
     return s;
 }
+
+// Format date short — for tight table cells
+function formatDateShort(d) {
+    if (!d) return '-';
+    var s = String(d).replace('T00:00:00Z','').replace('T00:00:00','');
+    var parts = s.split('-');
+    if (parts.length === 3) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var beYear = String(parseInt(parts[0]) + 543).slice(-2);
+      return parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + beYear;
+    }
+    return s;
+}
+
+// Format datetime — Thai Buddhist Era + time (HH:mm)
+function formatDateTime(d) {
+    if (!d) return '-';
+    var s = String(d);
+    var datePart = s.substring(0, 10);
+    var timePart = '';
+    if (s.length > 10) {
+      var t = s.substring(11);
+      timePart = t.substring(0, 5); // HH:mm
+    }
+    var parts = datePart.split('-');
+    if (parts.length === 3) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      if (timePart) formatted += ' ' + timePart;
+      return formatted;
+    }
+    return s;
+}
+
+// Format datetime with seconds — for debug/precision displays
+function formatDateTimeFull(d) {
+    if (!d) return '-';
+    var s = String(d);
+    var datePart = s.substring(0, 10);
+    var timePart = '';
+    if (s.length > 10) {
+      var t = s.substring(11);
+      timePart = t.substring(0, 8); // HH:mm:ss
+    }
+    var parts = datePart.split('-');
+    if (parts.length === 3) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var formatted = parts[2] + ' ' + months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+      if (timePart) formatted += ' ' + timePart;
+      return formatted;
+    }
+    return s;
+}
+
+// Format month/period label — for chart axes and period headers
+function formatPeriod(yearMonth) {
+    // Accepts "2026-08" or "2026-08-01"
+    if (!yearMonth) return '-';
+    var parts = String(yearMonth).split('-');
+    if (parts.length >= 2) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return months[parseInt(parts[1])-1] + ' ' + (parseInt(parts[0])+543);
+    }
+    return String(yearMonth);
+}
+
+// Format "last updated" — human-friendly relative + absolute
+function formatLastUpdated() {
+    var now = new Date();
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var day = ('0' + now.getDate()).slice(-2);
+    var mon = months[now.getMonth()];
+    var year = now.getFullYear() + 543;
+    var hh = ('0' + now.getHours()).slice(-2);
+    var mm = ('0' + now.getMinutes()).slice(-2);
+    return day + ' ' + mon + ' ' + year + ' ' + hh + ':' + mm;
+}
 ```
+
+### Usage Rules:
+
+| Where | Use Function | Example |
+|-------|-------------|---------|
+| Table column "วันที่ขาย" | `formatDate(row.sold_date)` | `05 Aug 2569` |
+| Table column with tight space | `formatDateShort(row.sold_date)` | `05 Aug 69` |
+| Header "Last Updated" | `formatLastUpdated()` | `05 Aug 2569 14:30` |
+| Header "Data Period" | `formatDate(dr.fy27Start) + ' - ' + formatDate(dr.fy27End)` | `01 Jul 2569 - 04 Aug 2569` |
+| Chart X-axis (monthly) | `formatPeriod(row.month)` | `Aug 2569` |
+| Debug log timestamps | `formatDateTimeFull(row.created_at)` | `05 Aug 2569 14:30:45` |
+| Footer "ข้อมูล ณ วันที่" | `formatLastUpdated()` | `05 Aug 2569 14:30` |
+
+### NEVER show to end user:
+
+| Bad (raw) | Good (formatted) |
+|-----------|------------------|
+| `2026-08-05` | `05 Aug 2569` |
+| `2026-07-02T00:00:00Z` | `02 Jul 2569` |
+| `2026-08-05T14:30:00Z` | `05 Aug 2569 14:30` |
+| `2026-08-05T14:30:00.000Z` | `05 Aug 2569 14:30` |
+| `2026-08` | `Aug 2569` |
+| `1722849000000` (epoch) | `05 Aug 2569 14:30` |
+
+### Rendering Guard (CRITICAL — #1 cause of raw date leaks)
+
+**The most common bug: building table rows with `row.sold_date` or `row.some_date` directly in innerHTML without calling formatDate().**
+
+WRONG — raw date leaks into UI:
+```javascript
+// BAD: This shows "2026-07-02T00:00:00Z" to user
+html += '<td>' + row.sold_date + '</td>';
+html += '<td>' + row.created_at + '</td>';
+html += '<td>' + row.period + '</td>';
+```
+
+RIGHT — always wrap date fields:
+```javascript
+// GOOD: Shows "02 Jul 2569" to user
+html += '<td>' + formatDate(row.sold_date) + '</td>';
+html += '<td>' + formatDateTime(row.created_at) + '</td>';
+html += '<td>' + formatPeriod(row.period) + '</td>';
+```
+
+**Rule: ANY field from SQL that contains a date/datetime/period MUST pass through the appropriate format function before being placed in innerHTML, textContent, or any visible DOM element.**
+
+Common date fields in mcg-sales-agent queries that MUST be formatted:
+- `sold_date` → `formatDate()`
+- `created_at` / `updated_at` → `formatDateTime()`
+- `period` / `month` / `year_month` → `formatPeriod()`
+- `start_date` / `end_date` → `formatDate()`
+- Any field ending in `_date`, `_at`, `_time` → format it
+
+### Quick Detection Pattern (for self-review before create_artifact):
+
+Search your artifact HTML for these patterns — if found, it's a bug:
+- `row.sold_date` NOT wrapped in `formatDate()`
+- `row.*_date` NOT wrapped in `formatDate()`
+- `row.*_at` NOT wrapped in `formatDateTime()`
+- Any `+ row.` followed by a date field name without format wrapper
 
 ---
 
@@ -458,13 +611,16 @@ tr:hover td { background: #f8f9fa; }
 | Popup on open without clicking Refresh | Missing localStorage cache pattern → framework auto-revalidates | Implement Section 7 cache pattern |
 | Silent timeout (>25s, no response) | Query scanning >3 months of data | Split FY27/FY26 into separate queries, each scanning ~1 month |
 | "T00:00:00Z" in date displays | PostgreSQL date cast without formatting | Use `formatDate()` function from Section 4 |
+| Raw ISO date like "2026-08-05" shown | Date not formatted before display | Use `formatDate()` for date, `formatDateTime()` for datetime |
+| Raw datetime like "2026-08-05T14:30:00Z" | Datetime not formatted | Use `formatDateTime()` — shows `05 Aug 2569 14:30` |
+| Month shown as "2026-08" | Period not formatted | Use `formatPeriod()` — shows `Aug 2569` |
 | Chart not rendering | Chart created before DOM ready | Use `setTimeout(function(){...}, 200)` after `innerHTML` |
 | "window.cowork.callMcpTool not available" | Artifact opened outside Cowork | Show friendly message, artifact only works in Cowork sidebar |
 | Cache not saving | `saveCache()` called AFTER `renderAll()` which modified data | Move `saveCache(results)` BEFORE `renderAll(results)` |
 
 ---
 
-## 11. Checklist: Building a New Artifact (19 items)
+## 11. Checklist: Building a New Artifact (20 items)
 
 1. Step 0: AskUserQuestion - ask chat reply or artifact first
 2. Step 0B: Clarify if needed - if request ambiguous, ask more
@@ -478,13 +634,14 @@ tr:hover td { background: #f8f9fa; }
 10. Debug box - dlog() every step
 11. ES5 only - var + function - never const/let/arrow
 12. callSql() - structuredContent, JSON array, NDJSON
-13. fmt() / pctStr() / yoyPct() / formatDate()
-14. Chart.js - destroy -> setTimeout 200ms -> recreate
-15. CSS - Section 9 base template
-16. Refresh button - disabled while loading, show "(cached)" label when from cache
-17. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
-18. Never share file path inside artifact - artifact only
-19. Naming convention - if multiple artifacts, use consistent prefix
+13. fmt() / pctStr() / yoyPct() / formatDate() / formatDateTime() / formatPeriod() / formatLastUpdated()
+14. **Date/DateTime formatting (Section 4)** — NEVER show raw ISO dates to user, always Buddhist Era format
+15. Chart.js - destroy -> setTimeout 200ms -> recreate
+16. CSS - Section 9 base template
+17. Refresh button - disabled while loading, show "(cached)" label when from cache
+18. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
+19. Never share file path inside artifact - artifact only
+20. Naming convention - if multiple artifacts, use consistent prefix
 
 
 ---
@@ -621,6 +778,23 @@ if script_match:
     if hardcoded_dates:
         errors.append(f'HARDCODED dates in SQL ({len(hardcoded_dates)} instances) — must use getDateRange()')
 
+# === 14. RAW DATE LEAK CHECK (date fields displayed without formatDate/formatDateTime) ===
+if script_match:
+    # Look for common date field names used directly in innerHTML without format wrapper
+    raw_date_patterns = re.findall(r"(?:row|item|d|r)\.(sold_date|created_at|updated_at|start_date|end_date|period|month|year_month|\w+_date|\w+_at)", script)
+    if raw_date_patterns:
+        # Check if they appear outside of formatDate/formatDateTime/formatPeriod calls
+        unformatted = []
+        for match in re.finditer(r"['\"`\+]\s*(?:row|item|d|r)\.(sold_date|created_at|updated_at|start_date|end_date|period|month|year_month|\w+_date|\w+_at)", script):
+            # Check if it's inside a format call (look backwards ~30 chars)
+            start = max(0, match.start() - 40)
+            context = script[start:match.start()]
+            if not re.search(r'format(Date|DateTime|DateTimeFull|DateShort|Period|LastUpdated)\(', context):
+                unformatted.append(match.group(1))
+        if unformatted:
+            unique_fields = list(set(unformatted))[:5]
+            errors.append(f'RAW DATE LEAK: date fields used without formatDate/formatDateTime: {unique_fields}. Wrap in formatDate() or formatDateTime()')
+
 # === RESULTS ===
 print("=" * 60)
 print("ARTIFACT VALIDATION REPORT")
@@ -689,10 +863,11 @@ else:
 | Missing `id="debugBox"` | Debug box HTML omitted | Add `<div class="debug-box" id="debugBox"></div>` |
 | Hard-coded dates in SQL | Static dates instead of `getDateRange()` | Use `dr.fy27Start` / `dr.fy27End` variables |
 | `window.addEventListener` with load | Auto-execute pattern from template | Remove, use cache-init block pattern |
+| **RAW DATE LEAK** (`row.sold_date` without format) | Date field used directly in innerHTML/textContent | Wrap with `formatDate(row.sold_date)` or `formatDateTime(row.created_at)` — see Section 4 Rendering Guard |
 
 ---
 
-## 13. Updated Checklist (22 items — was 19, added 3 validation items)
+## 13. Updated Checklist (23 items — was 19, added validation + date formatting items)
 
 1. Step 0: AskUserQuestion - ask chat reply or artifact first
 2. Step 0B: Clarify if needed - if request ambiguous, ask more
@@ -706,13 +881,14 @@ else:
 10. Debug box - dlog() every step
 11. ES5 only - var + function - never const/let/arrow
 12. callSql() - structuredContent, JSON array, NDJSON
-13. fmt() / pctStr() / yoyPct() / formatDate()
-14. Chart.js - destroy -> setTimeout 200ms -> recreate
-15. CSS - Section 9 base template
-16. Refresh button - disabled while loading, show "(cached)" label when from cache
-17. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
-18. Never share file path inside artifact - artifact only
-19. Naming convention - if multiple artifacts, use consistent prefix
-20. **NEW: Pre-Create Validation (Step 12A)** — run validation script, fix ALL errors before create_artifact
-21. **NEW: Post-Create Verification (Step 12C)** — verify file size > 5KB, confirm artifact registered
-22. **NEW: MCP param check** — verify `{sql: ...}` not `{query: ...}` in callSql calls
+13. fmt() / pctStr() / yoyPct() / formatDate() / formatDateTime() / formatPeriod() / formatLastUpdated()
+14. **Date/DateTime formatting (Section 4)** — NEVER show raw ISO dates to user, use Buddhist Era formatted output
+15. Chart.js - destroy -> setTimeout 200ms -> recreate
+16. CSS - Section 9 base template
+17. Refresh button - disabled while loading, show "(cached)" label when from cache
+18. Cache init block - tryLoadCache() first, placeholder if no cache, NEVER auto-call loadData()
+19. Never share file path inside artifact - artifact only
+20. Naming convention - if multiple artifacts, use consistent prefix
+21. **Pre-Create Validation (Step 12A)** — run validation script, fix ALL errors before create_artifact
+22. **Post-Create Verification (Step 12C)** — verify file size > 5KB, confirm artifact registered
+23. **MCP param check** — verify `{sql: ...}` not `{query: ...}` in callSql calls

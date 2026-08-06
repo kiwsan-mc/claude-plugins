@@ -150,7 +150,7 @@
     },
     {
       "name": "mcg-sales-agent",
-      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group. รวม skills: artifact-creator, email-digest, email-template",
+      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group. รวม skills: artifact-creator, email-digest, email-template, path-resolver",
       "author": {
         "name": "MC Group AI Platform",
         "email": "ai-platform@mcjeans.com"

@@ -1,7 +1,7 @@
 {
   "name": "mcg-sales-agent",
   "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (pg_execute_sql, pg_describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group",
-  "version": "5.9.0",
+  "version": "5.10.0",
   "author": {
     "name": "MC Group AI Platform",
     "email": "ai-platform@mcjeans.com"
