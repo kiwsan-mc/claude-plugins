@@ -1,26 +1,9 @@
 {
   "name": "mcg-sales-agent",
   "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (pg_execute_sql, pg_describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "author": {
     "name": "MC Group AI Platform",
     "email": "ai-platform@mcjeans.com"
-  },
-  "skills": [
-    {
-      "name": "artifact-creator",
-      "description": "Create live monitoring dashboard artifacts (HTML with MCP data fetching, localStorage cache, Chart.js charts, pull-to-refresh). Triggers: \"create artifact\", \"monitor\", \"dashboard\", \"live artifact\".",
-      "source": "./skills/artifact-creator"
-    },
-    {
-      "name": "email-digest",
-      "description": "Summarize unread Outlook emails, categorize by priority (urgent/high/normal/low), and suggest response actions. Triggers: \"email summary\", \"what's in my inbox\", \"check my email\", \"inbox digest\".",
-      "source": "./skills/email-digest"
-    },
-    {
-      "name": "email-template",
-      "description": "MC Group dark-theme email template — standard responsive HTML template (Tahoma, dark/light mode) for sending reports or notifications via Outlook. Triggers: \"send email\", \"ส่งเมล\", \"email report\".",
-      "source": "./skills/email-template"
-    }
-  ]
+  }
 }
