@@ -203,17 +203,7 @@
       "source": "./pdf",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pdf"
     },
-    {
-      "name": "pdf-reading",
-      "description": "Read, inspect, and extract content from PDF files — text extraction, page rasterization, embedded images/tables/form-fields, and choosing the right strategy for different document types.",
-      "author": {
-        "name": "MC Group AI Platform",
-        "email": "ai-platform@mcjeans.com"
-      },
-      "category": "productivity",
-      "source": "./pdf-reading",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pdf-reading"
-    },
+
     {
       "name": "pptx",
       "description": "Create, edit, and analyze PowerPoint presentations (.pptx/.potx). Supports slide creation with pptxgenjs, template-based editing, thumbnails, and validation.",
