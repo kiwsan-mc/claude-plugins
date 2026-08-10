@@ -5,7 +5,7 @@ description: >
   ใช้เมื่อผู้ใช้ถาม: "ภาพรวม" "Dashboard" "KPI ทั้งหมด" "สรุปผู้บริหาร" "Overall performance"
   คำนวณ 12 KPI พร้อม 3 Key Takeaways
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
@@ -27,7 +27,7 @@ tools:
 เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
 
 ⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ pg_execute_sql หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
+- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
 - แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
 
 ---

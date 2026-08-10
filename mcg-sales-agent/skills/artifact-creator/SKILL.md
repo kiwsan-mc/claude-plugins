@@ -103,7 +103,7 @@ When building monitors for MC Group sales data - always use mcg-sales-agent skil
  
 1. Identify which specialized skill matches the question (sales-dashboard, abc-analysis, channel-regional, discount-margin, member-analysis, etc.)
 2. Call that skill to get KPI formulas, business rules, thresholds
-3. Use mcp__mcg-toolbox__pg_execute_sql with query patterns from the skill
+3. Use mcp__mcg-toolbox__sales_agent with query patterns from the skill
 4. Build artifact following technical patterns in this skill
  
 Never guess KPI formulas or thresholds - always follow mcg-sales-agent skills.

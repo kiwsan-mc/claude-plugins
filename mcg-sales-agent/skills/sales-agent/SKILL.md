@@ -5,7 +5,7 @@ description: >
   ร่างอีเมล สรุปรายงาน แปลภาษา ปรึกษาแนวทางการขาย
   **หากคำถามตรงกับ specialized skill ต้องแนะนำให้ใช้ skill นั้นแทน**
 tools:
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_execute_sql
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
@@ -70,7 +70,7 @@ tools:
 
 ### Step 0A: ค้นหา SQL Template
 
-ใช้ `pg_execute_sql` ค้นหาจาก table `query_patterns` ด้วย keyword matching:
+ใช้ `sales_agent` ค้นหาจาก table `query_patterns` ด้วย keyword matching:
 
 ```sql
 SELECT pattern_name, skill, sql_skeleton, required_params
@@ -97,7 +97,7 @@ LIMIT 3
 
 ### Step 0B: ค้นหา Business Rules + Column Mapping
 
-ใช้ `pg_execute_sql` ค้นหาจาก table `business_context`:
+ใช้ `sales_agent` ค้นหาจาก table `business_context`:
 
 ```sql
 -- ค้นหา KPI formula
@@ -214,7 +214,7 @@ Step 1: replace placeholders
 ---
 
 # 3. Data Tools
-- **pg_execute_sql**: (1) ค้นหา pattern/rules จาก query_patterns + business_context (2) execute SQL query (max 3 calls total)
+- **sales_agent**: (1) ค้นหา pattern/rules จาก query_patterns + business_context (2) execute SQL query (max 3 calls total)
 - **pg_describe_table**: เมื่อชื่อคอลัมน์ผิดพลาด
 - **pg_list_tables**: เมื่อผู้ใช้ถามว่ามีข้อมูลอะไรบ้าง
 

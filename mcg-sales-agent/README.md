@@ -9,7 +9,7 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 **v3.0.0** — Migrated from MSSQL to PostgreSQL (pgvector-enabled)
 
 ### Changelog
-- **v3.0.0**: Migrated to PostgreSQL + pgvector. New tools: `pg_execute_sql`, `pg_describe_table`, `pg_list_tables`. SQL syntax updated to PostgreSQL. Added `FY_Year` column support. SQM threshold ≥50.
+- **v3.0.0**: Migrated to PostgreSQL + pgvector. New tools: `sales_agent`, `pg_describe_table`, `pg_list_tables`. SQL syntax updated to PostgreSQL. Added `FY_Year` column support. SQM threshold ≥50.
 - **v2.2.5**: MSSQL version (deprecated)
 
 ## Skills
@@ -43,7 +43,7 @@ skills/
 
 | Tool | Description |
 |------|-------------|
-| `pg_execute_sql` | Execute PostgreSQL SELECT queries |
+| `sales_agent` | Execute PostgreSQL SELECT queries |
 | `pg_describe_table` | Get table schema |
 | `pg_list_tables` | List approved tables |
 
