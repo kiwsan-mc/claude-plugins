@@ -47,6 +47,13 @@ C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe
 - **หลายบัญชี**: ใช้ `nlm login --profile work` / `nlm login --profile personal`
 - **Auto-refresh**: Server จะ refresh token อัตโนมัติเมื่อหมดอายุ แต่ถ้า Google session หมดจริงต้อง login ใหม่
 
+> **⚠️ ข้อจำกัด**: `nlm login` ต้องเปิด browser บนเครื่อง user โดยตรง — Claude Cowork ทำแทนไม่ได้เพราะรันบน sandbox แยก
+> ถ้าเจอ auth error ให้แนะนำ user เปิด PowerShell แล้วรันเอง:
+> ```
+> & "C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe" --from notebooklm-mcp-cli nlm login
+> ```
+> หลัง login เสร็จ ให้ user แจ้งกลับมา แล้วตรวจสอบด้วย `nlm login --check`
+
 ### Context Window Management
 
 - MCP นี้มี **43 tools** ทั้งหมด — กิน context window มาก
