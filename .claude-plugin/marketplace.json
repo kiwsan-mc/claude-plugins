@@ -247,6 +247,17 @@
       "category": "productivity",
       "source": "./setup-cowork",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/setup-cowork"
+    },
+    {
+      "name": "gemini-notebook",
+      "description": "Guide for using gemini-notebook-mcp-cli (Gemini Notebook / NotebookLM) — authentication, 43 MCP tools, workflow recipes, troubleshooting, and best practices.",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./gemini-notebook",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/gemini-notebook"
     }
   ]
 }
