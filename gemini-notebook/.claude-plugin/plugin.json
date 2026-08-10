@@ -1,0 +1,9 @@
+{
+  "name": "gemini-notebook",
+  "description": "Skill for using gemini-notebook-mcp-cli effectively in Claude Code — authentication, tool categories, troubleshooting, and best practices.",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}
