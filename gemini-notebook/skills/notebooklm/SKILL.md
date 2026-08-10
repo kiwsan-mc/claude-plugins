@@ -8,6 +8,35 @@ tools: Bash, Read, Write
 
 คู่มือการใช้งาน gemini-notebook-mcp-cli ผ่าน Claude Code สำหรับจัดการ Gemini Notebook (เดิมชื่อ Google NotebookLM)
 
+## Path ของ CLI (Portable)
+
+ติดตั้งอยู่ที่ shared path ใช้ได้ทุกเครื่อง:
+
+```
+C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe
+```
+
+ถ้า `nlm` not found ให้ใช้ `uvx` แทน:
+
+```powershell
+& "C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe" --from notebooklm-mcp-cli nlm <command>
+```
+
+ตัวอย่าง:
+
+```powershell
+# login
+& "C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe" --from notebooklm-mcp-cli nlm login
+
+# check auth
+& "C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe" --from notebooklm-mcp-cli nlm login --check
+
+# doctor
+& "C:\ProgramData\McGroup\Claude\mcp\python3-standalone\Scripts\uvx.exe" --from notebooklm-mcp-cli nlm doctor
+```
+
+---
+
 ## สิ่งสำคัญที่ต้องรู้
 
 ### Authentication
