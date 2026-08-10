@@ -26,7 +26,29 @@ C:\ProgramData\McGroup\Claude\mcp\node-portable\node-v22.16.0-win-x64\npx.cmd
 
 ---
 
-## MCP Config (Kiro / Claude Code)
+## MCP Config
+
+### Claude Desktop — `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "notebooklm": {
+      "command": "C:\\ProgramData\\McGroup\\Claude\\mcp\\node-portable\\node-v22.16.0-win-x64\\npx.cmd",
+      "args": ["notebooklm-mcp@latest"],
+      "env": {
+        "HEADLESS": "false",
+        "NOTEBOOKLM_PROFILE": "standard"
+      }
+    }
+  }
+}
+```
+
+> **ทำไมตั้ง HEADLESS=false สำหรับ Claude Desktop?**
+> Claude Desktop รัน MCP server เป็น local process บนเครื่อง user โดยตรง
+> ดังนั้นเมื่อเรียก `setup_auth` → Chrome จะเปิดขึ้นมาบน desktop ให้ user login ได้เลย
+> ไม่ต้อง override show_browser per-call
 
 ### Kiro — `.kiro/settings/mcp.json`
 
