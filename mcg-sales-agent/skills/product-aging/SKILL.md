@@ -5,9 +5,9 @@ description: >
   "GREEN/YELLOW/RED/PURPLE" "สินค้าค้าง" "clearance" "สินค้าใหม่/เก่า" "stock health"
   วิเคราะห์อายุสินค้าแยก Aging Zone + Fashion Grade + Product Lifecycle
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__aging_distribution
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -20,21 +20,15 @@ tools:
 
 ---
 
-# Task: Product Aging & Stock Health Analysis
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+2. **aging_distribution** → Aging Zone distribution (GREEN/YELLOW/RED/PURPLE) + SKU + Margin% + Discount%
+3. **sales_agent** → เฉพาะเมื่อต้อง Fashion Grade detail หรือ Top 10 High Risk items
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+## Date Params Mapping:
+- fy_curr_start + max_date → ใช้ตรงจาก max_sold_date (tool นี้ไม่มี YoY ไม่ต้องใช้ fy_prev_start)
 
 ---
 

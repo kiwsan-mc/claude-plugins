@@ -5,9 +5,10 @@ description: >
   ใช้เมื่อผู้ใช้ถาม: "ภาพรวม" "Dashboard" "KPI ทั้งหมด" "สรุปผู้บริหาร" "Overall performance"
   คำนวณ 12 KPI พร้อม 3 Key Takeaways
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_by_channel
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -20,25 +21,18 @@ tools:
 
 ---
 
-# Task: Sales Performance Dashboard Overview
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → เรียกก่อนเสมอ (ได้ max_date, month_start, fy_curr_start, fy_prev_start, same_day_prev)
+2. **dashboard_kpi_overall** → KPI ภาพรวม (ส่ง date params จาก step 1)
+3. **dashboard_by_channel** → KPI แยก OFFLINE/ONLINE (ส่ง date params จาก step 1)
+4. **sales_agent** → เฉพาะเมื่อต้องการข้อมูลเพิ่มที่ fixed tools ไม่ cover (เช่น Channel Store Top 10)
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — ตรวจสอบช่วงเวลา (Apple-to-Apple บังคับ)
-
-1. ตรวจสอบ `MAX(sold_date)` จากข้อมูลจริง
-2. กำหนดช่วง FY27: `2026-07-01` ถึง `<= MAX(sold_date)`
-3. กำหนดช่วง FY26 ให้ตรงวันเดียวกัน
-
-**ห้ามใช้ FY26 เต็มปีเปรียบเทียบกับ FY27**
+## Date Params Mapping:
+- ถ้า user ถาม "เดือนนี้" → fy_curr_start = **month_start** จาก max_sold_date
+- ถ้า user ถาม "ปีนี้" / "FY" / "ภาพรวม" → fy_curr_start = **fy_curr_start** จาก max_sold_date
+- max_date, fy_prev_start, same_day_prev → ใช้ตรงจาก max_sold_date เสมอ
 
 ---
 

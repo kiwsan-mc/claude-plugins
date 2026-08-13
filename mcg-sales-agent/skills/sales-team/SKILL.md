@@ -5,9 +5,9 @@ description: >
   "ผู้จัดการ" "Manager" "Head Sales" "KPI พนักงาน" "ranking พนักงาน"
   วิเคราะห์ performance รายพนักงาน/ทีม/ผู้จัดการ
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__top_salesmen
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -20,21 +20,17 @@ tools:
 
 ---
 
-# Task: Sales Team Performance Analysis
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+2. **top_salesmen** → Top 10 พนักงานขาย + Net Sales, YoY, Tickets, ATV (OFFLINE only)
+3. **sales_agent** → เฉพาะเมื่อต้อง Manager Team ranking หรือ Head Sales summary
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+## Date Params Mapping:
+- ถ้า user ถาม "เดือนนี้" → fy_curr_start = **month_start**
+- ถ้า user ถาม "ปีนี้" / "FY" → fy_curr_start = **fy_curr_start**
+- max_date, fy_prev_start, same_day_prev → ใช้ตรงจาก max_sold_date
 
 ---
 

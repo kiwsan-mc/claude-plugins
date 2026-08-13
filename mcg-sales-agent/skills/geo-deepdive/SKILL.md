@@ -5,9 +5,9 @@ description: >
   "พิกัด" "GPS" "catchment" "แผนที่" "ละเอียดระดับอำเภอ"
   วิเคราะห์ภูมิศาสตร์ระดับอำเภอ/ตำบล
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__geo_district_top
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -20,21 +20,15 @@ tools:
 
 ---
 
-# Task: Geography Deep Dive
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+2. **geo_district_top** → Top 15 อำเภอ/เขต + Net Sales, Tickets, Branch Count (OFFLINE)
+3. **sales_agent** → เฉพาะเมื่อต้อง Province density, expansion analysis, หรือ ตำบล-level
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day
+## Date Params Mapping:
+- fy_curr_start + max_date → ใช้ตรงจาก max_sold_date
 
 ---
 
