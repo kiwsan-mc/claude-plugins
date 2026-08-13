@@ -9,6 +9,8 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_by_channel
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_summary
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_channel_list
 ---
 
 #[[file:../sales-agent/SKILL.md]]

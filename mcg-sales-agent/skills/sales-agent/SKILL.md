@@ -9,6 +9,13 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_channel_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_vendor_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_salesman_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_summary
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_summary
 ---
 
 # MC Group Sales Agent v3

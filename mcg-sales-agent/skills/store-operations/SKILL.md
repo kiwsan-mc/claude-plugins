@@ -8,6 +8,8 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__store_cluster_comparison
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_summary
 ---
 
 #[[file:../sales-agent/SKILL.md]]

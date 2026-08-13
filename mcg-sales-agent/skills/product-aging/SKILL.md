@@ -8,6 +8,8 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__aging_distribution
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_summary
 ---
 
 #[[file:../sales-agent/SKILL.md]]

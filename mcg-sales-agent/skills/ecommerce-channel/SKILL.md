@@ -8,6 +8,7 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__ecom_platform_breakdown
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_channel_list
 ---
 
 #[[file:../sales-agent/SKILL.md]]
