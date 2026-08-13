@@ -77,7 +77,7 @@ new_sqm::float
 / NULLIF(SUM(new_sqm::float), 0)
 ```
 
-⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE' AND new_sqm >= 50`
+⚠️ **เงื่อนไข**: `WHERE main_channel = 'OFFLINE'`
 
 ⚠️ ใช้ `COUNT(DISTINCT sold_date)` เป็น "วันที่มีข้อมูล" — ห้ามใช้ DATEDIFF
 
@@ -85,7 +85,7 @@ new_sqm::float
 
 ## Step 4 — Top 5 / Bottom 5 + จังหวัด
 
-Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE, new_sqm >= 50
+Top 5/Bottom 5 สาขา — เฉพาะ OFFLINE
 
 Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 
@@ -118,7 +118,7 @@ Top 10 จังหวัด — Sales/Sqm เฉลี่ย + Margin%
 - Net Sales_Runrate = (Net Sales MTD / วันที่มีข้อมูล) × วันเต็มเดือน
 - SQM = new_sqm (ค่าจริง ไม่ต้องหาร)
 - Net Sales MTD = SUM(total_exc_vat_price)
-- `new_sqm >= 50` (filter ค่าผิดปกติ)
+
 - COUNT(DISTINCT sold_date) — ไม่ใช้ DATEDIFF
 - แนวทางปรับปรุงอ้างอิงข้อมูลจริง
 
