@@ -24,7 +24,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
 2. **ecom_platform_breakdown** → Platform breakdown (Shopee/Lazada/TikTok/Mcshop) + YoY + Discount%
 3. **sales_agent** → เฉพาะเมื่อต้อง Campaign Type (Organic/Ads) หรือ Top Products per Platform
 

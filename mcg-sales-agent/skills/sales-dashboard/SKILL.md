@@ -26,7 +26,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (ได้ max_date, month_start, fy_curr_start, fy_prev_start, same_day_prev)
+1. **max_sold_date** → Call at least once at the start of the conversation (returns max_date, month_start, fy_curr_start, fy_prev_start, same_day_prev). If already called earlier in the same chat, reuse cached values.
 2. **dashboard_kpi_overall** → KPI ภาพรวม (ส่ง date params จาก step 1)
 3. **dashboard_by_channel** → KPI แยก OFFLINE/ONLINE (ส่ง date params จาก step 1)
 4. **sales_agent** → เฉพาะเมื่อต้องการข้อมูลเพิ่มที่ fixed tools ไม่ cover (เช่น Channel Store Top 10)

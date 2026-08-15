@@ -25,7 +25,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
 2. **geo_district_top** → Top 15 อำเภอ/เขต + Net Sales, Tickets, Branch Count (OFFLINE)
 3. **sales_agent** → เฉพาะเมื่อต้อง Province density, expansion analysis, หรือ ตำบล-level
 

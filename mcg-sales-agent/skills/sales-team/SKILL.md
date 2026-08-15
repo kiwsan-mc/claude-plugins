@@ -24,7 +24,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
 2. **top_salesmen** → Top 10 พนักงานขาย + Net Sales, YoY, Tickets, ATV (OFFLINE only)
 3. **sales_agent** → เฉพาะเมื่อต้อง Manager Team ranking หรือ Head Sales summary
 

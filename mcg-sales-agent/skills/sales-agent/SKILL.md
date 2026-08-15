@@ -26,7 +26,8 @@ tools:
 
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — ALWAYS call max_sold_date first (limit_rows=1)
+## Step 0 — call max_sold_date once per conversation (limit_rows=1)
+Call at least once at the start of the conversation. If already called earlier in the same chat, reuse the cached values — no need to call again.
 Returns: max_date, month_start, current_fy, fy_curr_start, fy_prev_start, same_day_prev
 
 ## Date Params Mapping:

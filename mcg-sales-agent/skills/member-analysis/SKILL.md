@@ -23,7 +23,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
 2. **member_vs_nonmember** → Member vs Non-Member Net Sales, Tickets, Member% พร้อม YoY
 3. **sales_agent** → เฉพาะเมื่อต้อง drill-down (Member Group, Generation, Channel Store breakdown)
 

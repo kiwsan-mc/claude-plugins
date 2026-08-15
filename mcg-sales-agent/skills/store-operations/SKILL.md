@@ -25,7 +25,7 @@ tools:
 # Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
 ## Priority Order:
-1. **max_sold_date** → เรียกก่อนเสมอ (limit_rows=1)
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
 2. **store_cluster_comparison** → Cluster comparison + Avg Sales per Branch, ATV แยก Space Range
 3. **sales_agent** → เฉพาะเมื่อต้อง Store Status, New Stores list, หรือ lifecycle detail
 
