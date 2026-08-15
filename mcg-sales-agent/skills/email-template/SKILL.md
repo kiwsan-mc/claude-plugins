@@ -1,6 +1,6 @@
 ---
 name: "email-template"
-description: "MC Group email template — use when sending any report or notification email via Outlook. Applies the standard MC Group theme (Tahoma, #2c3e50 header, responsive design) with header/body/footer structure. Triggers: \"send email\", \"ส่งเมล\", \"email report\", \"send report via email\", \"outlook\"."
+description: "MC Group email template — use when sending any report or notification email via Outlook. Applies the standard MC Group theme (Tahoma, #2c3e50 header, responsive design) with header/body/footer structure. Triggers: \"send email\", \"email report\", \"send report via email\", \"outlook\"."
 ---
 
 # MC Group Email Template
@@ -140,7 +140,7 @@ img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100
 
 ### Greeting
 ```html
-<p class="email-text" style="font-family: Tahoma, Geneva, sans-serif; font-size: 13px; color: #222222; margin: 0 0 18px 0;">เรียน ทุกท่าน,</p>
+<p class="email-text" style="font-family: Tahoma, Geneva, sans-serif; font-size: 13px; color: #222222; margin: 0 0 18px 0;">Dear All,</p>
 ```
 
 ### Info Box (slate border)
@@ -273,7 +273,7 @@ img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100
 
 ### Help/Contact Line
 ```html
-<p class="email-text" style="font-family: Tahoma, Geneva, sans-serif; font-size: 13px; color: #333333; margin: 0 0 20px 0; line-height: 1.6;">หากพบข้อผิดพลาดของข้อมูลหรือต้องการความช่วยเหลือเพิ่มเติม กรุณาเขียนรายละเอียดและส่งอีเมลแจ้งเรามาที่ <a href="mailto:it-helpdesk@mcgroupnet.com" style="color: #0563C1; text-decoration: underline;">it-helpdesk&#64;mcgroupnet.com</a></p>
+<p class="email-text" style="font-family: Tahoma, Geneva, sans-serif; font-size: 13px; color: #333333; margin: 0 0 20px 0; line-height: 1.6;">If you find any data errors or need additional assistance, please describe the details and send an email to <a href="mailto:it-helpdesk@mcgroupnet.com" style="color: #0563C1; text-decoration: underline;">it-helpdesk&#64;mcgroupnet.com</a></p>
 ```
 
 ## Sending Steps
