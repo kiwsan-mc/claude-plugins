@@ -1,0 +1,9 @@
+{
+  "name": "mcg-inventory-agent",
+  "description": "MC Group Inventory Analyst Agent — ถามข้อมูลสินค้าคงคลัง (stock on hand), stock aging, การสั่งซื้อ (PO), และการโอนย้ายสต็อก (STO) ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องสต็อก, สินค้าคงเหลือ, สินค้าค้าง/aging, มูลค่าสต็อก, การเติมสินค้า, PO/GR, โอนสต็อกระหว่างสาขา",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}

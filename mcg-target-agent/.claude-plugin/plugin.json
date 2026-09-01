@@ -1,0 +1,9 @@
+{
+  "name": "mcg-target-agent",
+  "description": "MC Group Sales Target Analyst Agent — ถามข้อมูลเป้าขาย vs ยอดจริง (% achievement) และยอดขายระดับ invoice (Company/Account) พร้อม GP% ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องเป้าขาย, การทำเป้า, achievement, ยอดขายระดับบริษัท/บัญชี, gross profit",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}

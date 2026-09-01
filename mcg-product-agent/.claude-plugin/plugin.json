@@ -1,0 +1,9 @@
+{
+  "name": "mcg-product-agent",
+  "description": "MC Group Product Master Analyst Agent — ถามข้อมูล master สินค้า (assortment) เช่น จำนวน SKU/model, แบรนด์, หมวดหมู่, gender, season, สี, ไซส์, aging, sales type, ราคาป้าย/ราคาขาย, margin ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องโครงสร้างสินค้า ไม่ใช่ยอดขาย/สต็อก",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}
