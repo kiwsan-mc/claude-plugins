@@ -269,7 +269,7 @@ function getDateRange() {
 ### Required Functions:
  
 ```javascript
-// Format date (date only) — Gregorian (ค.ศ.)
+// Format date (date only) — Gregorian (CE)
 function formatDate(d) {
     if (!d) return '-';
     var s = String(d).replace('T00:00:00Z','').replace('T00:00:00','');
@@ -294,7 +294,7 @@ function formatDateShort(d) {
     return s;
 }
  
-// Format datetime — Gregorian (ค.ศ.) + time (HH:mm)
+// Format datetime — Gregorian (CE) + time (HH:mm)
 function formatDateTime(d) {
     if (!d) return '-';
     var s = String(d);
@@ -363,13 +363,13 @@ function formatLastUpdated() {
  
 | Where | Use Function | Example |
 |-------|-------------|---------|
-| Table column "วันที่ขาย" | `formatDate(row.sold_date)` | `05 Aug 2026` |
+| Table column "Sold Date" | `formatDate(row.sold_date)` | `05 Aug 2026` |
 | Table column with tight space | `formatDateShort(row.sold_date)` | `05 Aug 26` |
 | Header "Last Updated" | `formatLastUpdated()` | `05 Aug 2026 14:30` |
 | Header "Data Period" | `formatDate(dr.fy27Start) + ' - ' + formatDate(dr.fy27End)` | `01 Jul 2026 - 04 Aug 2026` |
 | Chart X-axis (monthly) | `formatPeriod(row.month)` | `Aug 2026` |
 | Debug log timestamps | `formatDateTimeFull(row.created_at)` | `05 Aug 2026 14:30:45` |
-| Footer "ข้อมูล ณ วันที่" | `formatLastUpdated()` | `05 Aug 2026 14:30` |
+| Footer "Data as of" | `formatLastUpdated()` | `05 Aug 2026 14:30` |
  
 ### NEVER show to end user:
  

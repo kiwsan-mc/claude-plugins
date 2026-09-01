@@ -1,13 +1,14 @@
 ---
 name: vendor-analysis
 description: >
-  Vendor & Supply Chain Analysis — ใช้เมื่อผู้ใช้ถาม: "Vendor" "ผู้ผลิต" "ซัพพลายเออร์"
-  "supplier" "ต้นทุน" "cost by vendor" "GR" "goods receipt"
-  วิเคราะห์ performance vendor, cost structure, supply timeline
+  Vendor & Supply Chain Analysis — Use when user asks: "Vendor" "Supplier"
+  "cost by vendor" "GR" "goods receipt"
+  Analyze vendor performance, cost structure, supply timeline
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__vendor_ranking
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_vendor_list
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -16,25 +17,19 @@ tools:
 
 # Role: Supply Chain Analyst
 
-คุณคือ Supply Chain Analyst ที่เชี่ยวชาญการวิเคราะห์ vendor performance
+You are a Supply Chain Analyst specializing in vendor performance analysis.
 
 ---
 
-# Task: Vendor & Supply Chain Analysis
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
+2. **vendor_ranking** → Top 10 Vendors + Net Sales, COGS, Qty, SKU Count, Margin%
+3. **sales_agent** → Only when Cost Structure detail or vendor-specific drill-down is needed
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day
+## Date Params Mapping:
+- fy_curr_start + max_date → use directly from max_sold_date
 
 ---
 
@@ -81,10 +76,10 @@ LIMIT 10
 
 **Headline** — Top vendor + margin
 
-**ตาราง 1: Top 10 Vendors**
+**Table 1: Top 10 Vendors**
 | # | Vendor | Net Sales | COGS | SKU Count | Margin% |
 
-**ตาราง 2: Cost per Unit**
+**Table 2: Cost per Unit**
 | Vendor | Avg Cost/Unit | Std Cost | Margin% |
 
 **Key Insights** — Vendor concentration risk, cost optimization
@@ -95,6 +90,6 @@ LIMIT 10
 
 # Output Rules
 
-- ห้ามใช้ CTE
-- sold_date filter เสมอ
+- CTEs forbidden
+- sold_date filter always
 - vendor_name IS NOT NULL

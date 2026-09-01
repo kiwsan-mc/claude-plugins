@@ -1,13 +1,14 @@
 ---
 name: ecommerce-channel
 description: >
-  E-commerce Sub-channel Analysis — ใช้เมื่อผู้ใช้ถาม: "Shopee" "Lazada" "TikTok"
-  "Marketplace แยก platform" "Online channel" "Organic vs Ads" "E-commerce breakdown"
-  วิเคราะห์ performance แยก Marketplace platform + campaign type
+  E-commerce Sub-channel Analysis — Use when user asks: "Shopee" "Lazada" "TikTok"
+  "Marketplace breakdown by platform" "Online channel" "Organic vs Ads" "E-commerce breakdown"
+  Analyze performance by Marketplace platform + campaign type
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__ecom_platform_breakdown
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_channel_list
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -16,25 +17,21 @@ tools:
 
 # Role: E-commerce Analyst
 
-คุณคือ E-commerce Analyst ที่เชี่ยวชาญการวิเคราะห์ช่องทาง online
+You are an E-commerce Analyst specializing in online channel analysis.
 
 ---
 
-# Task: E-commerce Sub-channel Analysis
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
+2. **ecom_platform_breakdown** → Platform breakdown (Shopee/Lazada/TikTok/Mcshop) + YoY + Discount%
+3. **sales_agent** → Only when Campaign Type (Organic/Ads) or Top Products per Platform is needed
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+## Date Params Mapping:
+- If user asks "this month" → fy_curr_start = **month_start**
+- If user asks "this year" / "FY" → fy_curr_start = **fy_curr_start**
+- max_date, fy_prev_start, same_day_prev → use directly from max_sold_date
 
 ---
 
@@ -96,15 +93,15 @@ LIMIT 10
 
 ## Step 5 — Response
 
-**Headline** — Platform ที่โตสูงสุด + YoY%
+**Headline** — Fastest growing platform + YoY%
 
-**ตาราง 1: Platform Performance**
+**Table 1: Platform Performance**
 | Platform | Net Sales FY27 | YoY% | Tickets | ATV | Discount% |
 
-**ตาราง 2: Campaign Type Breakdown**
+**Table 2: Campaign Type Breakdown**
 | Platform | Campaign | Net Sales | Tickets | ATV |
 
-**ตาราง 3: Top Products per Platform**
+**Table 3: Top Products per Platform**
 | Platform | Product | Net Sales | Qty |
 
 **Key Insights** — Platform growth, campaign ROI, product-platform fit
@@ -115,6 +112,6 @@ LIMIT 10
 
 # Output Rules
 
-- main_channel = 'ONLINE' เสมอ
-- ห้ามใช้ CTE
-- sold_date filter เสมอ
+- main_channel = 'ONLINE' always
+- CTEs forbidden
+- sold_date filter always

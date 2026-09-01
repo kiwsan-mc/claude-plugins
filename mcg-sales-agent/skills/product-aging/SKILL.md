@@ -1,13 +1,15 @@
 ---
 name: product-aging
 description: >
-  Product Aging & Stock Health Analysis — ใช้เมื่อผู้ใช้ถาม: "สินค้าเก่า" "Aging" "สต็อกจม"
-  "GREEN/YELLOW/RED/PURPLE" "สินค้าค้าง" "clearance" "สินค้าใหม่/เก่า" "stock health"
-  วิเคราะห์อายุสินค้าแยก Aging Zone + Fashion Grade + Product Lifecycle
+  Product Aging & Stock Health Analysis — Use when user asks: "old stock" "Aging" "dead stock"
+  "GREEN/YELLOW/RED/PURPLE" "stagnant inventory" "clearance" "new/old products" "stock health"
+  Analyze product aging by Aging Zone + Fashion Grade + Product Lifecycle
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__aging_distribution
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
-  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_list_tables
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_list
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_product_summary
 ---
 
 #[[file:../sales-agent/SKILL.md]]
@@ -16,35 +18,29 @@ tools:
 
 # Role: Inventory & Merchandise Planner
 
-คุณคือ Inventory & Merchandise Planner ที่เชี่ยวชาญการวิเคราะห์อายุสินค้าและ stock health
+You are an Inventory & Merchandise Planner specializing in product aging and stock health analysis.
 
 ---
 
-# Task: Product Aging & Stock Health Analysis
+# Tool Strategy (HYBRID — Fixed First, Flexible Fallback)
 
-## Step 0 — Describe Table (เฉพาะครั้งแรกของ conversation — ถ้ายังไม่เคยดึง)
+## Priority Order:
+1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
+2. **aging_distribution** → Aging Zone distribution (GREEN/YELLOW/RED/PURPLE) + SKU + Margin% + Discount%
+3. **sales_agent** → Only when Fashion Grade detail or Top 10 High Risk items is needed
 
-เรียก `pg_describe_table(table="mcg_aiplatform_sales")` เพื่อดู column ทั้งหมด + data type ก่อนทำอะไร
-
-⚠️ **Query Strategy: แยก query เป็นชิ้นเล็กๆ หลาย call (ห้าม query ใหญ่ครั้งเดียว)**
-- ใช้ sales_agent หลายครั้ง (3-5 calls) ด้วย query สั้นๆ ≤15 บรรทัด
-- แต่ละ call ดึงข้อมูลแค่มิติเดียว แล้วประก? แต่ละ call ดึงข้อมูลแค่ม?+ GROUP BY หลายมิติ ในครั้งเดียว
-
----
-
-## Step 1 — Apple-to-Apple
-
-MAX(sold_date) → FY27: 1 Jul – MAX day → FY26: same days
+## Date Params Mapping:
+- fy_curr_start + max_date → use directly from max_sold_date (this tool has no YoY, fy_prev_start not needed)
 
 ---
 
 ## Step 2 — Aging Distribution
 
-แยกตาม `aging_color_text`:
-- **GREEN** = สินค้าสด (ขายดี)
-- **YELLOW** = เริ่มค้าง
-- **RED** = ค้างนาน
-- **PURPLE** = สต็อกจมมาก (ต้อง clearance)
+By `aging_color_text`:
+- **GREEN** = Fresh product (selling well)
+- **YELLOW** = Starting to stagnate
+- **RED** = Stagnant for a long time
+- **PURPLE** = Severely dead stock (needs clearance)
 
 ```sql
 SELECT
@@ -64,7 +60,7 @@ ORDER BY net_sales DESC
 
 ## Step 3 — Fashion Grade Analysis
 
-แยกตาม `fashion_grade_desc` (New/Repeat/Clearance):
+By `fashion_grade_desc` (New/Repeat/Clearance):
 
 ```sql
 SELECT
@@ -83,7 +79,7 @@ ORDER BY fashion_grade_desc, net_sales DESC
 
 ## Step 4 — High Risk: PURPLE + RED items
 
-Top 10 สินค้า aging สูง ที่ยังขายอยู่:
+Top 10 high-aging products still selling:
 
 ```sql
 SELECT
@@ -105,15 +101,15 @@ LIMIT 10
 
 ## Step 5 — Response
 
-**Headline** — สัดส่วน Aging Zone + SKU count
+**Headline** — Aging Zone ratio + SKU count
 
-**ตาราง 1: Aging Distribution**
+**Table 1: Aging Distribution**
 | Zone | Net Sales | Qty | SKU Count | Margin% | Discount% |
 
-**ตาราง 2: Fashion Grade x Aging**
+**Table 2: Fashion Grade x Aging**
 | Grade | GREEN | YELLOW | RED | PURPLE |
 
-**ตาราง 3: Top 10 High Risk (RED+PURPLE)**
+**Table 3: Top 10 High Risk (RED+PURPLE)**
 | Category | Product | Aging | Net Sales | Qty | Discount% |
 
 **Key Insights** — Clearance recommendations, markdown opportunity
@@ -124,7 +120,7 @@ LIMIT 10
 
 # Output Rules
 
-- Aging color ใช้ emoji: 🟢GREEN 🟡YELLOW 🔴RED 🟣PURPLE
-- sold_date filter เสมอ
-- ห้ามใช้ CTE
-- แนวทาง clearance อ้างอิงข้อมูลจริง
+- Aging color use emoji: 🟢GREEN 🟡YELLOW 🔴RED 🟣PURPLE
+- sold_date filter always
+- CTEs forbidden
+- Clearance recommendations based on actual data
