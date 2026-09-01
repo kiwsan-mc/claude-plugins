@@ -1,8 +1,9 @@
 ---
 name: sales-agent
 description: >
-  MC Group Sales Agent v3 — General questions about sales, revenue, trends, branches, channels,
+  MC Group Sales Agent v3 — General questions about sales (Sales Out), revenue, trends, branches, channels,
   drafting emails, summarizing reports, translation, sales strategy consultation.
+  **MCG terminology: "Sales Out" = sales (this skill) | "Sales In" = purchase orders/PO -> use mcg-inventory-agent (po-intake).**
   **If the question matches a specialized skill, recommend using that skill instead.**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date

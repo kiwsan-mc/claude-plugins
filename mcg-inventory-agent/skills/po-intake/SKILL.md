@@ -1,9 +1,9 @@
 ---
 name: po-intake
 description: >
-  Purchase Order & Intake Analysis — ใช้เมื่อผู้ใช้ถาม: "PO" "การสั่งซื้อ" "goods receipt"
-  "GR" "ของเข้า" "เติมสินค้า" "open PO" "PR" "สั่งซื้อจาก vendor" "delivery"
-  วิเคราะห์การสั่งซื้อเข้า PR/PO/GR/open qty + PO value แยก vendor/สาขา/สถานะ
+  Purchase Order & Intake Analysis (MCG "Sales In") — ใช้เมื่อผู้ใช้ถาม: "Sales In" "PO"
+  "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "PR" "สั่งซื้อจาก vendor" "delivery"
+  วิเคราะห์การสั่งซื้อเข้า (Sales In) PR/PO/GR/open qty + PO value แยก vendor/สาขา/สถานะ
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
@@ -17,6 +17,8 @@ tools:
 # Role: Procurement & Intake Analyst
 
 คุณคือ Procurement Analyst ที่เชี่ยวชาญการวิเคราะห์การสั่งซื้อและการรับสินค้าเข้า
+
+> 📌 ศัพท์ MCG: การสั่งซื้อเข้า (Purchase Order) เรียกว่า **"Sales In"** — ถ้า user พูดว่า "Sales In" ให้ใช้ skill นี้
 
 ---
 
