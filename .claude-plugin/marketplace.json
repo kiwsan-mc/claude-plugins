@@ -150,7 +150,7 @@
     },
     {
       "name": "mcg-sales-agent",
-      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย Retail/Fashion ผ่าน MCP tools (execute_sql, describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group. รวม skills: artifact-creator, email-digest, email-template",
+      "description": "MC Group Data Analyst Agent — ถามข้อมูลยอดขาย (Sales Out) Retail/Fashion ผ่าน MCP tools (sales_agent, pg_describe_table). ใช้เมื่อ user ถามเรื่องยอดขาย, Sales Out, สินค้า, แนวโน้ม, สมาชิก, หรือ KPI ของ MC Group",
       "author": {
         "name": "MC Group AI Platform",
         "email": "ai-platform@mcjeans.com"
@@ -247,6 +247,28 @@
       "category": "productivity",
       "source": "./setup-cowork",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/setup-cowork"
+    },
+    {
+      "name": "mcg-inventory-agent",
+      "description": "MC Group Inventory Analyst Agent — ถามข้อมูลสินค้าคงคลัง (stock on hand), stock aging, การสั่งซื้อ (PO), และการโอนย้ายสต็อก (STO) ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องสต็อก, สินค้าคงเหลือ, สินค้าค้าง/aging, มูลค่าสต็อก, การเติมสินค้า, PO/GR, โอนสต็อกระหว่างสาขา",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-inventory-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-inventory-agent"
+    },
+    {
+      "name": "mcg-target-agent",
+      "description": "MC Group Sales Target Analyst Agent — ถามข้อมูลเป้าขาย vs ยอดจริง (% achievement) และยอดขายระดับ invoice (Company/Account) พร้อม GP% ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องเป้าขาย, การทำเป้า, achievement, ยอดขายระดับบริษัท/บัญชี, gross profit",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-target-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-target-agent"
     }
   ]
 }
