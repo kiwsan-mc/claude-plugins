@@ -4,6 +4,8 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 
 ถามข้อมูลสินค้าคงคลัง (stock on hand, aging, PO, STO) ด้วยภาษาธรรมชาติ (Thai/English) ผ่าน Synapse MCP tools.
 
+> 📌 **ศัพท์ MCG:** การสั่งซื้อเข้า/PO = **"Sales In"** (skill `po-intake`) · ยอดขาย = **"Sales Out"** → ใช้ `mcg-sales-agent`
+
 ## Version
 
 **v1.0.0** — Synapse inventory domain (T-SQL, canned tools + raw query fallback)
@@ -15,7 +17,7 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 | `inventory-agent` | Inventory Agent | กฎกลาง, tool priority, aging zones, snapshot rules (shared foundation) |
 | `stock-health` | Stock Health Analyst | สต็อกคงเหลือปัจจุบันแยก aging/brand/region + สินค้าเสี่ยง clearance |
 | `stock-trend` | Inventory Planner | สต็อกย้อนหลัง time series + เปรียบเทียบช่วงเวลา |
-| `po-intake` | Procurement Analyst | PR/PO/GR/open qty แยก vendor/สาขา + fulfillment |
+| `po-intake` | Procurement Analyst | **Sales In** (PR/PO/GR/open qty) แยก vendor/สาขา + fulfillment |
 | `sto-transfer` | Distribution Analyst | โอนย้ายสต็อกระหว่างสาขา + open transfer |
 
 ## Architecture
@@ -54,5 +56,5 @@ skills/
 
 - "สต็อกคงเหลือแยก aging" → `stock-health`
 - "แนวโน้มสต็อก 30 วันล่าสุด" → `stock-trend`
-- "PO ค้างส่งจาก vendor ไหนบ้าง" → `po-intake`
+- "Sales In / PO ค้างส่งจาก vendor ไหนบ้าง" → `po-intake`
 - "การโอนสต็อกระหว่างสาขาเดือนนี้" → `sto-transfer`

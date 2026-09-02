@@ -4,6 +4,8 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
 ถามข้อมูลยอดขาย Retail/Fashion ด้วยภาษาธรรมชาติ (Thai/English) ผ่าน MCP tools ที่เชื่อมต่อ PostgreSQL (pgvector).
 
+> 📌 **ศัพท์ MCG:** ยอดขาย = **"Sales Out"** (plugin นี้) · การสั่งซื้อเข้า/PO = **"Sales In"** → ใช้ `mcg-inventory-agent` (po-intake)
+
 ## Version
 
 **v3.0.0** — Migrated from MSSQL to PostgreSQL (pgvector-enabled)
