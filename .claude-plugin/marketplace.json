@@ -269,6 +269,17 @@
       "category": "productivity",
       "source": "./mcg-target-agent",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-target-agent"
+    },
+    {
+      "name": "mcg-product-agent",
+      "description": "MC Group Product Master Analyst Agent — ถามข้อมูล master สินค้า (assortment) เช่น จำนวน SKU/model, แบรนด์, หมวดหมู่, gender, season, สี, ไซส์, aging, sales type, ราคาป้าย/ราคาขาย, margin ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องโครงสร้างสินค้า ไม่ใช่ยอดขาย/สต็อก",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-product-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-product-agent"
     }
   ]
 }
