@@ -7,6 +7,8 @@ description: >
 tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_target_vs_actual_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_yoy_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__max_invoice_date_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__search_columns_sales_synapse
@@ -69,7 +71,9 @@ tools:
 | Tool | ใช้เมื่อ |
 |------|---------|
 | `sales_target_vs_actual_synapse` | เป้า/day, เป้า/category, target & actual qty, actual sales, achievement% — filter year/month ได้ |
-| `sales_company_summary_synapse` | ยอดขาย invoice-level: net sales (excl VAT), qty, gross profit + GP%, moving cost, discount — ต้องมี date range |
+| `sales_company_summary_synapse` | ยอดขาย invoice-level (current): net sales (excl VAT), qty, gross profit + GP%, moving cost — ต้องมี date range |
+| `max_invoice_date_synapse` | **anchor** — MAX invoice date + A2A ranges (เรียกก่อนทำ YoY) |
+| `sales_company_summary_yoy_synapse` | **YoY** — company sales curr vs prev (Apple-to-Apple) net sales + GP + qty |
 | `sales_query_synapse` | Raw T-SQL (SELECT/WITH) เมื่อ canned ไม่พอ |
 | `describe_table_sales_synapse` | ดู schema |
 | `search_columns_sales_synapse` | ค้นหาคอลัมน์ด้วย pattern |
@@ -86,18 +90,68 @@ tools:
 
 # 5. Raw Query Rules (เฉพาะเมื่อใช้ sales_query_synapse)
 
-- T-SQL: ใช้ `TOP N` ไม่ใช่ `LIMIT`
-- CAST measures `AS float` ก่อนหาร
-- `sap_zsdr006` ต้องมี `S_SIN_Tax_Invoice_Date` filter เสมอ
-- SUM ก่อนหาร: `SUM(A)::float / NULLIF(SUM(B), 0)`
+## 5.1 T-SQL Syntax (Synapse — ไม่ใช่ PostgreSQL)
+- ใช้ `TOP N` ไม่ใช่ `LIMIT`
+- **CAST measures `AS float` ก่อนหารเสมอ** — ⚠️ ห้ามใช้ `::float` (นั่นคือ PostgreSQL — Synapse ใช้ `CAST(x AS float)`)
+- SUM ก่อนหาร: `SUM(CAST(A AS float)) / NULLIF(SUM(CAST(B AS float)), 0)`
+- `sap_zsdr006` ต้องมี `S_SIN_Tax_Invoice_Date` filter เสมอ (ตารางใหญ่)
+- `APPROX_COUNT_DISTINCT(...)` สำหรับนับ invoice/สาขา
 - SELECT / WITH เท่านั้น (read-only)
+
+## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
+
+**Company/Account (sap_zsdr006):**
+- Net Sales (ext VAT) = `S_SIN_Net_Sales_Exclude_VAT` — ⚠️ ยอดขายมาตรฐานคือ **excl VAT** เสมอ (ไม่ใช่ inc VAT)
+- Gross Profit = `S_SIN_Gross_Profit` | Moving Cost = `S_SIN_Moving_Cost_Amount` | Qty = `S_SIN_Quantity`
+- GP% = `SUM(CAST(S_SIN_Gross_Profit AS float)) / NULLIF(SUM(CAST(S_SIN_Net_Sales_Exclude_VAT AS float)), 0) * 100`
+
+**Target (script_sales_target):**
+- Actual Sales = `L_STK_Total_Sales` | Target = `L_STK_Target_By_Category` | Actual/Target Qty = `L_STK_Quantity` / `L_STK_Target_Quantity`
+- Achievement% = `SUM(CAST(L_STK_Total_Sales AS float)) / NULLIF(SUM(CAST(L_STK_Target_By_Category AS float)), 0) * 100`
+
+## 5.3 Apple-to-Apple / YoY
+
+⚠️ **`sales_company_summary_synapse` ให้ค่า current อย่างเดียว** — ถ้า user ขอเทียบปีก่อน (YoY):
+
+**วิธีที่ 1 (แนะนำ) — ใช้ canned YoY tool:**
+1. เรียก `max_invoice_date_synapse` → ได้ max_date, same_day_prev, fy_curr_start, fy_prev_start
+2. เรียก `sales_company_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)` → ได้ ns_curr/ns_prev, gp_curr/gp_prev, qty_curr/qty_prev
+3. คำนวณ YoY% = (curr − prev) / NULLIF(prev, 0) × 100 เอง
+
+**วิธีที่ 2 (fallback) — raw query** ถ้าต้องการ measure/dimension นอกเหนือ canned: ใช้ `sales_query_synapse` ด้วย **conditional SUM ในครั้งเดียว (ห้ามใช้ CTE 2 ชุด JOIN กัน)** อิงจำนวนวันเท่ากันตาม MAX(invoice date):
+
+**Step 1 — หา anchor date ก่อน:**
+```sql
+SELECT MAX(S_SIN_Tax_Invoice_Date) AS max_date FROM silver.sap_zsdr006
+```
+จาก max_date คำนวณ: fy_curr_start, fy_prev_start, same_day_prev (max_date - 1 ปี)
+
+**Step 2 — conditional SUM curr vs prev (จำนวนวันเท่ากัน):**
+```sql
+SELECT
+  S_SIN_Main_Channel_Text AS dimension_value,
+  SUM(CASE WHEN S_SIN_Tax_Invoice_Date BETWEEN '<curr_start>' AND '<max_date>'
+      THEN CAST(S_SIN_Net_Sales_Exclude_VAT AS float) ELSE 0 END) AS ns_curr,
+  SUM(CASE WHEN S_SIN_Tax_Invoice_Date BETWEEN '<prev_start>' AND '<same_day_prev>'
+      THEN CAST(S_SIN_Net_Sales_Exclude_VAT AS float) ELSE 0 END) AS ns_prev
+FROM silver.sap_zsdr006
+WHERE S_SIN_Tax_Invoice_Date BETWEEN '<prev_start>' AND '<max_date>'
+GROUP BY S_SIN_Main_Channel_Text
+ORDER BY ns_curr DESC
+```
+YoY% = `(ns_curr - ns_prev) / NULLIF(ns_prev, 0) * 100`
+
+> Target: ถ้า user ขอเทียบเป้าปีก่อน ใช้ conditional SUM บน `L_STK_Target_Year` (curr vs curr-1) แทน
 
 ---
 
-# 6. Fiscal Year
-FY = Jul 1 – Jun 30. ปัจจุบัน FY2027 (1 Jul 2026 – 30 Jun 2027)
-- เป้าอ้างอิงตาม target year/month ในข้อมูลเป้า
-- ยอดจริง invoice อ้างอิงตาม invoice date
+# 6. Fiscal Year & Apple-to-Apple
+FY = Jul 1 – Jun 30. FY สิ้นสุด = ปี ค.ศ. (FY2027 = 1 Jul 2026 – 30 Jun 2027)
+
+⚠️ **ห้าม hardcode ปี** — query MAX(invoice date) ก่อนเสมอ
+- fy_curr_start = (fy-1)-07-01 | fy_prev_start = (fy-2)-07-01 | same_day_prev = max_date − 1 ปี
+- **เทียบ YoY ต้องจำนวนวันเท่ากันเสมอ** (Apple-to-Apple) อิง MAX(invoice date) ไม่ใช่วันปัจจุบัน
+- เป้าอ้างอิง target year/month | ยอดจริง invoice อ้างอิง invoice date
 
 ---
 

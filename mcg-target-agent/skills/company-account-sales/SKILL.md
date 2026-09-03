@@ -7,6 +7,8 @@ description: >
   วิเคราะห์ยอดขาย invoice-level + GP% + discount แยก account/channel/region/brand
 tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_yoy_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__max_invoice_date_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
 ---
@@ -34,6 +36,8 @@ tools:
 เรียก `sales_company_summary_synapse(start_date=..., end_date=..., group_by=<dimension>)`
 
 ผลลัพธ์ให้: net sales (excl VAT), qty, gross profit + GP%, moving cost, discount
+
+> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** อย่าใช้ tool นี้ (current อย่างเดียว) — ให้ (1) เรียก `max_invoice_date_synapse` ก่อน แล้ว (2) เรียก `sales_company_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)` ได้ curr vs prev (Apple-to-Apple) แล้วคำนวณ YoY% = (curr − prev) / prev × 100 เอง — ตาม §5.3 ของ foundation
 
 ## Step 3 — Response
 

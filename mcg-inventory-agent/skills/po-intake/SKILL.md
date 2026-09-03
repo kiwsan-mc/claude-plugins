@@ -6,6 +6,8 @@ description: >
   วิเคราะห์การสั่งซื้อเข้า (Sales In) PR/PO/GR/open qty + PO value แยก vendor/สาขา/สถานะ
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_yoy_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__max_po_date_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
@@ -40,6 +42,8 @@ tools:
 เรียก `po_summary_synapse(start_date=..., end_date=..., group_by=<dimension>)`
 
 ผลลัพธ์ให้: PR/PO/GR/open quantities + PO value
+
+> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** (1) เรียก `max_po_date_synapse` → ได้ fy_curr_start, max_date, fy_prev_start, same_day_prev แล้ว (2) เรียก `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)` → ได้ po_qty/po_value curr vs prev (Apple-to-Apple) แล้วคำนวณ YoY% เอง
 
 ## Step 4 — Response
 

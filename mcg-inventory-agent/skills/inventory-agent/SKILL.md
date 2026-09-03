@@ -10,6 +10,10 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_daily_trend_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__max_stock_date_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__max_po_date_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_yoy_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__search_columns_inventory_synapse
@@ -89,6 +93,10 @@ Flow การเลือก tool:
 | `stock_daily_trend_synapse` | สต็อกย้อนหลังตามช่วงเวลา (time series หรือ snapshot-at-range) — ต้องระบุ start/end date |
 | `po_summary_synapse` | Purchase Order — PR/PO/GR/open qty + PO value — ต้องระบุ start/end date |
 | `sto_summary_synapse` | Stock Transfer Order — โอนย้ายระหว่างสาขา — ต้องระบุ start/end date |
+| `max_stock_date_synapse` | **anchor** — MAX snapshot date + A2A ranges (เรียกก่อนทำ stock YoY) |
+| `max_po_date_synapse` | **anchor** — MAX PO date + A2A ranges (เรียกก่อนทำ PO YoY) |
+| `stock_on_hand_yoy_synapse` | **YoY** — stock on hand curr vs snapshot วันเดียวกันปีก่อน (qty + cost) |
+| `po_summary_yoy_synapse` | **YoY** — PO (Sales In) curr vs prev (Apple-to-Apple) qty + value |
 | `inventory_query_synapse` | Raw T-SQL เมื่อ canned tool ไม่ครอบคลุม (SELECT/WITH เท่านั้น) |
 | `describe_table_inventory_synapse` | ดู schema เมื่อไม่แน่ใจชื่อคอลัมน์ |
 | `search_columns_inventory_synapse` | ค้นหาคอลัมน์ด้วย pattern |
@@ -107,22 +115,61 @@ Flow การเลือก tool:
 
 # 5. Raw Query Rules (เฉพาะเมื่อใช้ inventory_query_synapse)
 
-## 5.1 T-SQL Syntax (Synapse)
+## 5.1 T-SQL Syntax (Synapse — ไม่ใช่ PostgreSQL)
 - ใช้ `TOP N` ไม่ใช่ `LIMIT`
-- CAST measures `AS float` ก่อนหาร
-- ใช้ `APPROX_COUNT_DISTINCT` สำหรับนับ SKU/สาขา (เร็วกว่า COUNT DISTINCT บนตารางใหญ่)
+- **CAST measures `AS float` ก่อนหารเสมอ** — ⚠️ ห้ามใช้ `::float` (PostgreSQL) — Synapse ใช้ `CAST(x AS float)`
+- SUM ก่อนหาร: `SUM(CAST(A AS float)) / NULLIF(SUM(CAST(B AS float)), 0)`
+- `APPROX_COUNT_DISTINCT(...)` สำหรับนับ SKU/สาขา (เร็วกว่า COUNT DISTINCT บนตารางใหญ่)
 
-## 5.2 Snapshot Pinning (CRITICAL)
+## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
+
+**Stock (script_stock_daily / snapshot):**
+- Qty = `L_STD_Stock_Quantity` | Available = `L_STD_Stock_Available_Quantity` | On-order = `L_STD_Stock_OnOrder_Quantity`
+- Cost Value (ต้นทุน) = `L_STD_Stock_Total_Amount_Standard` | Selling Value (ราคาป้าย) = `L_STD_Stock_Total_Selling_Price`
+- ⚠️ แยก cost vs selling ให้ชัด — อย่าสลับ
+
+**PO (sap_po):** PO Qty = `S_PO_PO_Quantity`, GR/PR/open qty ตาม column ที่ describe | date = `S_PO_PO_Date`
+**STO (sap_sto):** date = `S_STO_PO_Date`
+
+## 5.3 Snapshot Pinning (CRITICAL)
 ⚠️ current stock ต้อง pin ที่ snapshot ล่าสุดเสมอ — ห้าม SUM ข้าม snapshot date:
 ```sql
 WHERE L_STD_Stock_Date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_daily_snapshot)
 ```
 
-## 5.3 Historical stock ต้องมี date range
+## 5.4 Historical stock ต้องมี date range
 `gold.script_stock_daily` ห้าม query โดยไม่มี `L_STD_Stock_Date` filter — ตารางใหญ่มาก
 
-## 5.4 Forbidden
+## 5.5 Apple-to-Apple / YoY
+
+⚠️ `stock_on_hand_synapse` / `po_summary_synapse` ให้ค่า current อย่างเดียว — ถ้า user ขอเทียบปีก่อน:
+
+**วิธีที่ 1 (แนะนำ) — ใช้ canned YoY tool:**
+- Stock: เรียก `stock_on_hand_yoy_synapse(group_by)` → ได้ qty_curr/qty_prev + cost_curr/cost_prev (auto pin snapshot vs −1 ปี)
+- PO/Sales In: เรียก `max_po_date_synapse` ก่อน → แล้ว `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)`
+- คำนวณ YoY% = (curr − prev) / NULLIF(prev, 0) × 100 เอง
+
+**วิธีที่ 2 (fallback) — raw query** ถ้าต้องการ measure/dimension นอกเหนือ canned: ใช้ `inventory_query_synapse` ด้วย **conditional SUM ในครั้งเดียว** อิงจำนวนวันเท่ากันตาม MAX(date):
+
+**Stock YoY** — pin snapshot ปัจจุบัน เทียบ snapshot วันเดียวกันปีก่อน:
+```sql
+DECLARE @snap date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_daily_snapshot);
+DECLARE @snap_prev date = DATEADD(year, -1, @snap);
+SELECT f.L_STD_Aging_Color_Text AS dimension_value,
+  SUM(CASE WHEN f.L_STD_Stock_Date = @snap THEN CAST(f.L_STD_Stock_Quantity AS float) ELSE 0 END) AS qty_curr,
+  SUM(CASE WHEN f.L_STD_Stock_Date = @snap_prev THEN CAST(f.L_STD_Stock_Quantity AS float) ELSE 0 END) AS qty_prev
+FROM gold.script_stock_daily f
+WHERE f.L_STD_Stock_Date IN (@snap, @snap_prev)
+GROUP BY f.L_STD_Aging_Color_Text
+```
+
+**PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `S_PO_PO_Date`
+
+YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
+
+## 5.6 Forbidden
 - ห้าม SELECT โดยไม่มี date/snapshot filter บนตาราง fact
+- ห้ามใช้ CTE 2 ชุด JOIN กัน (ช้า) — ใช้ conditional SUM แทน
 - SELECT / WITH เท่านั้น (read-only)
 
 ---

@@ -7,6 +7,7 @@ description: >
   วิเคราะห์สต็อกคงเหลือปัจจุบันแยก aging zone + มูลค่า cost/selling + สินค้าเสี่ยง
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
@@ -34,6 +35,8 @@ tools:
 เรียก `stock_on_hand_synapse(group_by=<dimension>)`
 
 ผลลัพธ์ให้: stock_qty, available_qty, onorder_qty, cost_value, selling_value, sku_count, branch_count
+
+> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** ใช้ `stock_on_hand_yoy_synapse(group_by=<dimension>)` แทน → ได้ qty_curr/qty_prev + cost_curr/cost_prev (snapshot ปัจจุบัน vs วันเดียวกันปีก่อน) แล้วคำนวณ YoY% = (curr − prev) / prev × 100
 
 ## Step 3 — (ถ้าต้องการเจาะสินค้าเสี่ยง) High Risk RED+PURPLE
 

@@ -95,10 +95,22 @@ tools:
 
 # 5. Raw Query Rules (เฉพาะเมื่อใช้ product_query_synapse)
 
-- T-SQL: ใช้ `TOP N` ไม่ใช่ `LIMIT`
+## 5.1 T-SQL Syntax (Synapse — ไม่ใช่ PostgreSQL)
+- ใช้ `TOP N` ไม่ใช่ `LIMIT`
 - นับ SKU/model → `APPROX_COUNT_DISTINCT(...)` (เร็วกว่าบนตารางใหญ่)
-- CAST measures `AS float` ก่อนหาร
+- **CAST measures `AS float` ก่อนหารเสมอ** — ⚠️ ห้ามใช้ `::float` (PostgreSQL)
+- SUM/AVG ก่อนหาร: `... / NULLIF(CAST(B AS float), 0)`
 - SELECT / WITH เท่านั้น (read-only)
+
+## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
+- Tag Price (ราคาป้าย) = `S_ATC_Tag_Price` | Selling Price (ราคาขาย) = `S_ATC_Selling_Price` | Moving Cost = `S_ATC_Moving_Cost`
+- Margin% = `(AVG(CAST(S_ATC_Selling_Price AS float)) - AVG(CAST(S_ATC_Moving_Cost AS float))) / NULLIF(AVG(CAST(S_ATC_Selling_Price AS float)), 0) * 100`
+- ⚠️ tag vs selling อย่าสลับ | margin NULL = ไม่มีข้อมูลราคา อย่ารายงานเป็น 0
+
+## 5.3 ไม่มี Apple-to-Apple / YoY ในโดเมนนี้ (CRITICAL)
+⚠️ `sap_article` เป็น **master snapshot ปัจจุบัน ไม่มีมิติเวลา** — เทียบ YoY (SKU/ราคาเปลี่ยนไปเทียบปีก่อน) **ทำไม่ได้ในโดเมนนี้**
+- ถ้า user ขอเทียบ SKU/assortment ปีต่อปี → แจ้งว่าข้อมูล master ไม่มีมิติเวลา และเสนอทางเลือก: ยอดขาย/สต็อกที่มี time-series ต้องใช้ **mcg-sales-agent** หรือ **mcg-inventory-agent** (join fact table)
+- ห้ามประดิษฐ์ตัวเลข "ปีก่อน" จาก master
 
 ---
 

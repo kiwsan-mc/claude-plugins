@@ -34,6 +34,8 @@ tools:
 
 ผลลัพธ์ให้: stock ตามวัน/ช่วง แยก dimension ที่เลือก (เช่น aging, brand)
 
+> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** tool นี้ให้ trend ช่วงเดียว — ต้องทำ Apple-to-Apple ผ่าน `inventory_query_synapse` ด้วย conditional SUM (snapshot วันเดียวกันปีก่อน) ตาม §5.5 ของ foundation
+
 ## Step 3 — Response
 
 **Headline** — ทิศทางสต็อก (เพิ่ม/ลด) ช่วงที่เลือก + %change
