@@ -10,6 +10,7 @@ tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_attribute_values_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_list_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse
+  - mcp__plugin_mcg-product-agent_synapse-product__product_schema_cheatsheet_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__describe_table_product_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__search_columns_product_synapse
 ---
@@ -82,6 +83,7 @@ tools:
 | `product_attribute_values_synapse` | list ค่า distinct ของ 1 attribute (มี SKU count) — ใช้ก่อน filter |
 | `product_list_synapse` | list SKU รายตัว + attributes — filter 1 dimension ได้ |
 | `product_query_synapse` | Raw T-SQL (SELECT/WITH) เมื่อ canned ไม่พอ |
+| `product_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงของ sap_article ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_product_synapse` | ดู schema |
 | `search_columns_product_synapse` | ค้นหาคอลัมน์ด้วย pattern |
 
@@ -94,6 +96,13 @@ tools:
 ---
 
 # 5. Raw Query Rules (เฉพาะเมื่อใช้ product_query_synapse)
+
+## 5.0 Schema First (MANDATORY)
+
+⚠️ **ก่อน `product_query_synapse` ครั้งแรกของ conversation** → เรียก `product_schema_cheatsheet_synapse` ครั้งเดียว (ได้ชื่อคอลัมน์จริงครบของ sap_article)
+- **ห้ามเดาชื่อคอลัมน์เด็ดขาด** — ทุกคอลัมน์ใน SQL ต้องมาจาก (ก) output ของ cheat sheet (ข) รายการใน §5.2 (ค) output ของ `describe_table_product_synapse` / `search_columns_product_synapse`
+- ถ้าไม่พบในสามที่นี้ = ค้นหาด้วย `search_columns_product_synapse` ก่อนเสมอ — ไม่ใช่เดา
+- ถ้าเรียก cheat sheet ไปแล้วใน conversation เดียวกัน ให้ใช้ผลเดิม ไม่ต้องเรียกซ้ำ
 
 ## 5.1 T-SQL Syntax (Synapse — ไม่ใช่ PostgreSQL)
 - ใช้ `TOP N` ไม่ใช่ `LIMIT`

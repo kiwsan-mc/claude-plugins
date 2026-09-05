@@ -9,6 +9,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__max_po_date_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
 
@@ -26,10 +27,15 @@ tools:
 
 # Task: PO / Intake Analysis
 
+## Step 0 — เรียก `max_po_date_synapse` ครั้งแรกของ conversation (anchor)
+
+⚠️ "ล่าสุด" หมายถึง **วันข้อมูล PO ล่าสุด** ไม่ใช่วันนี้ — ห้ามใช้วันที่ปัจจุบันของระบบ (ข้อมูล lag ได้)
+- end_date = `max_date` จาก anchor | YoY → ใช้ `fy_curr_start` / `fy_prev_start` / `same_day_prev` ตาม Step 3
+
 ## Step 1 — กำหนดช่วงเวลา (บังคับ)
 
-`po_summary_synapse` กรองด้วย PO date (S_PO_PO_Date) — ต้องมี start/end date
-- ถ้า user ไม่ระบุ → default 30 วันล่าสุด (แจ้ง user ว่าใช้ช่วงนี้) หรือถามกลับถ้าคลุมเครือ
+`po_summary_synapse` กรองด้วย PO date (S_PO_PO_Date) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
+- ถ้า user ไม่ระบุ → default: `max_date` ย้อนหลัง 30 วัน (จาก anchor — แจ้ง user ว่าใช้ช่วงนี้) หรือถามกลับถ้าคลุมเครือ
 
 ## Step 2 — เลือก dimension
 

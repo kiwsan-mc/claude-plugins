@@ -15,6 +15,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__search_columns_inventory_synapse
 ---
@@ -98,6 +99,7 @@ Flow การเลือก tool:
 | `stock_on_hand_yoy_synapse` | **YoY** — stock on hand curr vs snapshot วันเดียวกันปีก่อน (qty + cost) |
 | `po_summary_yoy_synapse` | **YoY** — PO (Sales In) curr vs prev (Apple-to-Apple) qty + value |
 | `inventory_query_synapse` | Raw T-SQL เมื่อ canned tool ไม่ครอบคลุม (SELECT/WITH เท่านั้น) |
+| `inventory_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงทุกตาราง ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_inventory_synapse` | ดู schema เมื่อไม่แน่ใจชื่อคอลัมน์ |
 | `search_columns_inventory_synapse` | ค้นหาคอลัมน์ด้วย pattern |
 
@@ -114,6 +116,13 @@ Flow การเลือก tool:
 ---
 
 # 5. Raw Query Rules (เฉพาะเมื่อใช้ inventory_query_synapse)
+
+## 5.0 Schema First (MANDATORY)
+
+⚠️ **ก่อน `inventory_query_synapse` ครั้งแรกของ conversation** → เรียก `inventory_schema_cheatsheet_synapse` ครั้งเดียว (ได้ชื่อคอลัมน์จริงครบทุกตารางที่ query ได้)
+- **ห้ามเดาชื่อคอลัมน์เด็ดขาด** — ทุกคอลัมน์ใน SQL ต้องมาจาก (ก) output ของ cheat sheet (ข) รายการใน §5.2 (ค) output ของ `describe_table_inventory_synapse` / `search_columns_inventory_synapse`
+- ถ้าไม่พบในสามที่นี้ = ค้นหาด้วย `search_columns_inventory_synapse` ก่อนเสมอ — ไม่ใช่เดา
+- ถ้าเรียก cheat sheet ไปแล้วใน conversation เดียวกัน ให้ใช้ผลเดิม ไม่ต้องเรียกซ้ำ
 
 ## 5.1 T-SQL Syntax (Synapse — ไม่ใช่ PostgreSQL)
 - ใช้ `TOP N` ไม่ใช่ `LIMIT`

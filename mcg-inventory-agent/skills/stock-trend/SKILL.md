@@ -6,7 +6,9 @@ description: >
   วิเคราะห์สต็อกตามช่วงเวลา + เปรียบเทียบ snapshot ต่างวัน
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_daily_trend_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__max_stock_date_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
 
@@ -22,11 +24,16 @@ tools:
 
 # Task: Stock Trend Analysis
 
+## Step 0 — เรียก `max_stock_date_synapse` ครั้งแรกของ conversation (anchor)
+
+⚠️ "ล่าสุด" หมายถึง **วันสต็อก snapshot ล่าสุด** ไม่ใช่วันนี้ — ห้ามใช้วันที่ปัจจุบันของระบบ (ข้อมูล lag ได้)
+- end_date = `max_date` จาก anchor | YoY → ใช้ `snap_prev` (วันเดียวกันปีก่อน) / `fy_curr_start` / `fy_prev_start`
+
 ## Step 1 — กำหนดช่วงเวลา (บังคับ)
 
-⚠️ ตาราง historical ใหญ่มาก — ต้องมี start/end date เสมอ
+⚠️ ตาราง historical ใหญ่มาก — ต้องมี start/end date เสมอ (รูปแบบ `YYYY-MM-DD`)
 - ถ้า user ไม่ระบุช่วง → **ถามกลับ** (เช่น "ต้องการดูย้อนหลังกี่วัน/เดือนครับ?")
-- default ที่แนะนำ: 30 วันล่าสุด หรือรายเดือนย้อน 3 เดือน
+- default ที่แนะนำ: `max_date` ย้อนหลัง 30 วัน หรือรายเดือนย้อน 3 เดือน (อิง anchor)
 
 ## Step 2 — ดึง trend
 

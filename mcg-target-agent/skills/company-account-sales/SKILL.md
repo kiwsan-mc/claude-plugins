@@ -10,6 +10,7 @@ tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_yoy_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__max_invoice_date_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__company_sales_schema_cheatsheet_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
 ---
 

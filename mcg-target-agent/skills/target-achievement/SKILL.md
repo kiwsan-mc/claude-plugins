@@ -7,6 +7,7 @@ description: >
 tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_target_vs_actual_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__company_sales_schema_cheatsheet_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
 ---
 

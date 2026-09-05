@@ -9,6 +9,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
 
@@ -43,15 +44,15 @@ tools:
 ถ้า canned tool ไม่ให้ระดับที่ต้องการ → ใช้ `inventory_query_synapse` (T-SQL, pin snapshot):
 ```sql
 SELECT TOP 10
-  a.aging_color,
+  a.S_ATC_Aging_Color_Text AS aging_color,
   a.S_ATC_Level3_Item_Category_Text AS category,
   SUM(CAST(s.L_STD_Stock_Quantity AS float)) AS stock_qty,
-  SUM(CAST(s.L_STD_Stock_Cost_Value AS float)) AS cost_value
+  SUM(CAST(s.L_STD_Stock_Total_Amount_Standard AS float)) AS cost_value
 FROM gold.script_stock_daily_snapshot s
 JOIN silver.sap_article a ON s.L_STD_Article = a.S_ATC_Article
 WHERE s.L_STD_Stock_Date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_daily_snapshot)
-  AND a.aging_color IN ('RED','PURPLE')
-GROUP BY a.aging_color, a.S_ATC_Level3_Item_Category_Text
+  AND a.S_ATC_Aging_Color_Text IN ('RED','PURPLE')
+GROUP BY a.S_ATC_Aging_Color_Text, a.S_ATC_Level3_Item_Category_Text
 ORDER BY cost_value DESC
 ```
 > ⚠️ ตรวจชื่อคอลัมน์จริงด้วย `describe_table_inventory_synapse` ก่อนถ้าไม่แน่ใจ

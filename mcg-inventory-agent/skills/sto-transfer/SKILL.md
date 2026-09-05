@@ -7,6 +7,7 @@ description: >
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
 ---
 
@@ -22,10 +23,20 @@ tools:
 
 # Task: Stock Transfer (STO) Analysis
 
+## Step 0 — หา anchor date ครั้งแรกของ conversation
+
+⚠️ "ล่าสุด" หมายถึง **วัน transfer ล่าสุดในข้อมูล** ไม่ใช่วันนี้ — ห้ามใช้วันที่ปัจจุบันของระบบ (ข้อมูล lag ได้)
+
+ไม่มี anchor tool สำหรับ STO — ใช้ `inventory_query_synapse`:
+```sql
+SELECT CAST(MAX(S_STO_PO_Date) AS date) AS max_date FROM silver.sap_sto
+```
+- end_date = `max_date` จาก anchor
+
 ## Step 1 — กำหนดช่วงเวลา (บังคับ)
 
-`sto_summary_synapse` กรองด้วย transfer date (S_STO_PO_Date) — ต้องมี start/end date
-- ถ้า user ไม่ระบุ → default 30 วันล่าสุด (แจ้ง user) หรือถามกลับ
+`sto_summary_synapse` กรองด้วย transfer date (S_STO_PO_Date) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
+- ถ้า user ไม่ระบุ → default: `max_date` ย้อนหลัง 30 วัน (จาก anchor — แจ้ง user) หรือถามกลับ
 
 ## Step 2 — เลือก dimension
 

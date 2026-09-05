@@ -7,6 +7,7 @@ description: >
 tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_dimension_summary_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse
+  - mcp__plugin_mcg-product-agent_synapse-product__product_schema_cheatsheet_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__describe_table_product_synapse
 ---
 
