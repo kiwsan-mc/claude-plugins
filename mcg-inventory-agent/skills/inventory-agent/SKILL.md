@@ -18,6 +18,10 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__search_columns_inventory_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_in_transit_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_value_by_aging_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_overdue_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_yoy_synapse
 ---
 
 # MC Group Inventory Agent v1
@@ -70,6 +74,10 @@ Flow การเลือก tool:
    - สต็อกย้อนหลัง → `stock_daily_trend_synapse`
    - การสั่งซื้อ → `po_summary_synapse`
    - การโอนย้าย → `sto_summary_synapse`
+   - สต็อกระหว่างทาง/blocked → `stock_in_transit_synapse`
+   - มูลค่าสต็อกแยก aging → `stock_value_by_aging_synapse`
+   - PO เกินกำหนดส่ง → `po_overdue_synapse`
+   - STO เทียบปีก่อน → `sto_summary_yoy_synapse`
 2. **canned tool ไม่ครอบคลุม?** → ใช้ `inventory_query_synapse` (raw T-SQL)
 3. **ไม่แน่ใจชื่อคอลัมน์?** → ใช้ `describe_table_inventory_synapse` หรือ `search_columns_inventory_synapse` ก่อน
 
@@ -102,6 +110,10 @@ Flow การเลือก tool:
 | `inventory_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงทุกตาราง ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_inventory_synapse` | ดู schema เมื่อไม่แน่ใจชื่อคอลัมน์ |
 | `search_columns_inventory_synapse` | ค้นหาคอลัมน์ด้วย pattern |
+| `stock_in_transit_synapse` | สต็อกระหว่างทาง (in-transit) + blocked — auto-pin latest snapshot แยก dimension |
+| `stock_value_by_aging_synapse` | มูลค่าสต็อกแยก aging zone (qty + cost value + selling value) |
+| `po_overdue_synapse` | Open PO เกินกำหนดส่ง (overdue) — open qty + waiting-GR + PO value แยก vendor/branch/category |
+| `sto_summary_yoy_synapse` | **YoY** — STO curr vs prev (Apple-to-Apple) transfer qty + value |
 
 ---
 

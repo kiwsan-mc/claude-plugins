@@ -13,6 +13,9 @@ tools:
   - mcp__plugin_mcg-target-agent_synapse-target__company_sales_schema_cheatsheet_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__search_columns_sales_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__promotion_sales_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__rebate_analysis_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__target_sales_mix_synapse
 ---
 
 # MC Group Sales Target Agent v1
@@ -68,8 +71,9 @@ tools:
 
 1. **เป้า vs ยอดจริง + achievement%** → `sales_target_vs_actual_synapse`
 2. **ยอดขายระดับ invoice (company/account, GP%)** → `sales_company_summary_synapse`
-3. **canned ไม่ครอบคลุม** → `sales_query_synapse` (raw T-SQL)
-4. **ไม่แน่ใจชื่อคอลัมน์** → `describe_table_sales_synapse` / `search_columns_sales_synapse`
+3. **โปรโมชัน** → `promotion_sales_synapse` | **rebate** → `rebate_analysis_synapse` | **sales mix แยก category** → `target_sales_mix_synapse`
+4. **canned ไม่ครอบคลุม** → `sales_query_synapse` (raw T-SQL)
+5. **ไม่แน่ใจชื่อคอลัมน์** → `describe_table_sales_synapse` / `search_columns_sales_synapse`
 
 ---
 
@@ -95,6 +99,9 @@ tools:
 | `company_sales_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงทุกตาราง ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_sales_synapse` | ดู schema |
 | `search_columns_sales_synapse` | ค้นหาคอลัมน์ด้วย pattern |
+| `promotion_sales_synapse` | โปรโมชัน — net sales/qty/gross profit/invoice count แยก promotion (ต้องมี date range) |
+| `rebate_analysis_synapse` | Rebate — net sales, rebate, net after rebate, rebate% แยก dimension (ต้องมี date range) |
+| `target_sales_mix_synapse` | Sales mix แยก category — sales mix%, ASP LY, qty LY, total sales LY (filter year/month ได้) |
 
 ---
 
