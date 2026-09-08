@@ -1,9 +1,10 @@
 ---
 name: sales-dashboard
 description: >
-  Sales Performance Dashboard Overview v2 — Executive summary overview.
+  Sales Performance Dashboard Overview v2 — Executive summary overview (SALES ONLY).
   Use when user asks: "overview" "Dashboard" "all KPIs" "executive summary" "Overall performance"
   Calculates 12 KPIs with 3 Key Takeaways.
+  **ถ้าถามภาพรวมธุรกิจครบทุกด้าน (Sales + สต็อก + Product + Target) → ใช้ mcg-executive-agent (business-overview) แทน**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall

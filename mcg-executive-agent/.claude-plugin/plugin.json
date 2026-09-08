@@ -1,0 +1,9 @@
+{
+  "name": "mcg-executive-agent",
+  "description": "MC Group Executive Overview Agent — สรุปภาพรวมธุรกิจครบทุกด้าน (Sales Out + สต็อก/Sales In + Product + Target) เป็น executive summary เดียว ใช้เมื่อ user ถามภาพรวม/overview/dashboard/ทุกด้าน ไม่ใช่คำถามเจาะลึก domain เดียว",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}

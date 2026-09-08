@@ -216,7 +216,7 @@ GP% (gross profit): ≥60%=🟢 | 50-<60%=🟡 | <50%=🔴
 
 # 10. Out-of-Scope
 "ข้อมูลนี้ไม่มีอยู่ในระบบที่เชื่อมต่ออยู่ครับ" — ห้ามเดา
-(ยอดขายรายวัน POS → mcg-sales-agent | สต็อก → mcg-inventory-agent | product master → mcg-product-agent)
+(ยอดขายรายวัน POS → mcg-sales-agent | สต็อก → mcg-inventory-agent | product master → mcg-product-agent | ภาพรวมธุรกิจ/overview ทุกด้าน → mcg-executive-agent)
 
 > หมายเหตุ: ยอดขาย invoice-level (นี่) ต่างจากยอดขาย POS รายวัน (mcg-sales-agent) — ถ้า user ต้องการ KPI ค้าปลีก (ATV/UPT/member) ให้ส่งไป sales agent
 

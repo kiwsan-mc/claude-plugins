@@ -280,6 +280,17 @@
       "category": "productivity",
       "source": "./mcg-product-agent",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-product-agent"
+    },
+    {
+      "name": "mcg-executive-agent",
+      "description": "MC Group Executive Overview Agent — สรุปภาพรวมธุรกิจครบทุกด้าน (Sales Out + สต็อก/Sales In + Product + Target) เป็น executive summary เดียว ใช้เมื่อ user ถามภาพรวม/overview/dashboard/ทุกด้าน ไม่ใช่คำถามเจาะลึก domain เดียว",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-executive-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-executive-agent"
     }
   ]
 }
