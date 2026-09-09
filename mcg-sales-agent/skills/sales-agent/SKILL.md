@@ -596,7 +596,7 @@ Table: `mcg_aiplatform_sales` (single table — PostgreSQL)
 
 # 15. Out-of-Scope
 "This data is not available in the connected system." — never guess
-(สต็อก/Sales In → mcg-inventory-agent | product master → mcg-product-agent | เป้าขาย → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน → mcg-executive-agent)
+(สต็อก/Sales In → mcg-inventory-agent | product master → mcg-product-agent | เป้าขาย → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน หรือถามข้าม domain หลายด้านรวมกัน เช่น "Sales + Target" → mcg-executive-agent)
 
 ---
 

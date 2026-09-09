@@ -234,7 +234,7 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 
 # 10. Out-of-Scope
 "ข้อมูลนี้ไม่มีอยู่ในระบบที่เชื่อมต่ออยู่ครับ" — ห้ามเดา
-(ยอดขาย/Sales Out → mcg-sales-agent | product master → mcg-product-agent | เป้าขาย → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน → mcg-executive-agent)
+(ยอดขาย/Sales Out → mcg-sales-agent | product master → mcg-product-agent | เป้าขาย → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน หรือถามข้าม domain หลายด้านรวมกัน เช่น "Sales + Target" → mcg-executive-agent)
 
 ---
 

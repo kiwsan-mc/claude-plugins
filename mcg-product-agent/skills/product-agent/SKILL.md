@@ -161,7 +161,7 @@ tools:
 
 # 9. Out-of-Scope
 "ข้อมูลนี้ไม่มีอยู่ในระบบที่เชื่อมต่ออยู่ครับ" — ห้ามเดา
-(ยอดขาย → mcg-sales-agent | สต็อก → mcg-inventory-agent | เป้า → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน → mcg-executive-agent)
+(ยอดขาย → mcg-sales-agent | สต็อก → mcg-inventory-agent | เป้า → mcg-target-agent | ภาพรวมธุรกิจ/overview ทุกด้าน หรือถามข้าม domain หลายด้านรวมกัน เช่น "Sales + Target" → mcg-executive-agent)
 
 ---
 

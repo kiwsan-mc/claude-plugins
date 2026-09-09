@@ -283,7 +283,7 @@
     },
     {
       "name": "mcg-executive-agent",
-      "description": "MC Group Executive Overview Agent — สรุปภาพรวมธุรกิจครบทุกด้าน (Sales Out + สต็อก/Sales In + Product + Target) เป็น executive summary เดียว ใช้เมื่อ user ถามภาพรวม/overview/dashboard/ทุกด้าน ไม่ใช่คำถามเจาะลึก domain เดียว",
+      "description": "MC Group Executive Overview Agent — สรุปภาพรวมธุรกิจเป็น executive summary เดียว ใช้เมื่อ user ถามภาพรวม/overview/dashboard/ทุกด้าน (ครบ 4 ด้าน) หรือถามสรุปข้าม domain หลายด้านรวมกัน (เช่น Sales + Target, ยอดขาย + เป้า) ดึงข้อมูลแยก query ตาม domain แต่ตอบเป็น summary เดียว ไม่ใช่คำถามเจาะลึก domain เดียว",
       "author": {
         "name": "MC Group AI Platform",
         "email": "ai-platform@mcjeans.com"
