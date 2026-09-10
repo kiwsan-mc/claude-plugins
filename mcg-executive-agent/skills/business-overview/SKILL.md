@@ -82,6 +82,7 @@ tools:
 |-------|-------------------|
 | "ภาพรวม" "overview" "ทุกด้าน" "dashboard" | ครบ 4 ด้าน (Sales Out + สต็อก + Product + Target) |
 | "Sales + Target" "ยอดขาย + เป้า" "Sales Performance ... Target" "เพิ่ม ... ด้วย" "พร้อม ..." | เฉพาะ domain ที่ระบุ (2 ด้านขึ้นไป) |
+| มี qualifier ระดับสาขา/ร้าน: รหัสสาขา (S081, D194…), "สาขา", ชื่อร้านเฉพาะ ("Mega บางนา", "เซ็นทรัล", "โลตัส", "บิ๊กซี") | **out-of-scope → ส่งต่อ mcg-sales-agent** (store-operations / sales-dashboard) ห้ามตอบเอง |
 | domain เดียวเจาะลึก (SKU รายตัว / สาขารายตัว) | ส่งไป agent เฉพาะ (out-of-scope) |
 
 ⚠️ **ตอบเป็น summary เดียวเสมอ** — ดึงแยก query ได้ แต่ห้ามตอบแยก domain
@@ -173,5 +174,12 @@ tools:
 ---
 
 # 9. Out-of-Scope
-- ถามเจาะลึก domain เดียว → ส่งไป agent เฉพาะ (mcg-sales-agent / mcg-inventory-agent / mcg-product-agent / mcg-target-agent)
-- ภาพรวมนี้คือ summary ระดับ executive — ไม่ลงลึกถึง SKU รายตัว / สาขารายตัว
+
+| Query pattern | ส่งไป |
+|---------------|-------|
+| "สาขา <code>" / "<ชื่อร้าน> dashboard" / "ร้าน <ชื่อ>" | mcg-sales-agent (store-operations / sales-dashboard) |
+| "SKU <code>" / "สินค้ารายตัว" | mcg-product-agent |
+| "สต็อกสาขา <code>" | mcg-inventory-agent |
+| domain เดียวเจาะลึกอื่น ๆ | agent เฉพาะ (mcg-sales-agent / mcg-inventory-agent / mcg-product-agent / mcg-target-agent) |
+
+⚠️ **ห้ามตอบเอง** — executive overview ไม่มี tool ดู branch master (`dim_branch_list`) และไม่ควรลงลึกระดับสาขา/SKU รายตัว ภาพรวมนี้คือ summary ระดับ executive เท่านั้น

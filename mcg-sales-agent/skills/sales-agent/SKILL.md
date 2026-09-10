@@ -587,6 +587,22 @@ Table: `mcg_aiplatform_sales` (single table — PostgreSQL)
 
 ---
 
+# 13.1 Branch Code Resolution (CRITICAL)
+
+## Resolution flow (ห้ามเดา — ต้อง verify กับข้อมูลจริง)
+1. User ให้รหัสสาขา (เช่น "S081") → verify กับ branch master ก่อน (`dim_branch_list` หรือ `sales_agent` query `branch_code`)
+2. User ให้ชื่อร้าน ("Mega บางนา", "เซ็นทรัล", "โลตัส") → **ค้นด้วยชื่อก่อน**: `branch_name ILIKE '%...%'` (หรือ `dim_branch_list` filter)
+3. รหัสไม่เจอ → **ค้นด้วยชื่อก่อน** แล้วค่อยถามกลับ — ห้ามสรุปว่า "ไม่มีสาขานี้" โดยไม่ค้นชื่อ
+4. ห้ามอ้างรายการ prefix ที่ "มี/ไม่มี" โดยไม่ query จริง — ละเมิด rule 1.1 (Never fabricate data)
+
+## Prefix semantics (อ้างอิง — ต้อง verify เสมอ)
+- `S` = Shop (SHOP channel) เช่น S081 = Shop Mc Jeans ศูนย์เมกาบางนา
+- `P` = Mc Outlet
+- `E` = Online (ดู §6 Regional Handling)
+- prefix อื่น (A/B/C/D/X/Y) = OP / Department store / Central-Robinson — ตรวจกับ `dim_branch_list` ก่อนสรุป
+
+---
+
 # 14. Error Handling
 - Query Error: Check → Fix → Retry once → Notify user
 - Empty Result: Report no data found — never interpret NULL as 0
