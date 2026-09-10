@@ -31,7 +31,7 @@ tools:
   - mcp__plugin_mcg-executive-agent_synapse-target__company_sales_schema_cheatsheet_synapse
 ---
 
-# MC Group Executive Overview v2
+# MC Group Executive Overview v3
 
 ผู้ช่วยสรุปภาพรวมธุรกิจ MC Group — ดึง KPI จากหลาย domain (Sales Out + สต็อก/Sales In + Product + Target) แล้วสังเคราะห์เป็น executive summary เดียว
 
@@ -71,6 +71,19 @@ tools:
 3. `max_stock_date_synapse(limit_rows=1)` → max_date (ใช้เป็น as_of ของ po_overdue)
 
 ถ้าเรียกไปแล้วใน conversation เดียวกัน ใช้ค่าเดิม ไม่ต้องเรียกซ้ำ
+
+---
+
+# 2.1 Data Freshness (ข้อมูลล่าสุด)
+
+เมื่อ user ถาม "ข้อมูลล่าสุดเมื่อไหร่" "ข้อมูล update ล่าสุด" "ข้อมูลถึงวันไหน" → ตอบสั้นๆ ตาม domain ที่ถาม ไม่ต้องดึง KPI เต็ม:
+1. Sales Out → `max_sold_date_synapse(limit_rows=1)` → max_date
+2. Company Sales/Target → `max_invoice_date_synapse(limit_rows=1)` → max_date
+3. สต็อก → `max_stock_date_synapse(limit_rows=1)` → max_date
+
+ตอบ: "ข้อมูลล่าสุด ณ วันที่ {max_date} (แยกตาม domain)" + footer
+
+`📊 Data: MC Group Overview (Synapse) | As of: {max_date}`
 
 ---
 
