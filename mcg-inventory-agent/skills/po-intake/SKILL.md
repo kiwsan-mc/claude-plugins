@@ -3,9 +3,7 @@ name: po-intake
 description: >
   Purchase Order & Intake Analysis (MCG "Sales In") — ใช้เมื่อผู้ใช้ถาม: "Sales In" "PO"
   "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "PR" "สั่งซื้อจาก vendor" "delivery"
-  "on-time" "delay" "vendor performance" "vendor group" "In-House" "Import" "Outsource" "markup" "cost avg"
   วิเคราะห์การสั่งซื้อเข้า (Sales In) PR/PO/GR/open qty + PO value แยก vendor/สาขา/สถานะ
-  + vendor grouping (In-House/Import/Outsource) + on-time/delay + markup/cost
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_summary_yoy_synapse
@@ -63,44 +61,6 @@ tools:
 **Key Insights** — vendor ที่ค้างส่งเยอะ (open สูง), fulfillment rate, ของกำลังเข้าที่ต้องเตรียมพื้นที่
 
 **Data Footer**
-
----
-
-# Vendor Group & Delivery Performance (custom SQL)
-
-> ⚠️ canned tool (`po_summary_synapse` ฯลฯ) **ไม่ครอบคลุม** vendor grouping / on-time-delay / markup → ต้องใช้ `inventory_query_synapse` (raw T-SQL) กับ `silver.sap_po`
-
-## ก่อนเขียน SQL — ถาม clarify ก่อนเสมอ (AskUserQuestion)
-
-prompt ที่ลึก/ซับซ้อน (หลาย measure + vendor grouping + นิยาม on-time/delay) → **ต้องถาม clarify ผ่าน AskUserQuestion ก่อน** แล้วค่อยเขียน SQL — ห้ามเดา business logic:
-
-| ประเด็น | ต้อง confirm |
-|---------|--------------|
-| ช่วงเวลา FY | FY2027 เริ่ม/จบวันไหน (fiscal calendar ของ MCG) |
-| grain "แต่ละเดือน" | แยกตาม `S_PO_PO_Date` (วันที่สั่ง) หรือ `S_PO_First_GR_Date` (วันที่รับเข้า)? |
-| Markup | สูตร `(Selling − Cost) / Cost × 100` ใช่ไหม |
-| Cost column | `S_PO_PO_Price_Unit` หรือ `S_PO_PO_Net_Price` |
-| Pending (ยังไม่ GR) | แยกออกจาก on-time/delay หรือตัดออก |
-
-## Vendor Group (นิยามธุรกิจ MCG — ห้ามแก้)
-
-| Group | เงื่อนไข |
-|-------|----------|
-| **In-House** | `S_PO_Vendor_Code IN ('1201','1301')` — PO_No มักขึ้นต้น '8' (cross-check `S_PO_PO_No LIKE '8%'`) |
-| **Import** | `S_PO_Vendor_Code LIKE '21%'` |
-| **Outsource** | `S_PO_Vendor_Code NOT IN ('1201','1301') AND S_PO_Vendor_Code NOT LIKE '21%'` |
-
-## On-Time / Delay
-
-- **On-Time** = `S_PO_First_GR_Date <= S_PO_Expected_Date`
-- **Delay** = `S_PO_First_GR_Date > S_PO_Expected_Date`
-- **Pending** = `S_PO_First_GR_Date IS NULL` (ยังไม่ GR — แยก ไม่นับ on-time/delay)
-
-## Measures
-
-- **ยอดซื้อ (Total GR)** = `SUM(CAST(S_PO_Total_GR_Value AS float))`
-- **Cost AVG** = `AVG(CAST(S_PO_PO_Price_Unit AS float))`
-- **Markup%** = `(Selling − Cost) / NULLIF(Cost,0) × 100` — selling = `S_PO_PO_Delivery_Completed_Selling_Price`, cost = `S_PO_PO_Price_Unit`
 
 ---
 
