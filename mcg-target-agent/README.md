@@ -6,8 +6,9 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v2.0.0** — ย้ายไป schema `[ai]` ของ Synapse
+**v2.1.0** — บังคับใส่ช่วงวันที่ใน `sales_target_vs_actual_synapse`
 
+- **v2.1.0**: บังคับส่ง `start_date` / `end_date` ทุกครั้ง (default = `month_start` → `max_date` จาก anchor) — ไม่ใส่จะสแกนทั้งตาราง fact ใช้เวลา 60–100 วิ เทียบกับ 6 วิเมื่อใส่ช่วง 1 เดือน
 - **v2.0.0**: ย้ายจาก `gold.script_sales_target` / `silver.sap_zsdr006` ไป `ai.dim_target_main_lines` / `ai.fact_daily_sales_account`; **ถอด target แยก category** (ตารางเป้าใหม่มีแค่ระดับสาขา × วัน); เพิ่มการกรองช่วงวันที่ใน `sales_target_vs_actual_synapse`
 - **v1.1.0**: เพิ่ม freshness + validation rules
 - **v1.0.0**: เริ่มต้น — target & company-sales domain

@@ -32,11 +32,16 @@ tools:
 
 ## Step 2 — ดึงข้อมูล
 
-เรียก `sales_target_vs_actual_synapse(group_by=<dimension>, year=<optional>, month=<optional>, start_date=<optional>, end_date=<optional>)`
+⚠️ **ต้องใส่ `start_date` / `end_date` ทุกครั้ง — ห้ามเรียกด้วย `group_by` อย่างเดียว** (ไม่ใส่ = สแกนทั้งตาราง ~900M แถว = 60–100 วิ)
 
-- `start_date` / `end_date` = ช่วงวันที่เปรียบเทียบ (`YYYY-MM-DD`, inclusive) — ใส่ `'all'` หรือไม่ใส่ = ไม่กรอง
+เรียก `sales_target_vs_actual_synapse(group_by=<dimension>, start_date=..., end_date=..., year=<optional>, month=<optional>)`
+
+- ค่า default เมื่อ user ไม่ระบุช่วง: `start_date = month_start` (จาก anchor), `end_date = max_date`
+- ระบุเดือน → `YYYY-MM-01` ถึงวันสุดท้ายของเดือนนั้น (เดือนปัจจุบันใช้ `max_date`)
+- "ทั้งปี/FY นี้" → `fy_curr_start` ถึง `max_date`
 - ⚠️ กรอง**ทั้งสองฝั่ง** (เป้าและยอดจริง) ด้วยช่วงเดียวกันเสมอ — ตัวหาร achievement จึงเป็นช่วงเดียวกับตัวตั้ง
-- ใส่ช่วงวันที่แล้วเร็วขึ้นมาก (วัดจริง: ทั้งประวัติ ~98 วิ → 2 สัปดาห์ ~6 วิ) — **ใส่ช่วงวันที่ทุกครั้งที่ user ระบุช่วงเวลาได้**
+- วัดจริง: ไม่ใส่ช่วง = 79.8 วิ → 1 เดือน = 6.1 วิ
+- **บอก user ด้วยว่าใช้ช่วงวันที่ไหน** ถ้าเป็นการเดาจาก default
 
 ผลลัพธ์ให้: dimension_value, target_value, target_weight, actual_qty, actual_sales, achievement_pct
 
