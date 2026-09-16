@@ -6,7 +6,11 @@ MC Group Product Master Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v1.0.0** — Synapse product master domain (T-SQL, canned tools + raw query fallback)
+**v1.2.0** — ย้ายไป schema `[ai]` ของ Synapse
+
+- **v1.2.0**: ย้ายจาก `silver.sap_article` ไป `ai.dim_article` (ตัด prefix `S_ATC_` ออก, join ด้วย `Article_Key`); ระบุว่า `Grade` / `Color_Tone` ว่างทั้งหมด
+- **v1.1.0**: เพิ่ม freshness + validation rules
+- **v1.0.0**: เริ่มต้น — product master domain
 
 > ⚠️ นี่คือ **master data ของสินค้า** ไม่ใช่ยอดขาย/สต็อก — ถามยอดขายใช้ `mcg-sales-agent`, ถามสต็อกใช้ `mcg-inventory-agent`
 

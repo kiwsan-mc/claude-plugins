@@ -10,7 +10,12 @@ MC Group Executive Overview Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v1.1.0** — Orchestrator skill (Synapse, 4 domains + cross-domain partial summary)
+**v2.0.0** — ย้ายไป schema `[ai]` ของ Synapse
+
+- **v2.0.0**: ย้ายแหล่งข้อมูลจาก `gold.` / `silver.` ไป schema `[ai]`; ถอด member / ticket / ATV ออกจาก KPI checklist เพราะไม่มีในแหล่งข้อมูลใหม่ (route ไป `mcg-sales-agent` แทน)
+- **v1.2.0**: เพิ่ม freshness + validation rules
+- **v1.1.0**: รองรับ cross-domain executive summary
+- **v1.0.0**: เริ่มต้น — executive overview plugin
 
 ## Skills
 

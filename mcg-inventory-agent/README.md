@@ -8,7 +8,11 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v1.0.0** — Synapse inventory domain (T-SQL, canned tools + raw query fallback)
+**v1.2.0** — ย้ายไป schema `[ai]` ของ Synapse
+
+- **v1.2.0**: ย้ายจาก `gold.script_stock_daily*` / `silver.sap_po` / `silver.sap_sto` ไป `ai.fact_MB52` / `ai.fact_sales_and_stock_daily` / `ai.fact_stock_month_ending` / `ai.fact_po_sto`; เพิ่มกฎต้อง filter `Item_Category` สำหรับ PO/STO
+- **v1.1.0**: เพิ่ม freshness + validation rules
+- **v1.0.0**: เริ่มต้น — inventory domain
 
 ## Skills
 
