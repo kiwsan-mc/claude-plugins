@@ -42,8 +42,11 @@ skills/
 
 ## Data Source
 
-- `silver.sap_article` — product master (brand, Level1-5, gender, season, color, size, aging, sales type, vendor, price, cost)
+- `ai.dim_article` — product master (brand, Level1-5, gender, season, color, size, aging, sales type, vendor, price, cost)
 - ไม่มีตัวเลขยอดขาย/สต็อกในตารางนี้
+
+> อัปเดต: ย้ายจาก `silver.sap_article` มาเป็น schema `[ai]` แล้ว (ตารางเดิมยังอยู่แต่เลิกใช้) — คอลัมน์ตัด prefix `S_ATC_` ออก และ join ด้วย `Article_Key`
+> ⚠️ `Grade` / `Color_Tone` ว่างทั้งหมด (100% NULL) — ใช้ `Fashion_Grade_Text` / `Color` แทน
 
 ## Usage
 

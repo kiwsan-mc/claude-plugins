@@ -13,7 +13,6 @@ tools:
   - mcp__plugin_mcg-executive-agent_synapse-sales__dashboard_kpi_overall_synapse
   - mcp__plugin_mcg-executive-agent_synapse-sales__dashboard_by_channel_synapse
   - mcp__plugin_mcg-executive-agent_synapse-sales__regional_sales_yoy_synapse
-  - mcp__plugin_mcg-executive-agent_synapse-sales__member_vs_nonmember_synapse
   - mcp__plugin_mcg-executive-agent_synapse-sales__subchannel_breakdown_synapse
   - mcp__plugin_mcg-executive-agent_synapse-sales__dim_channel_list_synapse
   - mcp__plugin_mcg-executive-agent_synapse-sales__sales_agent_synapse
@@ -54,12 +53,13 @@ tools:
 
 ## 1.4 ห้ามแสดงตารางเปรียบเทียบที่ไม่ครบ (CRITICAL)
 ตารางเปรียบเทียบ (YoY / curr vs prev) ต้องมีค่าครบทั้งสองช่วงทุกแถว — **ห้ามแสดง "—" ในคอลัมน์เปรียบเทียบ**
-- ถ้า KPI ใดไม่มีค่าปีก่อน → ห้ามใส่ในตารางเปรียบเทียบ ให้:
-  1. ดึงจาก tool ที่มี YoY (เช่น `member_vs_nonmember_synapse` มี YoY สำหรับ member metrics) หรือ
-  2. แยกแสดงเป็น "current only" (ตาราง/บรรทัดแยก ไม่ใช่คอลัมน์เปรียบเทียบ)
+- ถ้า KPI ใดไม่มีค่าปีก่อน → ห้ามใส่ในตารางเปรียบเทียบ ให้แยกแสดงเป็น "current only" (ตาราง/บรรทัดแยก ไม่ใช่คอลัมน์เปรียบเทียบ)
+- ⚠️ **member / CRM metrics ไม่มีในแหล่งข้อมูลของ agent นี้** — ถ้า user ขอ member ratio, Member Ticket%, Member ATV ให้ส่งต่อไป **mcg-sales-agent** (skill `member-analysis`) ห้ามดึงจาก sales domain แล้วรายงานเป็น member
 
 ## 1.5 ตัวเลขข้าม domain ต้องสอดคล้องกัน (CRITICAL)
 ถ้าตัวเลขจาก domain ต่างกันไม่ตรงกัน (เช่น Net Sales จาก Sales Out vs Actual จาก Target) → ระบุให้ชัดว่าเป็นคนละแหล่ง/นิยาม ห้ามนำเสนอเป็นตัวเลขเดียวกันโดยไม่ flag
+- ⚠️ ยอดขาย POS รายวัน (Sales Out) กับยอดขาย invoice-level (Company/Target) เป็น **คนละ population** — ห้ามบวกกันหรือเทียบกันตรง ๆ
+- ⚠️ **Tickets / ATV / UPT ไม่มีในแหล่งข้อมูลนี้แล้ว** — อย่ารายงาน ถ้า user ขอให้ส่งไป **mcg-sales-agent**
 
 ---
 
@@ -111,9 +111,9 @@ tools:
 - ถ้าปีกำกวม → อ้างจาก anchor (max_date) หรือถามกลับ
 
 ## 4.2 Channel (Shop)
-- "Shop" = ช่องทาง SHOP (`L_DS_BI_Channel_Store_Sub_2 = 'SHOP'`, OFFLINE)
-- Sales: ใช้ `subchannel_breakdown_synapse` หรือ raw query filter `L_DS_BI_Channel_Store_Sub_2 = 'SHOP'`
-- Target: ตารางเป้าไม่มี sub-channel "Shop" → ใช้ `L_STK_Main_Channel_Text = 'OFFLINE'` (Shop เป็น OFFLINE) หรือ filter ตาม branch
+- "Shop" = ช่องทาง SHOP (OFFLINE)
+- Sales: ใช้ `subchannel_breakdown_synapse` (ผลลัพธ์มี sub-channel "SHOP" ตรง ๆ — ไม่ต้อง filter เอง)
+- Target: ตารางเป้าเป็นระดับสาขา×วัน ไม่มี sub-channel → ใช้ `sales_target_vs_actual_synapse(group_by="channel")` แล้วดูค่า channel ที่เป็น OFFLINE หรือ `group_by="branch"` แล้วกรองตามสาขา
 - ถ้าไม่แน่ใจค่า channel → `dim_channel_list_synapse`
 
 ---
@@ -123,11 +123,11 @@ tools:
 ดึงเฉพาะ domain ที่ user ถาม (ดู §3)
 
 ## 5.1 Sales Out (ยอดขาย)
-- `dashboard_kpi_overall_synapse(fy_curr_start, fy_prev_start, max_date, same_day_prev)` → Net Sales, Tickets, Qty, Discount, COGS, Member + YoY
+- `dashboard_kpi_overall_synapse(fy_curr_start, fy_prev_start, max_date, same_day_prev)` → Net Sales, Qty, Discount, Gross Profit, COGS + YoY
 - `dashboard_by_channel_synapse(...)` → KPI แยก OFFLINE/ONLINE + YoY
 - `regional_sales_yoy_synapse(...)` → ยอดขายแยก region + margin%
-- `member_vs_nonmember_synapse(...)` → Member vs Non-Member + YoY
-- `subchannel_breakdown_synapse(...)` → ยอดขายแยก sub-channel (ใช้ filter "Shop")
+- `subchannel_breakdown_synapse(...)` → ยอดขายแยก sub-channel (ใช้ดูค่า "Shop")
+- ⚠️ ไม่มี member / ticket / ATV ในชุดนี้ — ถ้า user ขอ ให้ส่งไป **mcg-sales-agent**
 
 ## 5.2 Sales In / สต็อก
 - `stock_on_hand_synapse(group_by="aging")` → สต็อกคงเหลือ + มูลค่า แยก aging
@@ -149,7 +149,7 @@ tools:
 ## 6.1 Full (4 ด้าน) — เมื่อถาม "ภาพรวม/overview/ทุกด้าน"
 
 1. **Headline** — 1 บรรทัด: ภาพรวมธุรกิจ (เช่น "ยอดขาย +8.2% YoY, สต็อกจม RED เพิ่ม, ทำเป้า 101%")
-2. **Sales Out** — net sales + YoY + channel + member
+2. **Sales Out** — net sales + YoY + channel
 3. **Sales In / สต็อก** — on-hand + aging + in-transit + overdue PO
 4. **Product** — SKU + margin
 5. **Target** — achievement%

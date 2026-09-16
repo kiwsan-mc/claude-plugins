@@ -29,7 +29,7 @@ skills/
 
 | Domain | Server | Summary tools |
 |--------|--------|---------------|
-| Sales Out | `synapse-sales` | `max_sold_date_synapse`, `dashboard_kpi_overall_synapse`, `dashboard_by_channel_synapse`, `regional_sales_yoy_synapse`, `member_vs_nonmember_synapse`, `subchannel_breakdown_synapse`, `dim_channel_list_synapse`, `sales_agent_synapse`, `retail_sales_schema_cheatsheet_synapse` |
+| Sales Out | `synapse-sales` | `max_sold_date_synapse`, `dashboard_kpi_overall_synapse`, `dashboard_by_channel_synapse`, `regional_sales_yoy_synapse`, `subchannel_breakdown_synapse`, `dim_channel_list_synapse`, `sales_agent_synapse`, `retail_sales_schema_cheatsheet_synapse` |
 | Sales In / สต็อก | `synapse-inventory` | `max_stock_date_synapse`, `stock_on_hand_synapse`, `stock_value_by_aging_synapse`, `stock_in_transit_synapse`, `po_overdue_synapse` |
 | Product | `synapse-product` | `product_dimension_summary_synapse` |
 | Target | `synapse-target` | `max_invoice_date_synapse`, `sales_target_vs_actual_synapse`, `sales_company_summary_synapse`, `sales_query_synapse`, `company_sales_schema_cheatsheet_synapse` |
@@ -39,3 +39,9 @@ skills/
 - "ภาพรวมธุรกิจ" / "overview" / "executive summary" / "ทุกด้าน" → `business-overview` (ครบ 4 ด้าน)
 - "สรุป Sales Performance ... + Target ..." / "ยอดขาย + เป้า" / "เพิ่ม ... ด้วย" → `business-overview` (สรุปข้าม domain เป็น summary เดียว)
 - คำถามเจาะลึก domain เดียว → ส่งไป agent เฉพาะ (mcg-sales-agent / mcg-inventory-agent / mcg-product-agent / mcg-target-agent)
+
+## ขอบเขตข้อมูล (อัปเดต)
+
+- ใช้ schema `[ai]` ของ Synapse (ย้ายจาก `gold.` / `silver.` แล้ว)
+- ⚠️ **member / CRM metrics (Member%, Member ATV, Member Ticket%) และ Tickets / ATV / UPT ไม่มีในแหล่งข้อมูลของ agent นี้** → ส่งไป **mcg-sales-agent** (`member-analysis`, `sales-dashboard`)
+- ⚠️ ยอดขาย POS รายวัน กับยอดขาย invoice-level เป็นคนละ population — ไม่บวก/เทียบกันตรง ๆ

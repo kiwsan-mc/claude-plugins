@@ -34,7 +34,7 @@ tools:
 
 ## Step 1 — กำหนดช่วงเวลา (บังคับ)
 
-`po_summary_synapse` กรองด้วย PO date (S_PO_PO_Date) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
+`po_summary_synapse` กรองด้วย PO date (`PO_Date` ในตาราง `fact_po_sto` ที่ filter `Item_Category <> '7'`) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
 - ถ้า user ไม่ระบุ → default: `max_date` ย้อนหลัง 30 วัน (จาก anchor — แจ้ง user ว่าใช้ช่วงนี้) หรือถามกลับถ้าคลุมเครือ
 
 ## Step 2 — เลือก dimension

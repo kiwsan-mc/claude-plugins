@@ -15,7 +15,7 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 | Skill | Role | หน้าที่ |
 |-------|------|---------|
 | `target-agent` | Sales Target Agent | กฎกลาง, tool priority, FY, achievement/GP thresholds (shared foundation) |
-| `target-achievement` | Sales Planning Analyst | เป้า vs ยอดจริง + achievement% + 🟢🟡🔴 แยก channel/สาขา/category |
+| `target-achievement` | Sales Planning Analyst | เป้า vs ยอดจริง + achievement% + 🟢🟡🔴 แยก channel/สาขา/cluster/เดือน |
 | `company-account-sales` | Account Sales Analyst | ยอดขาย invoice-level + GP% + discount แยก account/channel/region/brand |
 
 ## Architecture
@@ -31,7 +31,7 @@ skills/
 
 | Tool | Description |
 |------|-------------|
-| `sales_target_vs_actual_synapse` | เป้า/day, เป้า/category, target & actual qty, actual sales, achievement% |
+| `sales_target_vs_actual_synapse` | เป้า/day, target & actual qty, actual sales, achievement% (กรอง year/month และช่วงวันที่ได้) |
 | `sales_company_summary_synapse` | ยอดขาย invoice-level: net sales, qty, gross profit + GP%, moving cost, discount |
 | `sales_query_synapse` | Raw T-SQL (SELECT/WITH) — fallback |
 | `describe_table_sales_synapse` | Schema lookup |
@@ -39,8 +39,10 @@ skills/
 
 ## Data Sources
 
-- `gold.script_sales_target` — เป้าขายรายวัน/เดือน
-- `silver.sap_zsdr006` — ยอดขายระดับ invoice (Company/Account) — ต้อง filter invoice date
+- `ai.dim_target_main_lines` — เป้าขายรายวัน **ระดับสาขา × วัน เท่านั้น** (ไม่มี category/channel/cluster)
+- `ai.fact_daily_sales_account` — ยอดขายระดับ invoice (Company/Account) — ต้อง filter `Tax_Invoice_Date`
+
+> อัปเดต: ย้ายจาก `gold.script_sales_target` / `silver.sap_zsdr006` มาเป็น schema `[ai]` แล้ว (ตารางเดิมยังอยู่แต่เลิกใช้)
 
 ## Usage
 

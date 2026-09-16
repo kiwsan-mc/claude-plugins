@@ -41,16 +41,21 @@ skills/
 | `stock_daily_trend_synapse` | สต็อกย้อนหลังตามช่วงเวลา |
 | `po_summary_synapse` | Purchase Order (PR/PO/GR/open) |
 | `sto_summary_synapse` | Stock Transfer Order |
+| `stock_on_hand_yoy_synapse` | สต็อก YoY (snapshot ปัจจุบัน vs วันเดียวกันปีก่อน) |
+| `po_summary_yoy_synapse` / `sto_summary_yoy_synapse` | PO / STO YoY (Apple-to-Apple) |
+| `max_stock_date_synapse` / `max_po_date_synapse` | anchor date ของสต็อก / PO |
 | `inventory_query_synapse` | Raw T-SQL (SELECT/WITH) — fallback |
 | `describe_table_inventory_synapse` | Schema lookup |
 | `search_columns_inventory_synapse` | Column search |
 
 ## Data Sources
 
-- `gold.script_stock_daily_snapshot` — สต็อกรายวัน (~1.3B rows, pin latest snapshot สำหรับ current)
-- `gold.script_stock_daily` — สต็อกย้อนหลัง (ต้องมี date range)
-- `silver.sap_po` — Purchase Order
-- `silver.sap_sto` — Stock Transfer Order
+- `ai.fact_MB52` — สต็อกคงเหลือ snapshot ล่าสุด (วันเดียว) — current on-hand
+- `ai.fact_sales_and_stock_daily` — สต็อกย้อนหลัง + ยอดขายรายวัน (ต้องมี date range)
+- `ai.fact_stock_month_ending` — สต็อกสิ้นเดือน (2022-01 … 2026-08)
+- `ai.fact_po_sto` — Purchase Order + Stock Transfer Order รวมตารางเดียว → แยกด้วย `Item_Category` (PO = `<> '7'`, STO = `= '7'`)
+
+> อัปเดต: ย้ายจาก `gold.script_stock_daily*` / `silver.sap_po` / `silver.sap_sto` มาเป็น schema `[ai]` แล้ว (ตารางเดิมยังอยู่แต่เลิกใช้)
 
 ## Usage
 

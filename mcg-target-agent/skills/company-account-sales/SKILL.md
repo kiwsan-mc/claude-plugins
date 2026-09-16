@@ -59,4 +59,6 @@ tools:
 - ต้องมี date range เสมอ (invoice date)
 - GP% = gross profit / net sales * 100 — ใช้ threshold สี
 - นี่คือยอดขาย invoice-level (ต่างจาก POS รายวันของ mcg-sales-agent)
+- ⚠️ แหล่งข้อมูลนี้**ไม่รวม** billing type ฝั่ง Sales-In (Z250/Z260/Z860/ZC26/ZC83/ZC84) — ยอดจึงไม่เท่ากับตาราง invoice เดิม และไม่ควรมาเทียบข้ามแหล่งโดยไม่ flag
+- ⚠️ คอลัมน์ rebate ทั้งหมดในตารางนี้เป็น 0 และ `Supplier_Name` ว่าง — ถ้า user ถาม rebate ให้ใช้ `rebate_analysis_synapse` (ซึ่งรายงาน discount/GP แทน) อย่าดึง rebate จาก raw query
 - ห้ามตีความ NULL เป็น 0

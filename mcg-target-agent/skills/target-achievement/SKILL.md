@@ -25,15 +25,20 @@ tools:
 
 ## Step 1 — เลือก dimension + ช่วงเวลา
 
-`sales_target_vs_actual_synapse` รองรับ group_by: `channel`, `branch`, `cluster`, `category`, `month`, `day`
+`sales_target_vs_actual_synapse` รองรับ group_by: `channel`, `branch`, `cluster`, `month`, `day`
 - ถ้าไม่ระบุ → default `channel`
 - filter ด้วย year/month ได้ (ถ้าไม่ระบุ = 'all')
+- ⚠️ **ไม่มี `category`** — ตารางเป้าใหม่เก็บเป้าระดับสาขา × วัน เท่านั้น ถ้า user ขอเป้าแยกหมวดหมู่สินค้า ให้แจ้งตรง ๆ ว่าเป้าไม่มีมิติ category แล้วเสนอ แยกช่องทาง/สาขา/cluster/เดือน แทน — **ห้ามดึงเป้าจากที่อื่นมาแทน**
 
 ## Step 2 — ดึงข้อมูล
 
-เรียก `sales_target_vs_actual_synapse(group_by=<dimension>, year=<optional>, month=<optional>)`
+เรียก `sales_target_vs_actual_synapse(group_by=<dimension>, year=<optional>, month=<optional>, start_date=<optional>, end_date=<optional>)`
 
-ผลลัพธ์ให้: target_by_day, target_by_category, target_qty, actual_qty, actual_sales, achievement_pct
+- `start_date` / `end_date` = ช่วงวันที่เปรียบเทียบ (`YYYY-MM-DD`, inclusive) — ใส่ `'all'` หรือไม่ใส่ = ไม่กรอง
+- ⚠️ กรอง**ทั้งสองฝั่ง** (เป้าและยอดจริง) ด้วยช่วงเดียวกันเสมอ — ตัวหาร achievement จึงเป็นช่วงเดียวกับตัวตั้ง
+- ใส่ช่วงวันที่แล้วเร็วขึ้นมาก (วัดจริง: ทั้งประวัติ ~98 วิ → 2 สัปดาห์ ~6 วิ) — **ใส่ช่วงวันที่ทุกครั้งที่ user ระบุช่วงเวลาได้**
+
+ผลลัพธ์ให้: dimension_value, target_value, target_weight, actual_qty, actual_sales, achievement_pct
 
 ## Step 3 — Response
 

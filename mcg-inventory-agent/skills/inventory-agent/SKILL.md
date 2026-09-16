@@ -57,9 +57,9 @@ tools:
 ห้ามพูดถึง SQL, Database, MCP, Query, Tool, ชื่อ Column, ชื่อ Table, ชื่อฟังก์ชัน, Synapse — สื่อสารเหมือนนักวิเคราะห์
 
 **ห้ามเด็ดขาด:**
-- ❌ "คอลัมน์ L_STD_Stock_Quantity" → ✅ "จำนวนสต็อก"
-- ❌ "ผมจะ query จาก script_stock_daily_snapshot" → ✅ "ผมจะตรวจสอบข้อมูลในระบบ"
-- ❌ "join sap_article" → ✅ "เชื่อมกับข้อมูลสินค้า"
+- ❌ "คอลัมน์ Stock_Quantity" → ✅ "จำนวนสต็อก"
+- ❌ "ผมจะ query จาก fact_MB52" → ✅ "ผมจะตรวจสอบข้อมูลในระบบ"
+- ❌ "join dim_article" → ✅ "เชื่อมกับข้อมูลสินค้า"
 - ❌ "GROUP BY aging_color" → ✅ "แยกตาม aging zone"
 
 **ให้พูดเป็นภาษาธุรกิจเสมอ** — ทำงานเบื้องหลัง ไม่ต้องอธิบาย process ให้ user รู้
@@ -86,8 +86,8 @@ Flow การเลือก tool:
 ⚠️ **ห้ามเดารหัสสาขา** — ถ้า user ให้รหัสสาขา (เช่น "S081") หรือชื่อร้าน ("Mega บางนา", "เซ็นทรัล", "โลตัส") ต้อง verify กับ branch master ก่อนเสมอ
 
 **Resolution flow:**
-1. User ให้รหัสสาขา (เช่น "S081") → verify กับ branch master ก่อน: `stock_on_hand_synapse(group_by="branch", filter_column="branch", filter_value="S081")` หรือ `inventory_query_synapse` query `sap_site` (`S_S_Branch_Code`)
-2. User ให้ชื่อร้าน ("Mega บางนา", "เซ็นทรัล", "โลตัส") → **ค้นด้วยชื่อก่อน**: query `sap_site` ด้วย `S_S_Branch_Text LIKE '%...%'` (หรือ `S_S_Branch2_Text` / `S_S_Branch3_Text`)
+1. User ให้รหัสสาขา (เช่น "S081") → verify กับ branch master ก่อน: `stock_on_hand_synapse(group_by="branch", filter_column="branch", filter_value="S081")` หรือ `inventory_query_synapse` query `ai.dim_branch` (`Branch_Code_Key`)
+2. User ให้ชื่อร้าน ("Mega บางนา", "เซ็นทรัล", "โลตัส") → **ค้นด้วยชื่อก่อน**: query `ai.dim_branch` ด้วย `Branch_Text LIKE '%...%'` (หรือ `Branch2_Text` / `Branch3_Text` / `Branch_Code_And_Text`)
 3. รหัสไม่เจอ → **ค้นด้วยชื่อก่อน** แล้วค่อยถามกลับ — ห้ามสรุปว่า "ไม่มีสาขานี้" โดยไม่ค้นชื่อ
 4. ห้ามอ้างรายการ prefix ที่ "มี/ไม่มี" โดยไม่ query จริง — ละเมิด rule 1.1 (ห้ามสร้างข้อมูล)
 
@@ -146,11 +146,12 @@ Flow การเลือก tool:
 
 # 4. Main Data Sources
 
-- `gold.script_stock_daily_snapshot` — สต็อกรายวัน (~1.3B rows) → **current on-hand ต้อง pin ที่ MAX(L_STD_Stock_Date) เสมอ**
-- `gold.script_stock_daily` — สต็อกย้อนหลัง (ต้องมี date range filter เสมอ)
-- `silver.sap_po` — Purchase Order (intake)
-- `silver.sap_sto` — Stock Transfer Order
-- join: `sap_article` on `L_STD_Article = S_ATC_Article`, `sap_site` on `L_STD_Branch_Code = S_S_Branch_Code`
+- `ai.fact_MB52` — สต็อกคงเหลือ **snapshot ล่าสุด (วันเดียว)** → ใช้เป็น current on-hand
+- `ai.fact_sales_and_stock_daily` — สต็อกย้อนหลัง + ยอดขายรายวัน (ต้องมี date range filter เสมอ) → ใช้ทำ trend / YoY ของสต็อก
+- `ai.fact_stock_month_ending` — สต็อกสิ้นเดือน (2022-01-31 … 2026-08-31) → ใช้ดูแนวโน้มระยะยาว
+- `ai.fact_po_sto` — Purchase Order + Stock Transfer Order **รวมตารางเดียว** → แยกด้วย `Item_Category`
+- join: `ai.dim_article` on `Article_Key`, `ai.dim_branch` on `Branch_Code_Key`
+- ⚠️ `fact_MB52` มีวันเดียว — ถ้าต้องการหลายวัน/YoY ต้องใช้ `fact_sales_and_stock_daily`
 
 ---
 
@@ -171,22 +172,26 @@ Flow การเลือก tool:
 
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
-**Stock (script_stock_daily / snapshot):**
-- Qty = `L_STD_Stock_Quantity` | Available = `L_STD_Stock_Available_Quantity` | On-order = `L_STD_Stock_OnOrder_Quantity`
-- Cost Value (ต้นทุน) = `L_STD_Stock_Total_Amount_Standard` | Selling Value (ราคาป้าย) = `L_STD_Stock_Total_Selling_Price`
+**Stock (ai.fact_MB52 / ai.fact_sales_and_stock_daily):**
+- Qty = `Stock_Quantity` | Available = `Stock_Available_Quantity` | On-order = `Stock_OnOrder_Quantity`
+- Cost Value (ต้นทุน) = `Stock_Total_Amount_Standard` | Selling Value (ราคาป้าย) = `Stock_Total_Selling_Price`
 - ⚠️ แยก cost vs selling ให้ชัด — อย่าสลับ
 
-**PO (sap_po):** PO Qty = `S_PO_PO_Quantity`, GR/PR/open qty ตาม column ที่ describe | date = `S_PO_PO_Date`
-**STO (sap_sto):** date = `S_STO_PO_Date`
+**PO / STO (ai.fact_po_sto):** PO Qty = `PO_Quantity` | GR = `Total_GR_Quantity` | Open = `Open_Quantity` | PO Value = `PO_Value` | vendor = `Vendor_Text`
+- date: `PO_Date` (ทั้ง PO และ STO ใช้คอลัมน์นี้ — ตารางรวมกันแล้ว)
+- ⚠️ **ต้อง filter `Item_Category` เสมอ**: PO = `Item_Category <> '7'`, STO = `Item_Category = '7'`
+  ถ้าไม่กรอง PO จะพอง ~42% และ STO พอง ~239% (เพราะตารางรวมสองแหล่งไว้ด้วยกัน)
 
 ## 5.3 Snapshot Pinning (CRITICAL)
-⚠️ current stock ต้อง pin ที่ snapshot ล่าสุดเสมอ — ห้าม SUM ข้าม snapshot date:
+⚠️ `ai.fact_MB52` มี **วันเดียว** (snapshot ล่าสุด) — ห้าม SUM ข้าม snapshot date:
 ```sql
-WHERE L_STD_Stock_Date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_daily_snapshot)
+WHERE Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 ```
+ถ้าต้องการมากกว่าหนึ่งวัน (trend / YoY) → ใช้ `ai.fact_sales_and_stock_daily` (`Date_Key`) หรือ `ai.fact_stock_month_ending` (`Stock_Date`) แทน
 
 ## 5.4 Historical stock ต้องมี date range
-`gold.script_stock_daily` ห้าม query โดยไม่มี `L_STD_Stock_Date` filter — ตารางใหญ่มาก
+`ai.fact_sales_and_stock_daily` ห้าม query โดยไม่มี `Date_Key` filter — ตารางใหญ่มาก
+(ครอบคลุม 2024-07-01 เป็นต้นมา)
 
 ## 5.5 Apple-to-Apple / YoY
 
@@ -199,19 +204,23 @@ WHERE L_STD_Stock_Date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_da
 
 **วิธีที่ 2 (fallback) — raw query** ถ้าต้องการ measure/dimension นอกเหนือ canned: ใช้ `inventory_query_synapse` ด้วย **conditional SUM ในครั้งเดียว** อิงจำนวนวันเท่ากันตาม MAX(date):
 
-**Stock YoY** — pin snapshot ปัจจุบัน เทียบ snapshot วันเดียวกันปีก่อน:
+**Stock YoY** — pin snapshot ปัจจุบัน (จาก `fact_MB52`) เทียบวันเดียวกันปีก่อน (จาก `fact_sales_and_stock_daily`):
 ```sql
-DECLARE @snap date = (SELECT MAX(L_STD_Stock_Date) FROM gold.script_stock_daily_snapshot);
-DECLARE @snap_prev date = DATEADD(year, -1, @snap);
-SELECT f.L_STD_Aging_Color_Text AS dimension_value,
-  SUM(CASE WHEN f.L_STD_Stock_Date = @snap THEN CAST(f.L_STD_Stock_Quantity AS float) ELSE 0 END) AS qty_curr,
-  SUM(CASE WHEN f.L_STD_Stock_Date = @snap_prev THEN CAST(f.L_STD_Stock_Quantity AS float) ELSE 0 END) AS qty_prev
-FROM gold.script_stock_daily f
-WHERE f.L_STD_Stock_Date IN (@snap, @snap_prev)
-GROUP BY f.L_STD_Aging_Color_Text
+WITH snap AS (
+  SELECT MAX(Stock_Date) AS d FROM ai.fact_MB52
+)
+SELECT f.Aging_Color_Text AS dimension_value,
+  SUM(CASE WHEN f.Date_Key = s.d THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_curr,
+  SUM(CASE WHEN f.Date_Key = DATEADD(year, -1, s.d) THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_prev
+FROM ai.fact_sales_and_stock_daily f
+CROSS JOIN snap s
+WHERE f.Date_Key IN (s.d, DATEADD(year, -1, s.d))
+GROUP BY f.Aging_Color_Text
 ```
+> ⚠️ `inventory_query_synapse` รับ **SELECT / WITH เท่านั้น — ห้ามใช้ `DECLARE`** (จะถูก reject) ถ้าต้องการตัวแปร ให้ใช้ CTE แทนตามตัวอย่างข้างบน
+> หมายเหตุ: ค่า ณ วัน snapshot จากสองตารางตรงกัน (ตรวจแล้ว 2026-09-14 = 4,814,498 ชิ้นทั้งคู่)
 
-**PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `S_PO_PO_Date`
+**PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `PO_Date` + filter `Item_Category`
 
 YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 
@@ -223,7 +232,7 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 ---
 
 # 6. Aging Zones
-`aging_color` (จาก sap_article): 🟢 GREEN = สินค้าสด | 🟡 YELLOW = เริ่มค้าง | 🔴 RED = ค้างนาน | 🟣 PURPLE = สต็อกจมมาก (ต้อง clearance)
+`aging_color` (จาก dim_article / fact_MB52): 🟢 GREEN = สินค้าสด | 🟡 YELLOW = เริ่มค้าง | 🔴 RED = ค้างนาน | 🟣 PURPLE = สต็อกจมมาก (ต้อง clearance)
 
 ---
 

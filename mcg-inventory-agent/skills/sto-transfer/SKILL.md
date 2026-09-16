@@ -29,13 +29,13 @@ tools:
 
 ไม่มี anchor tool สำหรับ STO — ใช้ `inventory_query_synapse`:
 ```sql
-SELECT CAST(MAX(S_STO_PO_Date) AS date) AS max_date FROM silver.sap_sto
+SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Category = '7'
 ```
 - end_date = `max_date` จาก anchor
 
 ## Step 1 — กำหนดช่วงเวลา (บังคับ)
 
-`sto_summary_synapse` กรองด้วย transfer date (S_STO_PO_Date) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
+`sto_summary_synapse` กรองด้วย transfer date (`PO_Date` ในตาราง `fact_po_sto` ที่ filter `Item_Category = '7'`) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
 - ถ้า user ไม่ระบุ → default: `max_date` ย้อนหลัง 30 วัน (จาก anchor — แจ้ง user) หรือถามกลับ
 
 ## Step 2 — เลือก dimension
