@@ -276,7 +276,32 @@ When the user asks a question matching a specialized skill below, recommend it b
 ---
 
 # 4. Main Data Source
-`mcg_aiplatform_sales` — ~13M rows (PostgreSQL)
+`mcg_aiplatform_sales` — ~13M rows (PostgreSQL), **ตารางเดียว (BASE TABLE) อยู่ใน schema `public`**
+
+## 4.1 ชื่อตาราง — อ่านก่อนเขียน SQL (CRITICAL)
+
+⚠️ `mcg_aiplatform_sales` เป็น **ชื่อตาราง ไม่ใช่ชื่อ schema** — ห้ามเขียน `mcg_aiplatform_sales.<อะไรก็ตาม>`
+
+- ✅ `FROM mcg_aiplatform_sales`
+- ❌ `FROM mcg_aiplatform_sales.sales_fy2027` → `ERROR: relation "mcg_aiplatform_sales.sales_fy2027" does not exist`
+
+**เทียบ FY ให้ filter `fy_year` บนตารางเดียวกัน — ห้ามเปลี่ยนไปใช้ตารางอื่น**
+```sql
+WHERE fy_year = '2027'   -- FY27 (4 หลัก ไม่ใช่ 'FY27')
+```
+
+⚠️ ในฐานข้อมูล**มี**ตาราง `sales_fy2025`, `sales_fy2026`, `sales_fy2027`, `sales_default` อยู่ใน schema `public` ด้วย — เป็น partition ทางกายภาพของตารางหลัก (ยอดรวมเท่ากับ `mcg_aiplatform_sales` แยกตาม `fy_year`)
+- **skill นี้ไม่ใช้ตารางพวกนั้นเลย** — ใช้ `mcg_aiplatform_sales` + `fy_year` เสมอ
+- ถ้าจำเป็นต้องอ้างจริง ๆ ต้อง qualify ด้วย schema จริง: `public.sales_fy2027` — **ไม่ใช่** `mcg_aiplatform_sales.sales_fy2027`
+
+## 4.2 `pg_search_columns` / `pg_describe_table` — ระวังผลลัพธ์ว่างเปล่า
+
+⚠️ ทั้งสอง tool **คืนค่าว่างโดยไม่ error** เมื่อหาไม่เจอ — แยกไม่ออกระหว่าง "ไม่มีจริง" กับ "ใส่ parameter ผิด" **ห้ามตีความว่าว่างเปล่า = ไม่มีข้อมูลนั้น**
+
+- `pg_search_columns(pattern='%member%')` — ใช้ `pattern` อย่างเดียวพอ ไม่ต้องใส่ `schema`
+- ⚠️ ถ้าใส่ `schema='mcg_aiplatform_sales'` จะได้ **ว่างเปล่า** เพราะนั่นคือชื่อตาราง ไม่ใช่ schema — schema ที่ถูกคือ `public`
+- `pg_describe_table(table='mcg_aiplatform_sales')` ใช้ได้ (ไม่ต้องใส่ schema)
+- ถ้าได้ผลว่าง ให้เปลี่ยนชื่อ/ตัด parameter แล้วลองใหม่ **ก่อน**สรุปว่าไม่มี
 
 ---
 
@@ -512,7 +537,12 @@ channel_store: Marketplace, SHOP, Mc outlet, CHAIN, LOCAL-CREDIT, Mcshop.com, MO
 # 10. Ticket Rules
 Use SUM(ticket_count). ticket_count>0=sale, <0=return, =0=not used in ATV/UPT
 
-v2: `CASE WHEN member_count > ticket_count THEN ticket_count ELSE member_count END`
+⚠️ **Member tickets ต้องกันทั้งสองด้าน** — ใช้ `CASE WHEN member_count > ticket_count AND ticket_count > 0 THEN ticket_count ELSE member_count END`
+
+- guard เดิม (`member_count > ticket_count` เฉย ๆ) **เพี้ยนเมื่อแถวเป็น return** (`ticket_count < 0`) และ `member_count = 0` เพราะ `0 > -N` เป็นจริง จึงไปหยิบค่าติดลบมาใช้ → ยอด member tickets ติดลบ
+- ตัวอย่างจริง (FY27 to date): Marketplace `member_count = 0` ทั้งช่องทาง แต่ได้ member tickets = **−6,398**; ใส่ guard `ticket_count > 0` แล้วได้ **0** ถูกต้อง
+- ตรวจแล้ว: OUTSIDE PROMOTION −5 → 2, OTHERS 239 → 240, LOCALSHOP 286 → 289
+- `ticket_count` ติดลบมีจริง 140,871 แถวทั้งตาราง (returns) — อย่าลืมว่ามันมีอยู่
 
 ---
 
