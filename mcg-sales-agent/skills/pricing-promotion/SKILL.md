@@ -4,6 +4,8 @@ description: >
   Pricing & Promotion Analysis — Use when user asks: "price" "Pricing" "list price"
   "markdown" "average price" "promotion effectiveness" "ONE-PRICED" "CLEARANCE"
   Analyze price point, markdown depth, promotion type performance
+  ⚠️ "CLEARANCE" ที่นี่ = sales type/ราคา — ถ้าหมายถึงสินค้าค้างสต็อก → mcg-inventory-agent (stock-health)
+
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pricing_sales_type

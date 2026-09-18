@@ -4,6 +4,8 @@ description: >
   Size & Color Analysis — Use when user asks: "Size" "Color" "Tone"
   "which size sells best" "which color is stagnant" "size mix" "color trend" "assortment"
   Analyze size distribution, color preference, design trend
+  ⚠️ ยอดขายแยก size/color — ถ้าหมายถึง "assortment"/โครงสร้างสินค้า/จำนวน SKU → mcg-product-agent (assortment-summary)
+
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__color_trend

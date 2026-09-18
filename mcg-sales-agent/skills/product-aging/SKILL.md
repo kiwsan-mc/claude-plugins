@@ -4,6 +4,8 @@ description: >
   Product Aging & Stock Health Analysis — Use when user asks: "old stock" "Aging" "dead stock"
   "GREEN/YELLOW/RED/PURPLE" "stagnant inventory" "clearance" "new/old products" "stock health"
   Analyze product aging by Aging Zone + Fashion Grade + Product Lifecycle
+  ⚠️ ที่นี่ = aging ของ "ยอดขาย" — ถ้าถาม aging/มูลค่าของ "สต็อกคงเหลือ" → mcg-inventory-agent (stock-health)
+
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__aging_distribution

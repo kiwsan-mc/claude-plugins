@@ -1,0 +1,9 @@
+{
+  "name": "mcg-crm-agent",
+  "description": "MC Group CRM & Member Analyst Agent — วิเคราะห์ลูกค้า/สมาชิก (member) รายตัว, การแบ่ง segment (RFM/frequency/demographic), ส่วนลดสมาชิก (CRM discount), การคืนสินค้า และ ticket/ATV ของสมาชิก ผ่าน Synapse MCP tools (ai.poc_fact_sales_with_crm). ใช้เมื่อ user ถามเรื่องสมาชิก, ลูกค้า, member, loyalty, RFM, segment, CRM, ส่วนลดสมาชิก, การคืนสินค้า, ATV/UPT ของสมาชิก",
+  "version": "1.0.0",
+  "author": {
+    "name": "MC Group AI Platform",
+    "email": "ai-platform@mcjeans.com"
+  }
+}

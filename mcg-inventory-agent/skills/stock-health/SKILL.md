@@ -5,6 +5,8 @@ description: >
   "มูลค่าสต็อก" "aging" "สินค้าจม" "GREEN/YELLOW/RED/PURPLE" "เงินจมในสต็อก"
   "สต็อกแยกสาขา/แบรนด์/ภูมิภาค" "clearance"
   วิเคราะห์สต็อกคงเหลือปัจจุบันแยก aging zone + มูลค่า cost/selling + สินค้าเสี่ยง
+  ⚠️ ที่นี่ = aging/มูลค่าของ "สต็อกคงเหลือ" — ถ้าถามยอดขายตาม aging zone → mcg-sales-agent (product-aging)
+
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_yoy_synapse

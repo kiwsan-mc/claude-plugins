@@ -4,6 +4,8 @@ description: >
   Assortment Summary Analysis — ใช้เมื่อผู้ใช้ถาม: "มีกี่ SKU" "assortment" "product mix"
   "จำนวนสินค้าแยก brand/category/gender/season/color" "สัดส่วนสินค้า" "โครงสร้างสินค้า"
   วิเคราะห์จำนวน SKU/model + ราคาเฉลี่ย + margin แยกตาม dimension
+  ⚠️ ที่นี่ = โครงสร้างสินค้า (master data ไม่มียอดขาย) — ยอดขายแยก size/color → mcg-sales-agent (size-color)
+
 tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_dimension_summary_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse

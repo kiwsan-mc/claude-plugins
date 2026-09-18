@@ -4,6 +4,8 @@ description: >
   Vendor & Supply Chain Analysis — Use when user asks: "Vendor" "Supplier"
   "cost by vendor" "GR" "goods receipt"
   Analyze vendor performance, cost structure, supply timeline
+  ⚠️ ที่นี่ = ผลงาน/ต้นทุนของ vendor — ถ้าหมายถึง "GR"/"goods receipt"/การรับของเข้า → mcg-inventory-agent (po-intake)
+
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__vendor_ranking
