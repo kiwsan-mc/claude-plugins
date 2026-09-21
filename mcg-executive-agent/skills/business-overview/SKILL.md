@@ -93,7 +93,10 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ## 1.5 ตัวเลขข้าม domain ต้องสอดคล้องกัน (CRITICAL)
 ถ้าตัวเลขจาก domain ต่างกันไม่ตรงกัน (เช่น Net Sales จาก Sales Out vs Actual จาก Target) → ระบุให้ชัดว่าเป็นคนละแหล่ง/นิยาม ห้ามนำเสนอเป็นตัวเลขเดียวกันโดยไม่ flag
 - ⚠️ ยอดขาย POS รายวัน (Sales Out) กับยอดขาย invoice-level (Company/Target) เป็น **คนละ population** — ห้ามบวกกันหรือเทียบกันตรง ๆ
-- ⚠️ **Tickets / ATV / UPT ไม่มีใน synapse sales fact** — ถ้า user ขอ: ทั้งบริษัท → **mcg-sales-agent** (Postgres, มี ticket_count); เฉพาะ member/CRM subset → `member_ticket_atv_synapse` (mcg-crm-agent)
+- 🚫 **ต้นทุน (COGS) ก็ห้ามข้ามตารางด้วย (CRITICAL)** — GP ของ Sales Out ต้องใช้ต้นทุนจาก POS fact เท่านั้น **ห้ามหยิบ Moving Cost ของตาราง invoice มาหักกับยอดขาย POS** แม้ตัวเลขจะดูใกล้กันจนน่าใช้ (ของจริง 1–20 ก.ย. 2026: POS COGS 78.1M vs invoice moving cost 77.5M → GP ต่างกัน ~0.4M; ปีก่อนต่างกันถึง 2.6M → GP% เพี้ยน 1.3pp)
+- 🚫 **ห้ามรายงาน "จำนวนบิล" / ticket / ATV / UPT ในภาพรวมนี้เด็ดขาด** — platform นี้ไม่มี invoice/ticket key ในตาราง POS และ `Total_Ticket` **ไม่ใช่จำนวนบิล** (ผลรวมทั้งเดือนได้ 419,065 ซึ่งไม่ใช่ความจริง) ถ้า user ขอ: ทั้งบริษัท → ส่งต่อ **mcg-sales-agent** (Postgres, มี ticket_count จริง); เฉพาะ member/CRM subset → `member_ticket_atv_synapse` (mcg-crm-agent)
+  - ⚠️ **ห้ามดึง ticket จาก platform อื่น (Postgres) มาใส่ตาราง Sales Out ของที่นี่** — ทั้งตารางจะกลายเป็นตัวเลขข้าม platform โดย source ไม่ตรงกัน (ผิด §0 กฎ 2) ให้แยกเป็นตาราง/บรรทัดต่างหากพร้อมระบุ source
+- ⚠️ **as-of ของแต่ละ domain ไม่เท่ากัน — ห้ามใช้ค่าเดียวกันทั้งรายงาน** — Sales Out / Company / สต็อก = 20 ก.ย. แต่ Member/CRM = 16 ก.ย. → หัวตารางของ Member ต้องเขียนช่วงที่เป็นจริง (1–16) และ footer ต้องแยก as-of ตาม domain ไม่ใช่ใส่ 20 ก.ย. ทั้งหมด
 
 ---
 
