@@ -118,6 +118,15 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - ❌ "คอลัมน์ Net_Sales_Exclude_VAT" → ✅ "ยอดขายสุทธิ"
 - ❌ "query จาก dim_target_main_lines" → ✅ "ตรวจสอบข้อมูลเป้าในระบบ"
 
+⚠️ **กฎนี้ครอบคลุม "Insight" / กล่องหมายเหตุ / Data Footer ด้วย — ไม่ใช่แค่เนื้อคำตอบหลัก**
+
+ข้อห้ามข้างบนใช้กับ**ทุกส่วนที่ user เห็น** ถ้าจะใส่กล่องอธิบายหรือหมายเหตุ ให้เขียนเป็น**ภาษาธุรกิจ**เท่านั้น:
+- ❌ `★ Insight: sales_target_vs_actual_synapse เทียบ dim_target_main_lines กับ ai.fact_sales_and_stock_daily…`
+  → ✅ "เทียบเป้ากับยอดขายจริงในช่วงเดียวกัน" (หรือไม่ต้องมี block นี้เลยก็ได้ — ผู้อ่านต้องการคำตอบ ไม่ใช่กลไกเบื้องหลัง)
+- ❌ ใส่ชื่อ table / tool ลงใน Data Footer → ✅ ใช้ footer ตามรูปแบบที่กำหนดในไฟล์นี้เท่านั้น
+- ❌ ชื่อ measure/column ที่ tool คืนมา เป็น**ป้ายภายใน** → ✅ แปลเป็นภาษาไทย ("เป้า", "ยอดขายจริง", "อัตราการทำเป้า")
+- เกณฑ์: ถ้าประโยคนั้นบอก user ว่าเรา**ดึงข้อมูลยังไง** (ชื่อ tool / table / column / วิธี query) → ตัดออกหรือเขียนใหม่เป็นภาษาธุรกิจ
+
 ## 1.3 ตรวจข้อมูลก่อนวิเคราะห์ (Tool Priority)
 
 ⚠️ **CRITICAL — ใช้ canned tool ก่อนเสมอ**
@@ -251,6 +260,33 @@ YoY% = `(ns_curr - ns_prev) / NULLIF(ns_prev, 0) * 100`
 
 > Target: ถ้า user ขอเทียบเป้าปีก่อน ใช้ conditional SUM บน `Target_Year` ของ `ai.dim_target_main_lines` (curr vs curr-1) แทน — ทำได้เฉพาะมิติที่ตารางเป้ามี (สาขา/เดือน) ไม่มี category
 > ⚠️ ยอดขายจาก `fact_daily_sales_account` เป็นคนละ population กับยอด POS รายวัน — อย่าเอาไปบวก/เทียบกับ target โดยไม่ flag (rule 1.5)
+
+## 5.4 GP + Target + %Achievement อยู่รายงานเดียวกัน — 3 กฎบังคับ (CRITICAL)
+
+⚠️ สามตัวนี้มาจาก 2 ตาราง คนละ population — ใส่ตารางเดียวกันได้ แต่ต้องยึด 3 กฎนี้ทุกครั้ง
+
+**กฎ 1 — หนึ่งตัวเลข ยึดแหล่งเดียว (GP มีได้หลายค่า)**
+- GP ต้องมาจาก `Gross_Profit` หรือ `Net_Sales_Exclude_VAT` − `Moving_Cost_Amount` เท่านั้น
+- 🚫 **ห้ามใช้ `COGS` แทน `Moving_Cost_Amount`** — คนละคอลัมน์ ค่าไม่เท่ากัน (ของจริง 1–20 ก.ย. 2026: `Moving_Cost_Amount` 77,511,159.25 → GP **150,004,217.89** · `COGS` 78,147,269.03 → GP **149,368,108.03** ต่างกัน 636K)
+- 🚫 ห้ามหยิบ GP จาก platform อื่น (Postgres `cogs` → GP 152,192,992.97) มาใส่รายงานนี้
+- ถ้ามีตัวเลขให้เทียบ ต้องระบุว่ายึดเกณฑ์ไหน
+
+**กฎ 2 — ห้ามเอายอดขายที่ไม่รวม VAT ไปหารเป้า (กับดักที่พลาดบ่อยที่สุด)**
+- ตัวตั้งของ achievement ต้องเป็น `actual_sales` ที่ tool คืนมาเท่านั้น (= `Total_Price_After_Discount` **รวม VAT** และจำกัดเฉพาะสาขา×วันที่มีเป้า)
+- 🚫 ห้ามใช้ Net Sales (excl VAT) หรือยอดขาย POS มาหารเป้า — ของจริง 1–20 ก.ย. 2026:
+
+| ตัวตั้งที่ใช้ | ได้ | |
+|---|---|---|
+| `actual_sales` จาก tool = 242,176,567.91 (incl VAT · 586 สาขา) | **86.83%** | ✅ ถูก |
+| Company Net Sales 227,515,377.06 (excl VAT · ทุกสาขา) | 81.57% | ❌ |
+| POS excl VAT 229,917,394.39 | 82.44% | ❌ |
+
+- tool join เป้ากับยอดจริงด้วย `Date_Key` + `Branch_Code` ที่ชุดสาขา×วันเดียวกันแล้ว — apples-to-apples ให้เสร็จ อย่าไปสร้างตัวตั้งเอง
+
+**กฎ 3 — GP กับ achievement คนละ population ต้อง flag ทุกครั้ง**
+- GP มาจาก `fact_daily_sales_account` (Tax_Invoice_Date · **ทุกสาขา** · **excl VAT**)
+- achievement มาจาก `fact_sales_and_stock_daily` (**586 สาขาที่มีเป้า** · **incl VAT**)
+- → วางตารางเดียวกันได้ แต่ต้องเขียนกำกับว่าเป็นคนละนิยาม/population **ห้ามบวก / เฉลี่ย / เทียบกันตรง ๆ** (rule 1.5)
 
 ---
 

@@ -5,6 +5,7 @@ description: >
   Use when user asks: "overview" "Dashboard" "all KPIs" "executive summary" "Overall performance"
   Calculates 12 KPIs with 3 Key Takeaways.
   **ถ้าถามภาพรวมธุรกิจครบทุกด้าน (Sales + สต็อก + Product + Target + Member/CRM) → ใช้ mcg-executive-agent (business-overview) แทน — ที่นี่เป็น SALES ONLY (Postgres, ทุกสาขา)**
+  **ถ้าถามเป้า / target / %Achievement → ใช้ mcg-target-agent — ที่นี่ไม่มีข้อมูลเป้าเลยแม้แต่ตารางเดียว ห้ามเดาหรือประมาณ**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall
