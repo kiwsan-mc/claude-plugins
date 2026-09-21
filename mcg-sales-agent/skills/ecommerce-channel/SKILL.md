@@ -52,6 +52,38 @@ GROUP BY channel_store_sub_2
 ORDER BY ns_curr DESC
 ```
 
+### ⚠️ Step 2.1 — Mcshop.com ต้องใช้ `channel_store` ไม่ใช่ `channel_store_sub_2` (CRITICAL)
+
+`channel_store_sub_2` ใช้กับ Shopee / Lazada / TikTok ได้ปกติ แต่ **กับ Mcshop.com ให้ตัวเลขไม่ตรงกับ dashboard และไม่ตรงกับที่ธุรกิจใช้** เพราะไม่ได้แยก `Mcshop.com Offline` ออก
+
+**ค่าจริง งวด 1–20 ก.ย. 2026** — filter ต่างกัน ให้เลขต่างกันถึง 3 เท่า:
+
+| filter | ได้ | |
+|---|---|---|
+| `channel_store = 'Mcshop.com'` | **1,072,788.14** | ✅ ตรงกับ dashboard (1.07M) |
+| `sub_channel = 'MCSHOP.COM'` | 3,382,778.79 | 🚫 พอง 3.15 เท่า (ดูด offline 2,412,107.35 เข้ามา) |
+| `channel_store_sub_2 = 'Mcshop.com'` | 702,508.58 | ⚠️ ขาดไป 35% |
+| `channel_store_sub = 'Mcshop.com'` | 535,136.19 | ⚠️ ขาดไปครึ่ง |
+
+**query ที่ถูกสำหรับ Mcshop.com:**
+```sql
+SELECT SUM(total_exc_vat_price)::float AS ns,
+       SUM(total_quantity) AS qty,
+       SUM(ticket_count) AS tickets
+FROM mcg_aiplatform_sales
+WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
+  AND channel_store = 'Mcshop.com'
+```
+
+**กับดัก 4 ข้อ — ห้ามพลาด:**
+1. 🚫 **ห้ามใช้ `sub_channel` กับ Mcshop.com** — แถว `Mcshop.com Offline` ก็มี `sub_channel = 'MCSHOP.COM'` เหมือนกัน จึงดูด offline เข้ามาทั้งก้อน
+2. 🚫 **`main_channel = 'ONLINE'` ไม่ช่วยตัด offline** — สาขา E002 (`Mcshop.com Offline`) ถูก flag เป็น ONLINE
+3. 🚫 **ห้ามกรองด้วย `branch_code` หรือชื่อสาขา** — `E002` "MC Social Commerce" มีแถวอยู่ **ทั้งสองฝั่ง** (offline 1,907,297.74 · online 65,255.69) และ `LIKE '%cshop%'` จะลาก `Pc Mcshop` มาด้วย
+4. ถ้าต้องการเขียนแบบ defensive ใช้ `channel_store <> 'Mcshop.com Offline'` หรือ `channel_store_sub <> 'Pc Mcshop'` — ให้ผลเท่ากัน
+
+> 📌 ถ้า user เทียบกับ dashboard **Online Daily Performance** แล้วเลขไม่ตรง ให้สงสัยข้อนี้ก่อน — dashboard กรองด้วย `channel_store` แบบ exact match
+> ⚠️ dashboard อาจมีช่วงเวลาของการ์ด MTD กับกราฟ Daily ไม่ตรงกัน (การ์ดตรงกับ 1–20 ก.ย. แต่กราฟโชว์ถึง 10 ก.ย.) — ถ้า user ถาม ให้ยืนยันช่วงเวลากับ user ก่อนตอบ
+
 ---
 
 ## Step 3 — Campaign Type (channel_store_sub_3: Organic/Ads/Affiliate)
