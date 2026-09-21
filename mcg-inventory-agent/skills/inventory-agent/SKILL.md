@@ -197,10 +197,22 @@ Flow การเลือก tool:
 
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
-**Stock (ai.fact_MB52 / ai.fact_sales_and_stock_daily):**
-- Qty = `Stock_Quantity` | Available = `Stock_Available_Quantity` | On-order = `Stock_OnOrder_Quantity`
-- Cost Value (ต้นทุน) = `Stock_Total_Amount_Standard` | Selling Value (ราคาป้าย) = `Stock_Total_Selling_Price`
-- ⚠️ แยก cost vs selling ให้ชัด — อย่าสลับ
+**สต็อกคงเหลือ ("สต็อกคงเหลือเท่าไหร่" / "on hand") — ใช้ 4 measure นี้เท่านั้น จาก `ai.fact_MB52`:**
+
+| Measure | Column | ใช้ตอบ |
+|---------|--------|--------|
+| **Stock QTY** | `Stock_Total_Quantity` | จำนวนสต็อกคงเหลือ (ชิ้น) |
+| **Stock Amount MV** | `Stock_Total_Amount` | มูลค่าต้นทุน moving average (MV) |
+| **Stock Amount STD** | `Stock_Total_Amount_Standard` | มูลค่าต้นทุน standard (STD) |
+| **Stock Selling Price** | `Stock_Total_Selling_Price` | มูลค่าขายตามราคาป้าย |
+
+- ⚠️ **ห้ามใช้ `Stock_Quantity` แทน `Stock_Total_Quantity`** — คนละ measure (snapshot 2026-09: 4,941,717 vs 5,022,136 ชิ้น) เพราะ `Stock_Quantity` ไม่รวม in-transit/transit-out ที่ `Stock_Total_Quantity` รวมอยู่
+- ⚠️ **แยก MV / STD / Selling ให้ชัด — อย่าสลับ**: MV กับ STD เป็นต้นทุนคนละเกณฑ์ (2026-09: ฿1,200M vs ฿1,212M) ส่วน Selling เป็นราคาป้าย ไม่ใช่กำไร
+- ⚠️ `Stock_Total_*` **มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending`** — `ai.fact_sales_and_stock_daily` **ไม่มีคอลัมน์ชุดนี้** ดังนั้น trend/YoY รายวันต้องใช้ `Stock_Quantity` + `Stock_Amount_Standard` และ **ห้ามนำตัวเลขนั้นมาเทียบ/รวมกับ Stock QTY ของ snapshot ปัจจุบันในคำตอบเดียว**
+
+**Stock ย้อนหลัง (`ai.fact_sales_and_stock_daily` — คนละชุด measure):**
+- Qty = `Stock_Quantity` | Cost Value = `Stock_Amount_Standard` | Selling = `Stock_Available_Amount_Selling`
+- ยอด ณ วัน snapshot ตรงกับ `fact_MB52` แต่ `Stock_Quantity` ≠ `Stock_Total_Quantity` — ระบุ measure ให้ชัดเมื่ออ้างตัวเลข
 
 **PO / STO (ai.fact_po_sto):** PO Qty = `PO_Quantity` | GR = `Total_GR_Quantity` | Open = `Open_Quantity` | PO Value = `PO_Value` | vendor = `Vendor_Text`
 - date: `PO_Date` (ทั้ง PO และ STO ใช้คอลัมน์นี้ — ตารางรวมกันแล้ว)
@@ -244,6 +256,7 @@ GROUP BY f.Aging_Color_Text
 ```
 > ⚠️ `inventory_query_synapse` รับ **SELECT / WITH เท่านั้น — ห้ามใช้ `DECLARE`** (จะถูก reject) ถ้าต้องการตัวแปร ให้ใช้ CTE แทนตามตัวอย่างข้างบน
 > หมายเหตุ: ค่า ณ วัน snapshot จากสองตารางตรงกัน (ตรวจแล้ว 2026-09-14 = 4,814,498 ชิ้นทั้งคู่)
+> ⚠️ qty ในสูตรนี้ (`stock_on_hand_yoy_synapse` ก็เช่นกัน) ใช้ `Stock_Quantity` จากตารางรายวัน ซึ่ง **คนละ measure กับ Stock QTY (`Stock_Total_Quantity`) ของ snapshot ปัจจุบัน** — ถ้า user เทียบ "สต็อกคงเหลือปัจจุบัน vs ปีก่อน" ต้องบอกให้ชัดว่าใช้เกณฑ์ไหน อย่าให้ตัวเลขสองชุดปนกันในตารางเดียว
 
 **PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `PO_Date` + filter `Item_Category`
 
@@ -262,9 +275,10 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 ---
 
 # 7. Stock Value
-- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก)
-- **Selling Value** = มูลค่าขายตามราคาป้าย (ใช้ประเมิน potential revenue)
-- **Available Qty** = พร้อมขาย | **On-order Qty** = กำลังเข้า | **Total Qty** = รวม
+- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก) — มี **2 เกณฑ์**: **MV** (`Stock_Total_Amount`) และ **STD** (`Stock_Total_Amount_Standard`) → ต้องระบุว่าใช้เกณฑ์ไหน อย่าเรียกรวมๆ ว่า "มูลค่าต้นทุน" ลอยๆ
+- **Selling Value** = มูลค่าขายตามราคาป้าย (ใช้ประเมิน potential revenue) — `Stock_Total_Selling_Price`
+- **Stock QTY** = จำนวนคงเหลือรวม — `Stock_Total_Quantity`
+- ⚠️ `stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน **4 measure ข้างบนเท่านั้น** (ไม่คืน available / on-order) — ถ้า user ถาม available ("พร้อมขาย") หรือ on-order ("กำลังเข้า") แยก ให้ query เองด้วย `inventory_query_synapse` (`Stock_Available_Quantity` / `Stock_OnOrder_Quantity`)
 
 ---
 

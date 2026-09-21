@@ -52,6 +52,21 @@ skills/
 | `describe_table_inventory_synapse` | Schema lookup |
 | `search_columns_inventory_synapse` | Column search |
 
+## Stock on Hand Measures (สต็อกคงเหลือ)
+
+`stock_on_hand_synapse` และ `stock_value_by_aging_synapse` คืน 4 measure มาตรฐานนี้:
+
+| Measure | Column |
+|---------|--------|
+| **Stock QTY** | `Stock_Total_Quantity` |
+| **Stock Amount MV** | `Stock_Total_Amount` (ต้นทุน moving average) |
+| **Stock Amount STD** | `Stock_Total_Amount_Standard` (ต้นทุน standard) |
+| **Stock Selling Price** | `Stock_Total_Selling_Price` (ราคาป้าย) |
+
+> ⚠️ **ห้ามใช้ `Stock_Quantity` แทน `Stock_Total_Quantity`** — คนละ measure (snapshot 2026-09: 4,941,717 vs 5,022,136 ชิ้น)
+>
+> ⚠️ `Stock_Total_*` มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending` — `ai.fact_sales_and_stock_daily` **ไม่มี** ดังนั้น `stock_daily_trend_synapse` / `stock_on_hand_yoy_synapse` ใช้ `Stock_Quantity` และตัวเลข **ไม่ใช่** measure เดียวกันกับ Stock QTY ของ snapshot ปัจจุบัน
+
 ## Data Sources
 
 - `ai.fact_MB52` — สต็อกคงเหลือ snapshot ล่าสุด (วันเดียว) — current on-hand

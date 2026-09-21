@@ -159,8 +159,10 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ดึงเฉพาะ domain ที่ user ถาม (ดู §3)
 
 ## 5.1 Sales Out (ยอดขาย)
-- `dashboard_kpi_overall_synapse(fy_curr_start, fy_prev_start, max_date, same_day_prev)` → Net Sales, Qty, Discount, Gross Profit, COGS + YoY
-- `dashboard_by_channel_synapse(...)` → KPI แยก OFFLINE/ONLINE + YoY
+- `dashboard_kpi_overall_synapse(fy_curr_start, fy_prev_start, max_date, same_day_prev)` → Net Sales, Qty, Discount, Gross, COGS + YoY
+- ⚠️ **ค่า `Gross` ที่ tool คืนมาไม่ใช่กำไร** — เป็นยอดที่ **ราคาป้าย** (สูงกว่า Net Sales เสมอ) ห้ามนำมาแสดงเป็น Gross Profit เด็ดขาด (ถ้าเอา Gross ตั้งเป็น GP จะได้ %GP เกิน 100%)
+- **Gross Profit ของ Sales Out ต้องคำนวณเอง: `GP = Net Sales − COGS`** และ `GP% = GP / Net Sales × 100`
+- `dashboard_by_channel_synapse(...)` → KPI แยก OFFLINE/ONLINE + YoY (มี Net Sales + COGS ครบทั้ง curr/prev → คิด GP และ GP YoY ต่อช่องทางได้)
 - `regional_sales_yoy_synapse(...)` → ยอดขายแยก region + margin%
 - `subchannel_breakdown_synapse(...)` → ยอดขายแยก sub-channel (ใช้ดูค่า "Shop")
 - ⚠️ ไม่มี ticket / ATV ในชุดนี้ — ถ้า user ขอ ให้ส่งไป **mcg-sales-agent** (ทั้งบริษัท) ส่วน member top-line ดู §5.5
@@ -168,6 +170,8 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ## 5.2 Sales In / สต็อก
 - `stock_on_hand_synapse(group_by="aging")` → สต็อกคงเหลือ + มูลค่า แยก aging
 - `stock_value_by_aging_synapse()` → มูลค่าสต็อกแยก aging zone (qty + cost + selling)
+- 📌 **สต็อกคงเหลือใช้ 4 measure นี้:** **Stock QTY** (`Stock_Total_Quantity`) · **Stock Amount MV** · **Stock Amount STD** · **Stock Selling Price** — ⚠️ ห้ามใช้ `Stock_Quantity` แทน (คนละ measure: snapshot 2026-09 = 4.94M vs 5.02M ชิ้น) และเมื่อรายงานมูลค่าต้นทุนต้องบอกว่าใช้เกณฑ์ **MV** หรือ **STD**
+- ⚠️ สต็อกย้อนหลัง/YoY (`stock_daily_trend_synapse`, `stock_on_hand_yoy_synapse`) อ่านจากตารางรายวันซึ่ง **ไม่มี** คอลัมน์ `Stock_Total_*` — ใช้ `Stock_Quantity` จึง **ห้ามนำมาเทียบ/รวมกับ Stock QTY ของ snapshot ปัจจุบันในตารางเดียว**
 - `stock_in_transit_synapse(group_by="branch")` → สต็อกระหว่างทาง + blocked
 - `po_overdue_synapse(as_of=<max_stock_date>, group_by="vendor")` → PO เกินกำหนด
 

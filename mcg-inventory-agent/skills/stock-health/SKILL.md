@@ -37,7 +37,8 @@ tools:
 
 เรียก `stock_on_hand_synapse(group_by=<dimension>)`
 
-ผลลัพธ์ให้: stock_qty, available_qty, onorder_qty, cost_value, selling_value, sku_count, branch_count
+ผลลัพธ์ให้ 4 measure มาตรฐานของสต็อกคงเหลือ: **[Stock QTY]**, **[Stock Amount MV]**, **[Stock Amount STD]**, **[Stock Selling Price]** + `sku_count`, `branch_count`
+> 📌 ดูนิยาม measure ที่ §5.2 ของ inventory-agent — Stock QTY = `Stock_Total_Quantity` (ไม่ใช่ `Stock_Quantity`) และ cost มี 2 เกณฑ์ (MV / STD)
 
 > ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** ใช้ `stock_on_hand_yoy_synapse(group_by=<dimension>)` แทน → ได้ qty_curr/qty_prev + cost_curr/cost_prev (snapshot ปัจจุบัน vs วันเดียวกันปีก่อน) แล้วคำนวณ YoY% = (curr − prev) / prev × 100
 
@@ -48,14 +49,14 @@ tools:
 SELECT TOP 10
   a.Aging_Color_Text AS aging_color,
   a.Level3_Item_Category_Text AS category,
-  SUM(CAST(s.Stock_Quantity AS float)) AS stock_qty,
-  SUM(CAST(s.Stock_Total_Amount_Standard AS float)) AS cost_value
+  SUM(CAST(s.Stock_Total_Quantity AS float)) AS [Stock QTY],
+  SUM(CAST(s.Stock_Total_Amount_Standard AS float)) AS [Stock Amount STD]
 FROM ai.fact_MB52 s
 JOIN ai.dim_article a ON s.Article_Key = a.Article_Key
 WHERE s.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
   AND a.Aging_Color_Text IN ('RED','PURPLE')
 GROUP BY a.Aging_Color_Text, a.Level3_Item_Category_Text
-ORDER BY cost_value DESC
+ORDER BY [Stock Amount STD] DESC
 ```
 > ⚠️ ตรวจชื่อคอลัมน์จริงด้วย `describe_table_inventory_synapse` ก่อนถ้าไม่แน่ใจ
 
@@ -64,10 +65,10 @@ ORDER BY cost_value DESC
 **Headline** — สต็อกรวม (qty + cost value) + สัดส่วน aging เสี่ยง
 
 **ตาราง 1: Stock by Aging Zone**
-| Zone | Stock Qty | Cost Value | Selling Value | SKU | สาขาที่มี |
+| Zone | Stock QTY | Stock Amount MV | Stock Amount STD | Selling Price | SKU | สาขาที่มี |
 
 **ตาราง 2 (ถ้ามี): Top High-Risk (RED+PURPLE)**
-| Category | Aging | Stock Qty | Cost Value |
+| Category | Aging | Stock QTY | Stock Amount STD |
 
 **Key Insights** — เงินจมใน RED+PURPLE, clearance opportunity, สาขาที่สต็อกล้น
 
@@ -77,6 +78,6 @@ ORDER BY cost_value DESC
 
 # Output Rules
 - Aging ใช้ emoji: 🟢GREEN 🟡YELLOW 🔴RED 🟣PURPLE
-- แยก cost value vs selling value ให้ชัด — อย่าสลับ
+- แยก **Stock Amount MV / Stock Amount STD / Selling Price** ให้ชัด — อย่าสลับ และต้องบอก user ว่ามูลค่าต้นทุนที่รายงานใช้เกณฑ์ MV หรือ STD
 - current stock = snapshot ล่าสุดเสมอ
 - ห้ามตีความ NULL เป็น 0
