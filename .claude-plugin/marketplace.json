@@ -291,6 +291,17 @@
       "category": "productivity",
       "source": "./mcg-executive-agent",
       "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-executive-agent"
+    },
+    {
+      "name": "mcg-crm-agent",
+      "description": "MC Group CRM & Member Analyst Agent — ถามข้อมูลลูกค้า/สมาชิก (member) รายตัว รวมถึงยอดซื้อของสมาชิกรายคนตามรหัสลูกค้า, การแบ่ง segment (RFM/frequency/demographic), ส่วนลดสมาชิก (CRM discount), การคืนสินค้า และ ticket/ATV ของสมาชิก ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องสมาชิก, ลูกค้า, member, loyalty, RFM, segment, ส่วนลดสมาชิก, การคืนสินค้า หรือยอดซื้อของลูกค้ารายคน",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-crm-agent",
+      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-crm-agent"
     }
   ]
 }
