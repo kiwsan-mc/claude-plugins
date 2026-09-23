@@ -229,6 +229,10 @@ Flow การเลือก tool:
 | "on order" "มีเติมของไหม" "กำลังสั่ง" | `Stock_OnOrder_Quantity` |
 | "in-transit" "ระหว่างทาง" "ของกำลังมา" | `Intransit_Quantity` |
 | "ถูกกัก" "blocked" | `Blocked_Quantity` |
+| "ของค้าง" "สินค้าจม" "aging" "RED" "PURPLE" | `Aging_Color_Text` บน `fact_MB52` (ฐานคงเหลือ) → §5.7 (ก) |
+| "เงินจมในสต็อก" | มูลค่าต้นทุนฐานคงเหลือ (MV default + STD) + แยกส่วน RED+PURPLE → §5.7 (ข) |
+| "แนวโน้มสต็อก 3 เดือน" "trend" | `fact_stock_month_ending` ฐานคงเหลือ — 🚫 **ห้ามใช้ `fact_MB52`** (วันเดียว) → §5.7 (ค) |
+| "สต็อกเทียบปีก่อน" "YoY" | `fact_stock_month_ending` เดือนเดียวกันปีก่อน → §5.7 (ง) |
 
 - ✅ **ตอบคู่กันเสมอ** — ทุกคำตอบเรื่องสต็อกคงเหลือให้แสดง **ทั้งฐานคงเหลือ (headline) และฐานรวมทั้งหมด** เพื่อให้ตรงกับ Power BI และตรวจย้อนกลับได้
 - ⚠️ **MV ≠ STD** — คนละเกณฑ์ต้นทุน (2026-09-22 ฐาน Total: MV ฿1,206.2M vs STD ฿1,218.1M ต่าง ฿11.8M ≈ ฿2.35/ชิ้น) ห้ามเขียน "มูลค่าต้นทุน" ลอย ๆ ต้องระบุ MV หรือ STD
@@ -247,6 +251,9 @@ Flow การเลือก tool:
 - ⚠️ **ตารางรายวันล่าช้ากว่า snapshot** — ข้อมูลล่าสุด 2026-08-13 ขณะที่ `fact_MB52` อยู่ที่ 2026-09-22 (ดู §5.5)
 
 **PO / STO (ai.fact_po_sto):** PO Qty = `PO_Quantity` | GR = `Total_GR_Quantity` | Open = `Open_Quantity` | PO Value = `PO_Value` | vendor = `Vendor_Text`
+- ✅ **"ค้างส่ง" = `Still_To_Delivery_Quantity` / `Still_To_Delivery_Amount`** (ยังต้องส่งอีกเท่าไหร่) — ⚠️ **ไม่ใช่ `Open_Quantity`** ซึ่งเป็น PO−GR ดิบ: 2026-09-23 PO open 2,707,621 vs still **2,704,900** ชิ้น (ต่าง 2,721) · STO 793,061 vs **766,744** (ต่าง 26,317) → ถาม "ค้างส่ง" ให้ใช้ `Still_To_Delivery_*`
+- ✅ ทั้งสอง measure = **0 เมื่อ `Delivery_Completed = 'X'`** (ตรวจแล้ว: เศษเหลือแค่ 12 ชิ้น/฿1,072 จาก 100,000+ แถว) → ใช้ `Delivery_Completed <> 'X'` เป็นตัวกรอง "ยังไม่ส่งครบ" ได้
+- ดู query shape + ตัวเลขที่ **§5.7 (จ)**
 - date: `PO_Date` (ทั้ง PO และ STO ใช้คอลัมน์นี้ — ตารางรวมกันแล้ว)
 - ⚠️ **ต้อง filter `Item_Category` เสมอ**: PO = `Item_Category <> '7'`, STO = `Item_Category = '7'`
   ถ้าไม่กรอง PO จะพอง ~42% และ STO พอง ~239% (เพราะตารางรวมสองแหล่งไว้ด้วยกัน)
@@ -274,19 +281,23 @@ WHERE Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 
 **วิธีที่ 2 (fallback) — raw query** ถ้าต้องการ measure/dimension นอกเหนือ canned: ใช้ `inventory_query_synapse` ด้วย **conditional SUM ในครั้งเดียว** อิงจำนวนวันเท่ากันตาม MAX(date):
 
-**Stock YoY** — pin snapshot ปัจจุบัน (จาก `fact_MB52`) เทียบวันเดียวกันปีก่อน (จาก `fact_sales_and_stock_daily`):
+**Stock YoY (ระดับวัน)** — anchor = `MAX(Date_Key)` ของ **ตารางรายวันเอง** (เดิม anchor ที่ `fact_MB52` ซึ่งทำให้ได้ 0 เพราะสองตารางไม่ตรงวันกันแล้ว):
 ```sql
-WITH snap AS (
-  SELECT MAX(Stock_Date) AS d FROM ai.fact_MB52
+WITH anchor AS (
+  SELECT MAX(Date_Key) AS d FROM ai.fact_sales_and_stock_daily
 )
 SELECT f.Aging_Color_Text AS dimension_value,
-  SUM(CASE WHEN f.Date_Key = s.d THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_curr,
-  SUM(CASE WHEN f.Date_Key = DATEADD(year, -1, s.d) THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_prev
+  SUM(CASE WHEN f.Date_Key = a.d THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_curr,
+  SUM(CASE WHEN f.Date_Key = DATEADD(year, -1, a.d) THEN CAST(f.Stock_Quantity AS float) ELSE 0 END) AS qty_prev,
+  SUM(CASE WHEN f.Date_Key = a.d THEN CAST(f.Stock_Amount_Standard AS float) ELSE 0 END) AS cost_curr,
+  SUM(CASE WHEN f.Date_Key = DATEADD(year, -1, a.d) THEN CAST(f.Stock_Amount_Standard AS float) ELSE 0 END) AS cost_prev
 FROM ai.fact_sales_and_stock_daily f
-CROSS JOIN snap s
-WHERE f.Date_Key IN (s.d, DATEADD(year, -1, s.d))
+CROSS JOIN anchor a
+WHERE f.Date_Key IN (a.d, DATEADD(year, -1, a.d))
 GROUP BY f.Aging_Color_Text
 ```
+> ✅ ทดสอบแล้ว (2026-09-23): anchor ได้ `2026-08-13` เทียบ `2025-08-13` → ได้ข้อมูลทั้งสองฝั่ง (4,514,909 vs 4,245,996 ชิ้น · ฿1,114.0M vs ฿1,177.0M)
+> ℹ️ **ถ้าต้องการ YoY ระดับเดือน ให้ใช้ `fact_stock_month_ending`** ซึ่งใหม่กว่าและตรงเดือนกว่า → §5.7 (ง)
 > ⚠️ `inventory_query_synapse` รับ **SELECT / WITH เท่านั้น — ห้ามใช้ `DECLARE`** (จะถูก reject) ถ้าต้องการตัวแปร ให้ใช้ CTE แทนตามตัวอย่างข้างบน
 > 🚫 **`stock_on_hand_yoy_synapse` ใช้ไม่ได้ตอนนี้ (ตรวจ 2026-09-23)** — tool anchor วันปัจจุบันจาก `fact_MB52` (**2026-09-22**) แต่ตารางรายวันหยุดที่ **2026-08-13** → ฝั่ง current ไม่มีแถว จึงคืน **`qty_curr` = 0 ทุกกลุ่ม** (ยิงจริง group_by='region': ทุก region ได้ 0 ขณะที่ `qty_prev` มีค่า) ถ้าใช้จะตอบว่า "สต็อกลด 100%" — **ห้ามใช้จนกว่าข้อมูลรายวันจะตามทัน**
 > ✅ **สูตร fallback ข้างบนต้องแก้ anchor** — ใช้ `MAX(Date_Key)` ของ `fact_sales_and_stock_daily` **เอง** ไม่ใช่ `MAX(Stock_Date)` ของ `fact_MB52` เพราะสองตาราง**ไม่ตรงวันกันแล้ว** (MB52 2026-09-22 vs รายวัน 2026-08-13) · และต้อง**บอก user ว่าข้อมูลรายวันล่าช้า ~40 วัน**
@@ -301,17 +312,96 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 - ห้ามใช้ CTE 2 ชุด JOIN กัน (ช้า) — ใช้ conditional SUM แทน
 - SELECT / WITH เท่านั้น (read-only)
 
+## 5.7 คำถามยอดนิยม — query shape (ฐานคงเหลือ)
+
+> ทุกข้อใช้ **ฐานคงเหลือ** (`Stock_Quantity` / `Stock_Amount` / `Stock_Amount_Standard`) ตาม default ของธุรกิจ (§5.2) และต้อง **pin snapshot** หรือ **มี date filter** ทุกครั้ง · ตัวเลขตัวอย่างวัดเมื่อ 2026-09-23
+
+### (ก) ของค้าง / RED PURPLE — `ai.fact_MB52` (snapshot)
+```sql
+SELECT f.Aging_Color_Text AS aging,
+  SUM(CAST(f.Stock_Quantity AS float)) AS qty,
+  SUM(CAST(f.Stock_Amount AS float)) AS mv,
+  SUM(CAST(f.Stock_Amount_Standard AS float)) AS std
+FROM ai.fact_MB52 f
+WHERE f.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
+GROUP BY f.Aging_Color_Text
+```
+ตรวจแล้วผลรวม 4 กลุ่ม = **4,949,274** ตรงกับยอดทั้งตารางเป๊ะ → ไม่มีแถวหลุด
+
+| Zone | จำนวน | MV | STD |
+|---|---|---|---|
+| GREEN | 3,938,528 | ฿870.7M | ฿900.2M |
+| YELLOW | 627,310 | ฿129.9M | ฿135.5M |
+| 🟣 PURPLE | 273,009 | ฿150.3M | ฿126.6M |
+| 🔴 RED | 110,427 | ฿37.6M | ฿37.8M |
+
+🔴🟣 **RED + PURPLE (ของค้าง/จม) = 383,436 ชิ้น (7.7% ของสต็อก) · MV ฿187.9M · STD ฿164.4M**
+- ⚠️ ใช้ `Aging_Color_Text` **ของ fact row** (โซน ณ วัน snapshot) — **ไม่ใช่** ของ `dim_article` ซึ่งเป็นค่าคงที่ต่อ article (คนละโซน)
+- ℹ️ PURPLE มี MV (฿150.3M) **สูงกว่า** STD (฿126.6M) — ของจมมักถูกปรับต้นทุนมาตรฐานลงแล้ว → ระบุเกณฑ์ให้ตรงคำถาม
+
+### (ข) เงินจมในสต็อก
+- = **มูลค่าต้นทุนฐานคงเหลือทั้งคลัง**: **MV ฿1,188.6M** (default) + โชว์ STD ฿1,200.2M คู่กัน
+- ✅ ให้แยก **"จมหนัก" = RED+PURPLE ฿187.9M (MV)** ≈ **15.8%** ของเงินจมทั้งหมด — นี่คือตัวเลขที่ธุรกิจต้องการจริง
+
+### (ค) แนวโน้มสต็อก 3 เดือน — `ai.fact_stock_month_ending`
+```sql
+SELECT Stock_Date,
+  SUM(CAST(Stock_Quantity AS float)) AS qty,
+  SUM(CAST(Stock_Amount AS float)) AS mv,
+  SUM(CAST(Stock_Amount_Standard AS float)) AS std
+FROM ai.fact_stock_month_ending
+WHERE Stock_Date >= '<เดือนเริ่ม>'          -- ต้องมี date filter เสมอ
+GROUP BY Stock_Date ORDER BY Stock_Date
+```
+- 🚫 **ห้ามใช้ `fact_MB52`** ทำ trend — มีวันเดียว
+- ✅ `fact_stock_month_ending` ข้อมูลถึง **2026-08-31** → **ใหม่กว่า** ตารางรายวัน (2026-08-13) จึงเป็นตัวเลือกแรกของ trend/YoY ระดับเดือน
+- ตัวอย่างจริง: พ.ค. 4,161,254 → มิ.ย. 4,011,246 → ก.ค. 4,251,762 → ส.ค. 4,667,402 ชิ้น ⇒ **+12.2% ใน 3 เดือน** (MV ฿1,071.5M → ฿1,138.3M)
+
+### (ง) สต็อกเทียบปีก่อน (YoY) — `ai.fact_stock_month_ending`
+```sql
+SELECT Stock_Date,
+  SUM(CAST(Stock_Quantity AS float)) AS qty,
+  SUM(CAST(Stock_Amount_Standard AS float)) AS std
+FROM ai.fact_stock_month_ending
+WHERE Stock_Date IN ('<เดือนเดียวกันปีก่อน>','<เดือนนี้>')
+GROUP BY Stock_Date ORDER BY Stock_Date
+```
+- ตัวอย่างจริง: ส.ค. 2025 = 4,385,339 ชิ้น / ฿1,191.2M → ส.ค. 2026 = 4,667,402 ชิ้น / ฿1,149.4M ⇒ จำนวน **+6.4%** แต่ต้นทุน **−3.5%**
+- ⚠️ **กำกับวันที่ทุกครั้ง** — ยอดสิ้นเดือน (4,667,402 @ 31 ส.ค.) **ไม่ใช่** ยอดปัจจุบัน (4,949,274 @ 22 ก.ย.) ห้ามเทียบกันในบรรทัดเดียว
+- ℹ️ ต้องเทียบ **เดือนเดียวกัน** (ส.ค. vs ส.ค.) ไม่ใช่ "เดือนล่าสุด vs เดือนก่อน"
+
+### (จ) PO ค้างส่ง — `ai.fact_po_sto`
+```sql
+SELECT Item_Category,
+  COUNT(*) AS pending_rows,
+  SUM(CAST(Still_To_Delivery_Quantity AS float)) AS still_qty,
+  SUM(CAST(Still_To_Delivery_Amount AS float)) AS still_amt,
+  SUM(CASE WHEN Delivery_Date < '<as_of>' THEN CAST(Still_To_Delivery_Quantity AS float) ELSE 0 END) AS overdue_qty,
+  SUM(CASE WHEN Delivery_Date < '<as_of>' THEN CAST(Still_To_Delivery_Amount AS float) ELSE 0 END) AS overdue_amt
+FROM ai.fact_po_sto
+WHERE Still_To_Delivery_Quantity > 0
+GROUP BY Item_Category
+```
+- `<as_of>` = ใช้ `max_date` จาก `max_po_date_synapse` เพื่อความสม่ำเสมอ
+- ⚠️ **ต้องกรอง `Item_Category`**: PO = `<> '7'` · STO = `= '7'` → ถ้าไม่กรองจะ**พอง ~28%** (2026-09-23: PO เดี่ยว 2,704,900 ชิ้น/฿209.5M vs PO+STO 3,471,644 ชิ้น/฿380.7M)
+- ✅ ตัวอย่างจริง (2026-09-23 · **PO เท่านั้น**): ค้างส่ง **2,704,900 ชิ้น · ฿209.5M** จาก 2,078 ใบ
+  - **เลยกำหนดแล้ว (`Delivery_Date` < as_of) = 163,472 ชิ้น · ฿18.9M** (~6.0% ของชิ้น) — มีรายการค้างตั้งแต่ปี 2023 ควร flag
+  - ยังไม่ถึงกำหนด = 2,541,440 ชิ้น · ฿190.6M
+- ℹ️ **"ค้างส่ง" ≠ "เกินกำหนด"** — ค้างส่ง = ยังต้องส่ง (ส่วนใหญ่ยังไม่ถึงกำหนด) · เกินกำหนด = `Delivery_Date` < วันนี้ ต้องเทียบวันที่เสมอ
+- ℹ️ อย่าใช้ `PO_Value` ตอบ "ค้างส่ง" — นั่นคือมูลค่าใบสั่งซื้อ**เต็มใบ** ไม่ใช่ส่วนที่ยังค้าง (จะเกินจริงมาก)
+
 ---
 
 # 6. Aging Zones
 `aging_color` (จาก dim_article / fact_MB52): 🟢 GREEN = สินค้าสด | 🟡 YELLOW = เริ่มค้าง | 🔴 RED = ค้างนาน | 🟣 PURPLE = สต็อกจมมาก (ต้อง clearance)
+> 📌 query shape + ตัวเลขล่าสุดของของค้าง/RED+PURPLE อยู่ที่ **§5.7 (ก)** · เงินจมที่ **§5.7 (ข)**
 
 ---
 
 # 7. Stock Value
 > ⚠️ **ทุกบรรทัดในข้อนี้มี 2 ฐาน — ดู §5.2** ให้แสดงฐานคงเหลือ (default) คู่กับฐานรวมทั้งหมดเสมอ และกำกับว่าฐานไหน
 - **Stock QTY** — ฐานคงเหลือ `Stock_Quantity` (default) · ฐานรวมทั้งหมด `Stock_Total_Quantity`
-- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก) — **MV = default** (`Stock_Amount` / `Stock_Total_Amount`) + **โชว์ STD คู่ทุกครั้ง** (`Stock_Amount_Standard` / `Stock_Total_Amount_Standard`) → ห้ามเรียกรวม ๆ ว่า "มูลค่าต้นทุน" ลอย ๆ
+- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก) — **MV = default** (`Stock_Amount` / `Stock_Total_Amount`) + **โชว์ STD คู่ทุกครั้ง** (`Stock_Amount_Standard` / `Stock_Total_Amount_Standard`) → ห้ามเรียกรวม ๆ ว่า "มูลค่าต้นทุน" ลอย ๆ · query shape + ตัวเลขล่าสุดที่ **§5.7 (ข)**
 - **Selling Value** = มูลค่าขายตามราคาป้าย (ใช้ประเมิน potential revenue) — ฐานรวมทั้งหมด `Stock_Total_Selling_Price` · ฐานคงเหลือต้อง**คำนวณ** `SUM(Selling_Price × Stock_Quantity)`
 - ⚠️ `stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน **ฐานรวมทั้งหมดเท่านั้น** (และไม่คืน available / on-order / in-transit) → งานที่ต้องการฐานคงเหลือ หรือ available ("พร้อมขาย") / on-order ("กำลังเข้า") / in-transit ต้อง query เองด้วย `inventory_query_synapse`
 
@@ -323,9 +413,9 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 
 | Keyword | Specialized Skill | ให้อะไรเพิ่ม |
 |---------|-------------------|------------|
-| "สต็อกคงเหลือ" "on hand" "มูลค่าสต็อก" "aging" "สินค้าจม" "GREEN/RED/PURPLE" | **stock-health** | Stock on hand แยก aging/brand/region + สินค้าเสี่ยง clearance |
-| "สต็อกย้อนหลัง" "แนวโน้มสต็อก" "stock trend" "สต็อกเดือนที่แล้ว" | **stock-trend** | Time series สต็อก + เปรียบเทียบช่วงเวลา |
-| "Sales In" "PO" "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" | **po-intake** | PR/PO/GR/open qty แยก vendor/สาขา + delivery status |
+| "สต็อกคงเหลือ" "on hand" "มูลค่าสต็อก" "aging" "ของค้าง" "สินค้าจม" "เงินจม" "GREEN/RED/PURPLE" | **stock-health** | Stock on hand แยก aging/brand/region + สินค้าเสี่ยง clearance + ของค้าง/เงินจม (§5.7 ก–ข) |
+| "สต็อกย้อนหลัง" "แนวโน้มสต็อก" "stock trend" "สต็อกเดือนที่แล้ว" "แนวโน้ม 3 เดือน" "เทียบปีก่อน" "YoY" | **stock-trend** | Time series สต็อก + เทียบช่วงเวลา/ปีก่อน (§5.7 ค–ง) |
+| "Sales In" "PO" "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "ค้างส่ง" "PO ค้าง" | **po-intake** | PR/PO/GR/open qty แยก vendor/สาขา + delivery status + **ค้างส่ง/เกินกำหนด (§5.7 จ)** |
 | "โอนสต็อก" "STO" "transfer" "โอนระหว่างสาขา" | **sto-transfer** | Transfer qty + open transfer แยกสาขา/สถานะ |
 
 ### Template ตอบ:

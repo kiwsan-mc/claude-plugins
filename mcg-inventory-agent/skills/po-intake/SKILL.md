@@ -53,12 +53,14 @@ tools:
 
 ## Step 4 — Response
 
-**Headline** — ยอดสั่งซื้อรวม (PO value) + สัดส่วน open (ยังไม่รับเข้า)
+**Headline** — ยอดสั่งซื้อรวม (PO value) + **ค้างส่ง** (ยังต้องส่งอีก — qty + มูลค่า) + ส่วนที่**เลยกำหนดแล้ว**
 
 **ตาราง: PO Summary**
-| Dimension | PO Qty | GR Qty | Open Qty | PO Value | %รับเข้าแล้ว |
+| Dimension | PO Qty | GR Qty | **ค้างส่ง Qty** | **ค้างส่ง Amount** | PO Value | %รับเข้าแล้ว |
 
-**Key Insights** — vendor ที่ค้างส่งเยอะ (open สูง), fulfillment rate, ของกำลังเข้าที่ต้องเตรียมพื้นที่
+> ⚠️ **"ค้างส่ง" ใช้ `Still_To_Delivery_Quantity` / `Still_To_Delivery_Amount`** — 🚫 ไม่ใช่ `Open_Quantity` (PO−GR ดิบ ต่างกันเล็กน้อย) และ 🚫 ไม่ใช่ `PO_Value` (มูลค่าเต็มใบ ไม่ใช่ส่วนที่ค้าง) · query shape + ตัวเลขที่ **§5.7 (จ)**
+
+**Key Insights** — vendor ที่**ค้างส่ง**เยอะ · ส่วนที่**เลยกำหนดแล้ว** (มีค้างตั้งแต่ปี 2023 — ควร flag) · fulfillment rate · ของกำลังเข้าที่ต้องเตรียมพื้นที่
 
 **Data Footer**
 
@@ -66,6 +68,7 @@ tools:
 
 # Output Rules
 - ต้องมี date range เสมอ
-- แยก PO (สั่ง) vs GR (รับเข้าจริง) vs Open (ค้าง) ให้ชัด
-- Open qty สูง = สัญญาณ supply delay
+- แยก PO (สั่ง) vs GR (รับเข้าจริง) vs **ค้างส่ง** (`Still_To_Delivery_*`) ให้ชัด — และแยก **"ค้างส่ง" ออกจาก "เกินกำหนด"** (`Delivery_Date` < วันนี้): ค้างส่งส่วนใหญ่ยังไม่ถึงกำหนด
+- ⚠️ **ต้องกรอง `Item_Category`** เสมอ: PO = `<> '7'` (ไม่กรอง = พอง ~28% เพราะ STO ปนเข้ามา)
+- ค้างส่งสูง = สัญญาณ supply delay · เลยกำหนดสูง = ปัญหาที่ต้องตาม vendor
 - ห้ามตีความ NULL เป็น 0
