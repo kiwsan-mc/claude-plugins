@@ -206,22 +206,45 @@ Flow การเลือก tool:
 
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
-**สต็อกคงเหลือ ("สต็อกคงเหลือเท่าไหร่" / "on hand") — ใช้ 4 measure นี้เท่านั้น จาก `ai.fact_MB52`:**
+**⚠️ สต็อกมี 2 ฐาน (basis) — ต้องแยกให้ชัด และตอบคู่กันเสมอ** (snapshot ล่าสุด `Stock_Date` = 2026-09-22 · 1,233,316 แถว · 643 สาขา · 18,935 SKU)
 
-| Measure | Column | ใช้ตอบ |
-|---------|--------|--------|
-| **Stock QTY** | `Stock_Total_Quantity` | จำนวนสต็อกคงเหลือ (ชิ้น) |
-| **Stock Amount MV** | `Stock_Total_Amount` | มูลค่าต้นทุน moving average (MV) |
-| **Stock Amount STD** | `Stock_Total_Amount_Standard` | มูลค่าต้นทุน standard (STD) |
-| **Stock Selling Price** | `Stock_Total_Selling_Price` | มูลค่าขายตามราคาป้าย |
+| ฐาน | จำนวน | ต้นทุน MV | ต้นทุน STD | ราคาขาย |
+|-----|--------|-----------|------------|---------|
+| **คงเหลือ** ← default ของธุรกิจ | `Stock_Quantity` | `Stock_Amount` | `Stock_Amount_Standard` | **คำนวณ** `SUM(Selling_Price × Stock_Quantity)` จาก `dim_article` (ไม่มีคอลัมน์เก็บ) |
+| **รวมทั้งหมด** | `Stock_Total_Quantity` | `Stock_Total_Amount` | `Stock_Total_Amount_Standard` | `Stock_Total_Selling_Price` |
 
-- ⚠️ **ห้ามใช้ `Stock_Quantity` แทน `Stock_Total_Quantity`** — คนละ measure (snapshot 2026-09: 4,941,717 vs 5,022,136 ชิ้น) เพราะ `Stock_Quantity` ไม่รวม in-transit/transit-out ที่ `Stock_Total_Quantity` รวมอยู่
-- ⚠️ **แยก MV / STD / Selling ให้ชัด — อย่าสลับ**: MV กับ STD เป็นต้นทุนคนละเกณฑ์ (2026-09: ฿1,200M vs ฿1,212M) ส่วน Selling เป็นราคาป้าย ไม่ใช่กำไร
-- ⚠️ `Stock_Total_*` **มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending`** — `ai.fact_sales_and_stock_daily` **ไม่มีคอลัมน์ชุดนี้** ดังนั้น trend/YoY รายวันต้องใช้ `Stock_Quantity` + `Stock_Amount_Standard` และ **ห้ามนำตัวเลขนั้นมาเทียบ/รวมกับ Stock QTY ของ snapshot ปัจจุบันในคำตอบเดียว**
+**สมการที่ต้องจำ (พิสูจน์กับข้อมูลจริงแล้ว):**
+`Stock_Total_Quantity` = `Stock_Quantity` + `Intransit_Quantity` + `Blocked_Quantity`
+→ 2026-09-22: 4,949,274 + 83,413 + 7,706 = **5,040,393** ✓ (ลงตัวเป๊ะ ไม่มีเศษ)
 
-**Stock ย้อนหลัง (`ai.fact_sales_and_stock_daily` — คนละชุด measure):**
+**Routing — คำถามไทย → measure:**
+
+| user ถาม | ใช้ |
+|-----------|-----|
+| "สต็อกคงเหลือ" "on hand" "เหลือเท่าไหร่" | ฐาน **คงเหลือ** = `Stock_Quantity` |
+| "สต็อกทั้งหมด" "คงเหลือทั้งหมด" "total stock" | ฐาน **รวมทั้งหมด** = `Stock_Total_Quantity` |
+| "ราคาขาย" "มูลค่าขาย" "ราคาป้าย" | คอลัมน์ราคาขายของฐานนั้น (ฐานคงเหลือต้องคำนวณ — ดูตารางบน) |
+| "ต้นทุน" "COST" "มูลค่าสต็อก" | **MV = default** + **โชว์ STD คู่ทุกครั้ง** และเขียนกำกับเกณฑ์เสมอ |
+| "พร้อมขาย" "available" | `Stock_Available_Quantity` |
+| "on order" "มีเติมของไหม" "กำลังสั่ง" | `Stock_OnOrder_Quantity` |
+| "in-transit" "ระหว่างทาง" "ของกำลังมา" | `Intransit_Quantity` |
+| "ถูกกัก" "blocked" | `Blocked_Quantity` |
+
+- ✅ **ตอบคู่กันเสมอ** — ทุกคำตอบเรื่องสต็อกคงเหลือให้แสดง **ทั้งฐานคงเหลือ (headline) และฐานรวมทั้งหมด** เพื่อให้ตรงกับ Power BI และตรวจย้อนกลับได้
+- ⚠️ **MV ≠ STD** — คนละเกณฑ์ต้นทุน (2026-09-22 ฐาน Total: MV ฿1,206.2M vs STD ฿1,218.1M ต่าง ฿11.8M ≈ ฿2.35/ชิ้น) ห้ามเขียน "มูลค่าต้นทุน" ลอย ๆ ต้องระบุ MV หรือ STD
+- ⚠️ **ราคาป้าย ≠ ราคาขาย** — `Tag_Price` คนละตัวกับ `Selling_Price` (Tag × qty สูงกว่าอีกราว ฿855M) ถ้าต้องการราคาป้ายต้องระบุ
+- ⚠️ **อย่าบวกซ้ำ** — `Intransit_Quantity` / `Blocked_Quantity` ถูกรวมอยู่ในฐาน Total แล้ว (ตามสมการข้างบน) และ `Stock_Available_Quantity` (4,596,655) ต่ำกว่า `Stock_Quantity` (4,949,274) → เป็นยอดที่หักบางส่วนออกแล้ว ไม่ใช่ยอดเสริม
+- ⚠️ **ห้ามข้ามฐานในบรรทัดเดียว** — สองฐานเป็นคนละเกณฑ์ ต้องแยกบรรทัดพร้อม label เสมอ
+
+**⚠️ tool ที่ให้มาเป็นฐาน "รวมทั้งหมด" — ไม่ใช่ default ของธุรกิจ:**
+`stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน `Stock_Total_*` เป็น [Stock QTY] → **ถ้า user ถาม "สต็อกคงเหลือ" ต้องดึงฐานคงเหลือด้วย `inventory_query_synapse`** (`Stock_Quantity` / `Stock_Amount` / `Stock_Amount_Standard`) **ห้ามนำเลขของ tool มาเรียกเป็น "สต็อกคงเหลือ" เฉย ๆ** (จะเกินจริง 91,119 ชิ้น / +1.84%)
+> `stock_on_hand_yoy_synapse` เป็นข้อยกเว้น — คืน **ฐานคงเหลือ** (`Stock_Quantity` + `Stock_Amount_Standard`) อยู่แล้ว ⇒ ตรงกับ default
+> เหตุผลที่ไม่แก้ tool: ฐาน Total ยังมีประโยชน์ต่องานที่อิง Total และการแก้ต้อง deploy container app — จึงแก้ที่สกิลเท่านั้น (ตกลง 2026-09-23)
+
+**Stock ย้อนหลัง (`ai.fact_sales_and_stock_daily`):**
 - Qty = `Stock_Quantity` | Cost Value = `Stock_Amount_Standard` | Selling = `Stock_Available_Amount_Selling`
-- ยอด ณ วัน snapshot ตรงกับ `fact_MB52` แต่ `Stock_Quantity` ≠ `Stock_Total_Quantity` — ระบุ measure ให้ชัดเมื่ออ้างตัวเลข
+- ✅ ตารางนี้มี**เฉพาะฐานคงเหลือ** → **ตรงกับ default ของธุรกิจ** จึงทำ trend/YoY ได้ (ฐาน Total ทำไม่ได้ เพราะตารางรายวันไม่มี `Stock_Total_*`)
+- ⚠️ **ตารางรายวันล่าช้ากว่า snapshot** — ข้อมูลล่าสุด 2026-08-13 ขณะที่ `fact_MB52` อยู่ที่ 2026-09-22 (ดู §5.5)
 
 **PO / STO (ai.fact_po_sto):** PO Qty = `PO_Quantity` | GR = `Total_GR_Quantity` | Open = `Open_Quantity` | PO Value = `PO_Value` | vendor = `Vendor_Text`
 - date: `PO_Date` (ทั้ง PO และ STO ใช้คอลัมน์นี้ — ตารางรวมกันแล้ว)
@@ -245,6 +268,7 @@ WHERE Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 
 **วิธีที่ 1 (แนะนำ) — ใช้ canned YoY tool:**
 - Stock: เรียก `stock_on_hand_yoy_synapse(group_by)` → ได้ qty_curr/qty_prev + cost_curr/cost_prev (auto pin snapshot vs −1 ปี)
+- 🚫 **แต่ตอนนี้ใช้ไม่ได้ — ดูคำเตือนท้าย §5.5** (`qty_curr` = 0 ทุกกลุ่ม) → ใช้วิธีที่ 2 ไปก่อน
 - PO/Sales In: เรียก `max_po_date_synapse` ก่อน → แล้ว `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)`
 - คำนวณ YoY% = (curr − prev) / NULLIF(prev, 0) × 100 เอง
 
@@ -264,8 +288,9 @@ WHERE f.Date_Key IN (s.d, DATEADD(year, -1, s.d))
 GROUP BY f.Aging_Color_Text
 ```
 > ⚠️ `inventory_query_synapse` รับ **SELECT / WITH เท่านั้น — ห้ามใช้ `DECLARE`** (จะถูก reject) ถ้าต้องการตัวแปร ให้ใช้ CTE แทนตามตัวอย่างข้างบน
-> หมายเหตุ: ค่า ณ วัน snapshot จากสองตารางตรงกัน (ตรวจแล้ว 2026-09-14 = 4,814,498 ชิ้นทั้งคู่)
-> ⚠️ qty ในสูตรนี้ (`stock_on_hand_yoy_synapse` ก็เช่นกัน) ใช้ `Stock_Quantity` จากตารางรายวัน ซึ่ง **คนละ measure กับ Stock QTY (`Stock_Total_Quantity`) ของ snapshot ปัจจุบัน** — ถ้า user เทียบ "สต็อกคงเหลือปัจจุบัน vs ปีก่อน" ต้องบอกให้ชัดว่าใช้เกณฑ์ไหน อย่าให้ตัวเลขสองชุดปนกันในตารางเดียว
+> 🚫 **`stock_on_hand_yoy_synapse` ใช้ไม่ได้ตอนนี้ (ตรวจ 2026-09-23)** — tool anchor วันปัจจุบันจาก `fact_MB52` (**2026-09-22**) แต่ตารางรายวันหยุดที่ **2026-08-13** → ฝั่ง current ไม่มีแถว จึงคืน **`qty_curr` = 0 ทุกกลุ่ม** (ยิงจริง group_by='region': ทุก region ได้ 0 ขณะที่ `qty_prev` มีค่า) ถ้าใช้จะตอบว่า "สต็อกลด 100%" — **ห้ามใช้จนกว่าข้อมูลรายวันจะตามทัน**
+> ✅ **สูตร fallback ข้างบนต้องแก้ anchor** — ใช้ `MAX(Date_Key)` ของ `fact_sales_and_stock_daily` **เอง** ไม่ใช่ `MAX(Stock_Date)` ของ `fact_MB52` เพราะสองตาราง**ไม่ตรงวันกันแล้ว** (MB52 2026-09-22 vs รายวัน 2026-08-13) · และต้อง**บอก user ว่าข้อมูลรายวันล่าช้า ~40 วัน**
+> ✅ qty ในสูตรนี้ใช้ `Stock_Quantity` = **ฐานคงเหลือ ซึ่งเป็น default ของธุรกิจ (§5.2)** → ถ้าหยิบค่าปัจจุบันเป็น `Stock_Quantity` จาก `fact_MB52` ด้วย จะเทียบกันได้ตรงเกณฑ์ — 🚫 อย่าเอาค่าปัจจุบันจาก `stock_on_hand_synapse` (ฐานรวมทั้งหมด) มาเทียบกับปีก่อน (ฐานคงเหลือ)
 
 **PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `PO_Date` + filter `Item_Category`
 
@@ -284,10 +309,11 @@ YoY% = `(curr − prev) / NULLIF(prev, 0) * 100`
 ---
 
 # 7. Stock Value
-- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก) — มี **2 เกณฑ์**: **MV** (`Stock_Total_Amount`) และ **STD** (`Stock_Total_Amount_Standard`) → ต้องระบุว่าใช้เกณฑ์ไหน อย่าเรียกรวมๆ ว่า "มูลค่าต้นทุน" ลอยๆ
-- **Selling Value** = มูลค่าขายตามราคาป้าย (ใช้ประเมิน potential revenue) — `Stock_Total_Selling_Price`
-- **Stock QTY** = จำนวนคงเหลือรวม — `Stock_Total_Quantity`
-- ⚠️ `stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน **4 measure ข้างบนเท่านั้น** (ไม่คืน available / on-order) — ถ้า user ถาม available ("พร้อมขาย") หรือ on-order ("กำลังเข้า") แยก ให้ query เองด้วย `inventory_query_synapse` (`Stock_Available_Quantity` / `Stock_OnOrder_Quantity`)
+> ⚠️ **ทุกบรรทัดในข้อนี้มี 2 ฐาน — ดู §5.2** ให้แสดงฐานคงเหลือ (default) คู่กับฐานรวมทั้งหมดเสมอ และกำกับว่าฐานไหน
+- **Stock QTY** — ฐานคงเหลือ `Stock_Quantity` (default) · ฐานรวมทั้งหมด `Stock_Total_Quantity`
+- **Cost Value** = มูลค่าต้นทุน (ใช้ประเมินเงินจมในสต็อก) — **MV = default** (`Stock_Amount` / `Stock_Total_Amount`) + **โชว์ STD คู่ทุกครั้ง** (`Stock_Amount_Standard` / `Stock_Total_Amount_Standard`) → ห้ามเรียกรวม ๆ ว่า "มูลค่าต้นทุน" ลอย ๆ
+- **Selling Value** = มูลค่าขายตามราคาป้าย (ใช้ประเมิน potential revenue) — ฐานรวมทั้งหมด `Stock_Total_Selling_Price` · ฐานคงเหลือต้อง**คำนวณ** `SUM(Selling_Price × Stock_Quantity)`
+- ⚠️ `stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน **ฐานรวมทั้งหมดเท่านั้น** (และไม่คืน available / on-order / in-transit) → งานที่ต้องการฐานคงเหลือ หรือ available ("พร้อมขาย") / on-order ("กำลังเข้า") / in-transit ต้อง query เองด้วย `inventory_query_synapse`
 
 ---
 

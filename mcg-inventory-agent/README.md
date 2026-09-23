@@ -56,16 +56,20 @@ skills/
 
 `stock_on_hand_synapse` และ `stock_value_by_aging_synapse` คืน 4 measure มาตรฐานนี้:
 
-| Measure | Column |
-|---------|--------|
-| **Stock QTY** | `Stock_Total_Quantity` |
-| **Stock Amount MV** | `Stock_Total_Amount` (ต้นทุน moving average) |
-| **Stock Amount STD** | `Stock_Total_Amount_Standard` (ต้นทุน standard) |
-| **Stock Selling Price** | `Stock_Total_Selling_Price` (ราคาป้าย) |
+**⚠️ สต็อกมี 2 ฐาน (basis) — ตอบคู่กันเสมอ** (ดู §5.2 ของ inventory-agent)
 
-> ⚠️ **ห้ามใช้ `Stock_Quantity` แทน `Stock_Total_Quantity`** — คนละ measure (snapshot 2026-09: 4,941,717 vs 5,022,136 ชิ้น)
+| ฐาน | จำนวน | ต้นทุน MV | ต้นทุน STD | ราคาขาย |
+|-----|--------|-----------|------------|---------|
+| **คงเหลือ** ← default ของธุรกิจ | `Stock_Quantity` | `Stock_Amount` | `Stock_Amount_Standard` | คำนวณ `Selling_Price × Stock_Quantity` |
+| **รวมทั้งหมด** | `Stock_Total_Quantity` | `Stock_Total_Amount` | `Stock_Total_Amount_Standard` | `Stock_Total_Selling_Price` |
+
+> ✅ สมการที่พิสูจน์แล้ว: `Stock_Total_Quantity` = `Stock_Quantity` + `Intransit_Quantity` + `Blocked_Quantity` (2026-09-22: 4,949,274 + 83,413 + 7,706 = **5,040,393**)
 >
-> ⚠️ `Stock_Total_*` มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending` — `ai.fact_sales_and_stock_daily` **ไม่มี** ดังนั้น `stock_daily_trend_synapse` / `stock_on_hand_yoy_synapse` ใช้ `Stock_Quantity` และตัวเลข **ไม่ใช่** measure เดียวกันกับ Stock QTY ของ snapshot ปัจจุบัน
+> ⚠️ `stock_on_hand_synapse` / `stock_value_by_aging_synapse` คืน **ฐานรวมทั้งหมด** — ถ้า user ถาม "สต็อกคงเหลือ" ต้องดึงฐานคงเหลือด้วย `inventory_query_synapse` (ถ้าไม่ จะเกินจริง 91,119 ชิ้น / +1.84%)
+>
+> ⚠️ `Stock_Total_*` มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending` — `ai.fact_sales_and_stock_daily` **ไม่มี** → trend/YoY ทำได้เฉพาะ**ฐานคงเหลือ** (`Stock_Quantity` + `Stock_Amount_Standard`) ซึ่งตรงกับ default พอดี
+>
+> 🚫 `stock_on_hand_yoy_synapse` **ใช้ไม่ได้ตอนนี้** (คืน `qty_curr` = 0 ทุกกลุ่ม เพราะตารางรายวันหยุด 2026-08-13 แต่ tool anchor ที่ 2026-09-22)
 
 ## Data Sources
 

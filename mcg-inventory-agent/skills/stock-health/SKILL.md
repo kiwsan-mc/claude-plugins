@@ -38,9 +38,9 @@ tools:
 เรียก `stock_on_hand_synapse(group_by=<dimension>)`
 
 ผลลัพธ์ให้ 4 measure มาตรฐานของสต็อกคงเหลือ: **[Stock QTY]**, **[Stock Amount MV]**, **[Stock Amount STD]**, **[Stock Selling Price]** + `sku_count`, `branch_count`
-> 📌 ดูนิยาม measure ที่ §5.2 ของ inventory-agent — Stock QTY = `Stock_Total_Quantity` (ไม่ใช่ `Stock_Quantity`) และ cost มี 2 เกณฑ์ (MV / STD)
+> 📌 ดูนิยาม measure ที่ §5.2 ของ inventory-agent — ค่าที่ tool คืนเป็น **ฐานรวมทั้งหมด** (`Stock_Total_*`) ซึ่ง**ไม่ใช่** default ของธุรกิจ (default = ฐานคงเหลือ `Stock_Quantity`) → ต้องดึงฐานคงเหลือคู่ด้วยเสมอ และ cost มี 2 เกณฑ์ (MV / STD) ให้โชว์คู่ทุกครั้ง
 
-> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** ใช้ `stock_on_hand_yoy_synapse(group_by=<dimension>)` แทน → ได้ qty_curr/qty_prev + cost_curr/cost_prev (snapshot ปัจจุบัน vs วันเดียวกันปีก่อน) แล้วคำนวณ YoY% = (curr − prev) / prev × 100
+> 🚫 **ถ้า user ขอเทียบปีก่อน (YoY): `stock_on_hand_yoy_synapse` ใช้ไม่ได้ตอนนี้** — คืน `qty_curr` = 0 ทุกกลุ่ม (ตารางรายวันหยุด 2026-08-13 แต่ tool anchor ที่ 2026-09-22) → ดูวิธีที่ถูกใน §5.5 ของ inventory-agent (แก้ anchor เป็น `MAX(Date_Key)` ของตารางรายวันเอง + แจ้ง user ว่าข้อมูลล่าช้า ~40 วัน)
 
 ## Step 3 — (ถ้าต้องการเจาะสินค้าเสี่ยง) High Risk RED+PURPLE
 
@@ -49,8 +49,10 @@ tools:
 SELECT TOP 10
   a.Aging_Color_Text AS aging_color,
   a.Level3_Item_Category_Text AS category,
-  SUM(CAST(s.Stock_Total_Quantity AS float)) AS [Stock QTY],
-  SUM(CAST(s.Stock_Total_Amount_Standard AS float)) AS [Stock Amount STD]
+  SUM(CAST(s.Stock_Quantity AS float)) AS [Stock QTY (คงเหลือ)],
+  SUM(CAST(s.Stock_Total_Quantity AS float)) AS [Stock QTY (รวมทั้งหมด)],
+  SUM(CAST(s.Stock_Amount_Standard AS float)) AS [Stock Amount STD (คงเหลือ)],
+  SUM(CAST(s.Stock_Total_Amount_Standard AS float)) AS [Stock Amount STD (รวมทั้งหมด)]
 FROM ai.fact_MB52 s
 JOIN ai.dim_article a ON s.Article_Key = a.Article_Key
 WHERE s.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
