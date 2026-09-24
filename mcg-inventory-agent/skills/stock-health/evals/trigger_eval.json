@@ -1,0 +1,27 @@
+[
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": true},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": true},
+  {"query": "stock on hand ตอนนี้เท่าไหร่", "should_trigger": true},
+  {"query": "ของค้างมีเยอะไหม", "should_trigger": true},
+  {"query": "ของค้างเกิน 6 เดือนมีไหม", "should_trigger": true},
+  {"query": "ขายไม่ออกมีเท่าไหร่", "should_trigger": true},
+  {"query": "เงินจมในสต็อกเท่าไหร่", "should_trigger": true},
+  {"query": "มูลค่าสต็อกเท่าไหร่", "should_trigger": true},
+  {"query": "RED PURPLE มีเท่าไหร่", "should_trigger": true},
+  {"query": "สต็อกแยกแบรนด์", "should_trigger": true},
+  {"query": "สาขาไหนสต็อกล้น", "should_trigger": true},
+  {"query": "คลังกลางมีของเท่าไหร่", "should_trigger": true},
+
+  {"query": "Sales In เดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "PO ค้างส่งจาก vendor ไหนบ้าง", "should_trigger": false},
+  {"query": "PO+STO ค้างส่งรวมตอนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "open PO มีเท่าไหร่", "should_trigger": false},
+  {"query": "โอนสต็อกระหว่างสาขาเดือนนี้", "should_trigger": false},
+  {"query": "STO ค้างรับปลายทางมีเท่าไหร่", "should_trigger": false},
+  {"query": "แนวโน้มสต็อก 3 เดือน", "should_trigger": false},
+  {"query": "สต็อกเทียบปีก่อน", "should_trigger": false},
+  {"query": "สต็อกย้อนหลัง 6 เดือน", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false},
+  {"query": "มีสินค้ากี่ตัว", "should_trigger": false}
+]
