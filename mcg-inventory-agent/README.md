@@ -71,7 +71,7 @@ skills/
 >
 > ⚠️ `Stock_Total_*` มีเฉพาะ `ai.fact_MB52` และ `ai.fact_stock_month_ending` — `ai.fact_sales_and_stock_daily` **ไม่มี** → trend/YoY ทำได้เฉพาะ**ฐานคงเหลือ** (`Stock_Quantity` + `Stock_Amount_Standard`) ซึ่งตรงกับ default พอดี
 >
-> 🚫 `stock_on_hand_yoy_synapse` **ใช้ไม่ได้ตอนนี้** (คืน `qty_curr` = 0 ทุกกลุ่ม เพราะตารางรายวันหยุด 2026-08-13 แต่ tool anchor ที่ 2026-09-22)
+> ✅ `stock_on_hand_yoy_synapse` **ใช้ได้แล้ว** (ตรวจ 2026-09-24) — เคยคืน `qty_curr` = 0 ตอนตารางรายวันหยุดที่ 2026-08-13 แต่ถูกเติมครบถึง 2026-09-23 แล้ว
 
 ## Data Sources
 

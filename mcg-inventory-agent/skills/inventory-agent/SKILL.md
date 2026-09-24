@@ -231,9 +231,9 @@ Flow การเลือก tool:
 | "on order" "มีเติมของไหม" "กำลังสั่ง" | `Stock_OnOrder_Quantity` |
 | "in-transit" "ระหว่างทาง" "ของกำลังมา" | `Intransit_Quantity` |
 | "ถูกกัก" "blocked" | `Blocked_Quantity` |
-| **"ของค้าง"** "ขายไม่ออก" "ไม่มีการขาย" "slow moving" "ค้างเกิน 6 เดือน" | **ของค้างตามยอดขาย** = ไม่มีขายที่ร้าน OFFLINE ≥30/60/90 วัน · ตัดคลังออก → §5.7 (ฉ) |
+| **"ของค้าง"** "ขายไม่ออก" "ไม่มีการขาย" "slow moving" "ค้างเกิน 6 เดือน" **"ของค้างมีเยอะไหม"** | **ของค้างตามยอดขาย** = ไม่มีขายที่ร้าน OFFLINE ≥30/60/90 วัน · ตัดคลังออก → §5.7 (ฉ) + **ตารางบังคับ (ช)** |
 | "aging" "RED" "PURPLE" "สินค้าจม" "สี" | อายุสินค้า `Aging_Color_Text` บน `fact_MB52` → §5.7 (ก) |
-| "เงินจมในสต็อก" | มูลค่าต้นทุนฐานคงเหลือ (MV default + STD) + แยกส่วน RED+PURPLE → §5.7 (ข) |
+| "เงินจมในสต็อก" **"เงินจมในสต็อกเท่าไหร่"** | มูลค่าต้นทุนฐานคงเหลือ (MV default + STD) + แยกส่วน RED+PURPLE → §5.7 (ข) + **ตารางบังคับ (ช)** |
 | "แนวโน้มสต็อก 3 เดือน" "trend" | `fact_stock_month_ending` ฐานคงเหลือ — 🚫 **ห้ามใช้ `fact_MB52`** (วันเดียว) → §5.7 (ค) |
 | "สต็อกเทียบปีก่อน" "YoY" | `fact_stock_month_ending` เดือนเดียวกันปีก่อน → §5.7 (ง) |
 
@@ -458,16 +458,18 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 → **ต้องแนบตารางนี้ทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม
 
 **นิยาม:** รุ่น-สีที่ **(ไม่มีขายเลย ≥ 30 วัน) หรือ (ขายได้ ≤ 20% ของสต็อกคงเหลือ)** เรียงตาม Stock QTY มาก→น้อย เอา TOP 10
+> ⚙️ เกณฑ์ "ไม่มีขาย" ของตารางนี้ **ใช้ 30 วันคงที่** (แคบสุดใน 30/60/90 → จับของค้างได้กว้างสุด) · ถ้า user ระบุ 60/90 วัน ให้เปลี่ยน `>= 30` เป็น `>= 60` / `>= 90` **และบอกเกณฑ์ที่ใช้ในคำตอบ**
 · base = **ฐานคงเหลือ** · ตัดคลัง (`Branch_Code_Group = 'Store'`) · OFFLINE · สต็อก > 0
 
 ```sql
-WITH sold AS (            -- ยอดขายต่อรุ่น-สี (ไม่รวมคลัง)
-  SELECT a.Article_Model_Color AS mc, MAX(a.Article_Model) AS mdl,
+WITH sold AS (            -- ⚠️ ยอดขายต้องเป็น OFFLINE เท่านั้น (ให้ตรงนิยาม §5.7 (ฉ))
+  SELECT a.Article_Model_Color AS mc,
     SUM(CAST(f.Total_Quantity AS float)) AS s90, MAX(f.Date_Key) AS last_sold
   FROM ai.fact_sales_and_stock_daily f
   JOIN ai.dim_article a ON f.Article_Key = a.Article_Key
+  JOIN ai.dim_branch d ON f.Branch_Code_Key = d.Branch_Code_Key     -- ต้อง join เพื่อกรอง channel
   WHERE f.Date_Key >= DATEADD(day, -90, '<as_of>') AND f.Total_Quantity > 0
-    AND f.Branch_Code_Key <> '1101'
+    AND d.Main_Channel = 'OFFLINE' AND d.Channel_Store <> 'MFC'
   GROUP BY a.Article_Model_Color
 ),
 stock AS (                -- สต็อกคงเหลือต่อรุ่น-สี
@@ -483,34 +485,52 @@ stock AS (                -- สต็อกคงเหลือต่อรุ
 SELECT TOP 10 s.mc AS model_color, s.mdl AS model, s.stock_qty, s.mv,
   ISNULL(d.s90, 0) AS sold_90, d.last_sold,
   CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty, 0) * 100 AS decimal(6,1)) AS pct_vs_stock,
-  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty + ISNULL(d.s90,0), 0) * 100 AS decimal(6,1)) AS pct_incl_sales
+  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty + ISNULL(d.s90,0), 0) * 100 AS decimal(6,1)) AS pct_incl_sales,
+  CASE                                   -- ✅ บังคับ: บอกว่าแถวนี้เข้าเกณฑ์ไหน
+    WHEN d.last_sold IS NULL THEN 'ไม่เคยขาย'
+    WHEN DATEDIFF(day, d.last_sold, '<as_of>') >= 90 THEN 'ไม่มีขาย 90+ วัน'
+    WHEN DATEDIFF(day, d.last_sold, '<as_of>') >= 60 THEN 'ไม่มีขาย 60–89 วัน'
+    WHEN DATEDIFF(day, d.last_sold, '<as_of>') >= 30 THEN 'ไม่มีขาย 30–59 วัน'
+    ELSE 'ขาย ≤20% ของสต็อก'
+  END AS criterion
 FROM stock s LEFT JOIN sold d ON s.mc = d.mc
 WHERE (d.last_sold IS NULL OR DATEDIFF(day, d.last_sold, '<as_of>') >= 30)
    OR (d.s90 <= 0.20 * s.stock_qty)
 ORDER BY s.stock_qty DESC
 ```
 
-**ผลจริง (as_of 2026-09-23 · ไม่รวมคลัง · OFFLINE):**
+**ผลจริง (as_of 2026-09-23 · OFFLINE · ไม่รวมคลัง):**
 
-| รุ่น-สี | รุ่น | Stock QTY | MV | ขาย 90 วัน | ขายล่าสุด | ขาย ÷ สต็อก |
-|---|---|---|---|---|---|---|
-| XXMBDP13400 | XXMBDP134 | 9,234 | ฿3.06M | 619 | 2026-09-23 | **6.7%** |
-| XXMAMZ00900 | XXMAMZ009 | 7,331 | ฿3.95M | 433 | 2026-09-23 | **5.9%** |
-| XXMFSP2530B | XXMFSP253 | 7,247 | ฿2.56M | 995 | 2026-09-23 | 13.7% |
-| XXMBDP18520 | XXMBDP185 | 6,966 | ฿2.69M | 332 | 2026-09-23 | **4.8%** |
-| XXMFI31092B | XXMFI3109 | 6,916 | ฿2.72M | 1,074 | 2026-09-23 | 15.5% |
+| รุ่น-สี | รุ่น | Stock QTY | MV | ขาย 90 วัน | ขายล่าสุด | ขาย ÷ สต็อก | ขาย ÷ (สต็อก+ขาย) | **เกณฑ์ที่เข้า** |
+|---|---|---|---|---|---|---|---|---|
+| XXMBDP13400 | XXMBDP134 | 9,234 | ฿3.06M | 510 | 2026-09-23 | 5.5% | 5.2% | ขาย ≤20% ของสต็อก |
+| XXMAMZ00900 | XXMAMZ009 | 7,331 | ฿3.95M | 420 | 2026-09-23 | 5.7% | 5.4% | ขาย ≤20% ของสต็อก |
+| XXMFSP2530B | XXMFSP253 | 7,247 | ฿2.56M | 868 | 2026-09-23 | 12.0% | 10.7% | ขาย ≤20% ของสต็อก |
+| XXMBDP18520 | XXMBDP185 | 6,966 | ฿2.69M | 317 | 2026-09-23 | 4.6% | 4.4% | ขาย ≤20% ของสต็อก |
+| XXMFI31092B | XXMFI3109 | 6,916 | ฿2.72M | 1,062 | 2026-09-23 | 15.4% | 13.3% | ขาย ≤20% ของสต็อก |
+| XXMAMZ0170B | XXMAMZ017 | 6,642 | ฿3.07M | 1,239 | 2026-09-23 | 18.7% | 15.7% | ขาย ≤20% ของสต็อก |
+| XXMFIZ2220D | XXMFIZ222 | 6,390 | ฿3.24M | 783 | 2026-09-23 | 12.3% | 10.9% | ขาย ≤20% ของสต็อก |
+| XXM09Z00610 | XXM09Z006 | 6,248 | ฿1.62M | 808 | 2026-09-23 | 12.9% | 11.5% | ขาย ≤20% ของสต็อก |
+| XXMFSZ2432B | XXMFSZ243 | 6,047 | ฿2.00M | 986 | 2026-09-23 | 16.3% | 14.0% | ขาย ≤20% ของสต็อก |
+| XXMFMZ2310D | XXMFMZ231 | 5,719 | ฿2.46M | 592 | 2026-09-23 | 10.4% | 9.4% | ขาย ≤20% ของสต็อก |
 
-- 📊 ทั้งคลัง **2,660 รุ่น** → เข้าเกณฑ์ **447 รุ่น** · ไม่ขายใน 90 วัน 467 · ตาย 30–89 วัน 285
-- ⚠️ **ต้องกรองก่อนแล้วค่อย TOP 10** — TOP 10 by stock ดิบ ๆ จะได้รุ่น**ขายดี** (sell-through 30–77%) ซึ่งไม่ใช่ของค้าง
-- ⚠️ **นิยาม 20% มี 2 แบบ — โชว์ทั้งคู่เสมอ**: `ขาย ÷ สต็อก` (ใช้กรอง default) และ `ขาย ÷ (สต็อก + ขาย)` · เปลี่ยนรายการอันดับ 1 เช่น XXMFIZ222 = **22.7% vs 18.5%**
-- ℹ️ **"Model Col." ตีความ = `Article_Model_Color`** · ถ้าต้องการระดับรุ่น → เปลี่ยน GROUP BY เป็น `Article_Model` (TOP 10 จะเป็น XXMFIZ222 18,572 · XXMCCZ037 13,943 · XXMFI3109 11,587 …)
-- ✅ แสดง **"รุ่น-สี" + "รุ่น"** ทั้งคู่ เพื่อให้ตามกลับไปที่ master ได้
+- 📊 **ระดับรุ่น-สี** (ตรงกับตารางนี้): ทั้งคลัง **3,703 รุ่น-สี** → เข้าเกณฑ์ **1,869** · แยกเป็น **ไม่มีขาย ≥30 วัน 1,322** (ไม่เคยขาย 962 · ตาย 30–89 วัน 360) และ **ขาย ≤20% 547** (ที่เหลือ)
+- ⚠️ **ทุกแถวในตัวอย่างนี้เข้าเกณฑ์ "ขาย ≤20%" ทั้งหมด** และ `ขายล่าสุด` = วันเดียวกับ snapshot (คือยังขายอยู่ แต่ขายน้อยเทียบกับสต็อก) — ของที่ *ไม่มีขาย* มักมีสต็อกน้อยกว่าจึงไม่ติด TOP 10 ⇒ **คอลัมน์ "เกณฑ์ที่เข้า" คือสิ่งที่ทำให้อ่านออกว่าแถวไหนเป็นของค้างจริง** ต้องมีเสมอ
+- ⚠️ **ต้องกรองก่อน แล้วค่อย TOP 10 by Stock QTY** — ไม่ใช่ TOP 10 ก่อนแล้วค่อยกรอง
+- ⚠️ **ตัวหารของ 20% ต้องระบุ**: ตารางนี้ **กรองด้วย `ขาย ÷ สต็อก`** และ **โชว์ทั้งสองแบบ** (ทั้งคู่ต่างกันจริง — ถ้าเปลี่ยนตัวหาร รายการที่เข้าเกณฑ์จะเปลี่ยน)
+- ℹ️ **"Model Col." ตีความ = `Article_Model_Color`** · ถ้าต้องการระดับรุ่น → เปลี่ยน GROUP BY เป็น `Article_Model`
+- ✅ แสดง **"รุ่น-สี" + "รุ่น"** ทั้งคู่ เพื่อตามกลับไปที่ master ได้
+
+**🚫 3 กับดักข้อมูล (ยืนยันกับ DB 2026-09-24 — เคยทำให้ SQL เวอร์ชันแรกผิดมาแล้ว):**
+1. **`Main_Channel = 'OFFLINE'` ไม่ได้ตัดคลังออก** — สาขา `1101` (MFC) มี `Main_Channel = 'OFFLINE'` และถือ **53% ของทั้งบริษัท** ⇒ ตัดคลังด้วย **`d.Channel_Store <> 'MFC'`** แยกต่างหาก · 🚫 อย่าจำรหัส `1101` มาใช้ (เดิมใช้ literal แล้วจะเงียบ ๆ พังถ้าคลังเปลี่ยนชุด)
+2. **ยอดขายต้องกรอง OFFLINE ด้วย** — เวอร์ชันแรกกรองแค่ตัดคลัง ปล่อยให้ยอดออนไลน์ปนเข้ามา → `sold_90` สูงเกินทุกแถว (เช่น 619 แทน 510) และรุ่นที่ขายดีออนไลน์แต่ตายที่ร้านจะหายไป 43 รุ่น ⇒ **ขาย = OFFLINE เท่านั้น ให้ตรงกับ §5.7 (ฉ)**
+3. **`fact_MB52` ไม่ unique ที่ (Article_Key, Branch_Code_Key)** — ซ้ำ 29,608 คู่ ⇒ **ห้าม join ตารางยอดขายกับ MB52 ดิบ ๆ ที่คู่นี้** (fan-out) ให้ aggregate แยกกันแล้ว join ที่ระดับรุ่น-สี · และนับ "ขาย" จาก **ผลรวมของแถวที่ `Total_Quantity > 0`** ไม่ใช่การมีอยู่ของแถว (แถวส่วนใหญ่ในตารางรายวันมียอด 0/NULL)
 
 ---
 
 # 6. Aging Zones
 `aging_color` (จาก dim_article / fact_MB52): 🟢 GREEN = สินค้าสด | 🟡 YELLOW = เริ่มค้าง | 🔴 RED = ค้างนาน | 🟣 PURPLE = สต็อกจมมาก (ต้อง clearance)
-> 📌 query shape + ตัวเลขล่าสุดของของค้าง/RED+PURPLE อยู่ที่ **§5.7 (ก)** · เงินจมที่ **§5.7 (ข)**
+> 📌 query shape + ตัวเลขล่าสุดของของค้าง/RED+PURPLE อยู่ที่ **§5.7 (ก)** · เงินจมที่ **§5.7 (ข)** · **ตารางบังคับ Stock QTY by TOP 10 Model Color ที่ §5.7 (ช)** — แนบทุกครั้งเมื่อถามของค้าง/ของจม
 
 ---
 
@@ -529,7 +549,7 @@ ORDER BY s.stock_qty DESC
 
 | Keyword | Specialized Skill | ให้อะไรเพิ่ม |
 |---------|-------------------|------------|
-| "สต็อกคงเหลือ" "on hand" "มูลค่าสต็อก" "aging" "ของค้าง" "สินค้าจม" "เงินจม" "GREEN/RED/PURPLE" | **stock-health** | Stock on hand แยก aging/brand/region + สินค้าเสี่ยง clearance + ของค้าง/เงินจม (§5.7 ก–ข) |
+| "สต็อกคงเหลือ" "on hand" "มูลค่าสต็อก" "aging" "ของค้าง" "สินค้าจม" "เงินจม" "GREEN/RED/PURPLE" | **stock-health** | Stock on hand แยก aging/brand/region + สินค้าเสี่ยง clearance + ของค้าง/เงินจม + **ตารางบังคับ Stock QTY by TOP 10 Model Color (§5.7 ก–ข, ช)** |
 | "สต็อกย้อนหลัง" "แนวโน้มสต็อก" "stock trend" "สต็อกเดือนที่แล้ว" "แนวโน้ม 3 เดือน" "เทียบปีก่อน" "YoY" | **stock-trend** | Time series สต็อก + เทียบช่วงเวลา/ปีก่อน (§5.7 ค–ง) |
 | "Sales In" "PO" "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "ค้างส่ง" "PO ค้าง" | **po-intake** | PR/PO/GR/open qty แยก vendor/สาขา + delivery status + **ค้างส่ง/เกินกำหนด (§5.7 จ)** |
 | "โอนสต็อก" "STO" "transfer" "โอนระหว่างสาขา" | **sto-transfer** | Transfer qty + open transfer แยกสาขา/สถานะ |
@@ -579,6 +599,8 @@ ORDER BY s.stock_qty DESC
 
 **Default = กลาง**
 
+> ⚠️ **ข้อยกเว้นของ "สั้น":** 3 คำถาม **"ของค้างมีเยอะไหม" · "เงินจมในสต็อกเท่าไหร่" · "ของค้างเกิน 6 เดือนมีไหม"** → **ต้องมีตาราง §5.7 (ช) เสมอ** แม้คำถามจะเข้าข่าย "สั้น" (ตัวเลขเดียว / ใช่-ไม่ใช่) — ห้ามตอบแค่ตัวเลขลอย ๆ
+
 `📦 Data: Inventory (Synapse) | Snapshot/Period: [...] | As of: [latest snapshot date]`
 
 > ⚠️ Footer ต้องเป็นรูปแบบนี้เท่านั้น — **ห้ามใส่ชื่อ table / tool / column** (เช่น `fact_MB52`, `stock_on_hand_synapse`) และห้ามเปลี่ยน `Inventory (Synapse)` เป็นอย่างอื่น
@@ -589,5 +611,6 @@ ORDER BY s.stock_qty DESC
 
 ---
 
-# 15. Final Validation (9 checks)
+# 15. Final Validation (10 checks)
 1. ข้อมูลจริง 2. ใช้ canned tool ก่อน raw query 3. snapshot pinning ถูกต้อง (current) / date range (historical) 4. cost (MV/STD) vs selling ถูก และระบุเกณฑ์ที่ใช้ 5. ไม่เดาสาเหตุ 6. กระชับ 7. Data Footer 8. actionable **9. ไม่มีชื่อ tool / table / column รั่วออกไปในส่วนไหนเลย — รวมถึง insight block, หมายเหตุ และ footer (§1.2)**
+10. **"ของค้างมีเยอะไหม" / "เงินจมในสต็อกเท่าไหร่" / "ของค้างเกิน 6 เดือนมีไหม" → ต้องมีตาราง §5.7 (ช) Stock QTY by TOP 10 Model Color พร้อมคอลัมน์ "เกณฑ์ที่เข้า" และระบุ as-of**
