@@ -25,6 +25,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_yoy_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_slow_moving_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_transfer_candidates_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__sales_out_by_model_color
 ---
 
 # MC Group Inventory Agent v2
@@ -464,8 +465,8 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 
 **ใช้กับ 3 คำถามนี้เสมอ** (user สั่ง 2026-09-24): **"ของค้างมีเยอะไหม"** · **"เงินจมในสต็อกเท่าไหร่"** · **"ของค้างเกิน 6 เดือนมีไหม"**
 
-**โครงคำตอบบังคับ 4 ส่วน** — ต้องครบทุกส่วน ไม่ใช่ตอบแค่ยอดรวม:
-① ตัวเลขสรุป (+ bucket ของค้าง 30/60/90 และสี aging) → ② **ตาราง (ช) TOP 10 Model Color** → ③ **ตารางปลายทางโอน** (ภายใต้ Salesman + Channel) → ④ insight + footer
+**โครงคำตอบบังคับ 5 ส่วน** — ต้องครบทุกส่วน ไม่ใช่ตอบแค่ยอดรวม:
+① ตัวเลขสรุป (+ bucket ของค้าง 30/60/90 และสี aging) → ② **ตาราง (ช) TOP 10 Model Color** → ③ **ตารางปลายทางโอน** (ภายใต้ Salesman + Channel) → ④ **ยืนยัน Sales Out กับ mcg-sales** (หัวข้อถัดไป) → ⑤ insight + footer
 > **stock** มาจาก snapshot ล่าสุด (`fact_MB52`) · **Sales Out** มาจากยอดขาย **90 วันย้อนหลัง** (`fact_sales_and_stock_daily`) ⇒ **ต้องระบุ as-of ของทั้งสองฝั่ง** และห้ามใช้ตัวเลขชุดเดียวแทนกัน
 
 **✅ ใช้ tool สำเร็จรูปก่อน — ไม่ต้องเขียน SQL เอง: `stock_slow_moving_synapse(as_of, days, pct_threshold, top_n)`**
@@ -596,6 +597,20 @@ ORDER BY s.src_stock DESC, q.sold_90d DESC
 
 - 🚫 ตัด **สาขาต้นทาง** และ **คลัง** ออกเสมอ · ✅ แสดง **รหัสสาขา + ชื่อสาขา** ทั้งต้นทางและปลายทาง · ระบุ **as-of** ของทั้งฝั่งสต็อกและฝั่งยอดขาย
 - ℹ️ ขั้นนี้ผูกกับ **Salesman + Channel** ตามที่ธุรกิจต้องการ — เรียงสาขาต้นทางตามสต็อกมากสุด และปลายทางตามยอดขาย 90 วันมากสุด
+
+### ✅ ยืนยัน Sales Out กับ mcg-sales (บังคับ)
+
+**"Sales Out" เป็นของ mcg-sales** — ค่าที่ตาราง (ช) คำนวณได้เป็นยอดขายจากตารางฝั่ง Synapse ที่มี**ทั้งสต็อกและยอดขายอยู่ด้วยกัน** (จำเป็นต่อการหา "ขายล่าสุด" ต่อสาขา ⇒ join ข้าม platform ทำใน SQL เดียวไม่ได้) ⇒ **ต้องโชว์ทั้งสองแหล่งคู่กันเสมอ**
+
+**เรียก `sales_out_by_model_color(model_color, days, end_date)`** สำหรับ 2–3 รุ่น-สีแรกในตาราง (ช)
+
+| รุ่น-สี | ยอดขาย 90 วัน (จากตารางสต็อก) | **Sales Out (mcg-sales)** | ต่าง | หมายเหตุ |
+|---|---|---|---|---|
+| XXMBDP13400 | 510 | **511** | 0.2% | ตรงกัน ✅ (ตรวจ 2026-09-24) |
+
+- ✅ กำกับ **แหล่ง + ช่วงวันที่** ของทั้งสองฝั่ง — ทั้งคู่ใช้ OFFLINE + ตัดคลัง ⇒ เทียบกันได้
+- ⚠️ **ถ้าต่างกันมาก = scope/period ไม่ตรงกัน ไม่ใช่ platform ต่าง** → ตรวจช่วงวันที่และขอบเขตก่อนสรุป
+- 🚫 **ห้ามเรียกยอดจากตารางฝั่งสต็อกว่า "Sales Out" เฉย ๆ** โดยไม่กำกับแหล่ง
 
 ---
 

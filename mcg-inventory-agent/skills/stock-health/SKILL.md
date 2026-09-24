@@ -15,6 +15,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_slow_moving_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_transfer_candidates_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__sales_out_by_model_color
 ---
 
 #[[file:../inventory-agent/SKILL.md]]
@@ -120,6 +121,12 @@ ORDER BY [Stock Amount STD] DESC
 > ✅ คอลัมน์ **"เกณฑ์ที่เข้า"** บังคับ — บอกว่าแถวนั้นเข้าเกณฑ์ "ไม่มีขาย 30/60/90+ วัน" หรือ "ขาย ≤20% ของสต็อก" (ส่วนใหญ่ของ TOP 10 จะเป็นแบบหลัง และยังขายอยู่จริง ไม่ใช่ของที่ไม่มีขาย)
 
 - ✅ **เรียก `stock_slow_moving_synapse(...)`** (นิยามที่ **§5.7 (ช)**) · **ต้องแนบทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม · แล้วตามด้วย **ตารางปลายทางโอน** จาก `stock_transfer_candidates_synapse`
+
+**ตาราง 4 — บังคับ: ยืนยัน Sales Out กับ mcg-sales**
+
+| รุ่น-สี | ยอดขาย 90 วัน (จากตารางสต็อก) | **Sales Out (mcg-sales)** | ต่าง | หมายเหตุ |
+
+- ✅ **เรียก `sales_out_by_model_color(model_color, days, end_date)`** สำหรับ 2–3 รุ่น-สีแรกในตาราง (ช) — **"Sales Out" เป็นของ mcg-sales ต้องโชว์คู่ + กำกับแหล่งทั้งสองเสมอ** (รายละเอียด + เหตุผลที่ join ข้าม platform ไม่ได้: §5.7 (ช))
 - 🚫 **ต้องกรองก่อน แล้วค่อย TOP 10 by Stock QTY** — เกณฑ์: ไม่มีขาย ≥30 วัน **หรือ** ขาย ≤20% ของสต็อกคงเหลือ
   (ต้อง**กรองก่อน**แล้วค่อยจัดอันดับ — TOP 10 by stock ดิบ ๆ คละกันทั้งของค้างและของที่ขายดี)
 
