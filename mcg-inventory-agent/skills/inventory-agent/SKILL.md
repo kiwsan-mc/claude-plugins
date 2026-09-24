@@ -206,7 +206,9 @@ Flow การเลือก tool:
 
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
-**⚠️ สต็อกมี 2 ฐาน (basis) — ต้องแยกให้ชัด และตอบคู่กันเสมอ** (snapshot ล่าสุด `Stock_Date` = 2026-09-22 · 1,233,316 แถว · 643 สาขา · 18,935 SKU)
+**⚠️ สต็อกมี 2 ฐาน (basis) — ต้องแยกให้ชัด และตอบคู่กันเสมอ**
+> ตัวเลขตัวอย่างในข้อนี้อ้าง snapshot `Stock_Date` = **2026-09-22** (1,233,316 แถว · 643 สาขา · 18,935 SKU)
+> ✅ **ค่าจริงต้องอ่าน `MAX(Stock_Date)` เสมอ อย่าใช้ตัวเลขในเอกสาร** — snapshot เดินหน้าทุกวัน (ตรวจ 2026-09-24: ล่าสุดเป็น **2026-09-23** และยอดขยับเป็น 4,953,872 / 5,049,200 แล้ว)
 
 | ฐาน | จำนวน | ต้นทุน MV | ต้นทุน STD | ราคาขาย |
 |-----|--------|-----------|------------|---------|
@@ -229,7 +231,8 @@ Flow การเลือก tool:
 | "on order" "มีเติมของไหม" "กำลังสั่ง" | `Stock_OnOrder_Quantity` |
 | "in-transit" "ระหว่างทาง" "ของกำลังมา" | `Intransit_Quantity` |
 | "ถูกกัก" "blocked" | `Blocked_Quantity` |
-| "ของค้าง" "สินค้าจม" "aging" "RED" "PURPLE" | `Aging_Color_Text` บน `fact_MB52` (ฐานคงเหลือ) → §5.7 (ก) |
+| **"ของค้าง"** "ขายไม่ออก" "ไม่มีการขาย" "slow moving" "ค้างเกิน 6 เดือน" | **ของค้างตามยอดขาย** = ไม่มีขายที่ร้าน OFFLINE ≥30/60/90 วัน · ตัดคลังออก → §5.7 (ฉ) |
+| "aging" "RED" "PURPLE" "สินค้าจม" "สี" | อายุสินค้า `Aging_Color_Text` บน `fact_MB52` → §5.7 (ก) |
 | "เงินจมในสต็อก" | มูลค่าต้นทุนฐานคงเหลือ (MV default + STD) + แยกส่วน RED+PURPLE → §5.7 (ข) |
 | "แนวโน้มสต็อก 3 เดือน" "trend" | `fact_stock_month_ending` ฐานคงเหลือ — 🚫 **ห้ามใช้ `fact_MB52`** (วันเดียว) → §5.7 (ค) |
 | "สต็อกเทียบปีก่อน" "YoY" | `fact_stock_month_ending` เดือนเดียวกันปีก่อน → §5.7 (ง) |
@@ -248,7 +251,7 @@ Flow การเลือก tool:
 **Stock ย้อนหลัง (`ai.fact_sales_and_stock_daily`):**
 - Qty = `Stock_Quantity` | Cost Value = `Stock_Amount_Standard` | Selling = `Stock_Available_Amount_Selling`
 - ✅ ตารางนี้มี**เฉพาะฐานคงเหลือ** → **ตรงกับ default ของธุรกิจ** จึงทำ trend/YoY ได้ (ฐาน Total ทำไม่ได้ เพราะตารางรายวันไม่มี `Stock_Total_*`)
-- ⚠️ **ตารางรายวันล่าช้ากว่า snapshot** — ข้อมูลล่าสุด 2026-08-13 ขณะที่ `fact_MB52` อยู่ที่ 2026-09-22 (ดู §5.5)
+- ✅ **ตารางรายวันเป็นปัจจุบันแล้ว** — ล่าสุด 2026-09-23 (ตรวจ 2026-09-24) · ก่อนหน้าเคยหยุดที่ 2026-08-13 และถูกเติมกลับครบแล้ว → ใช้ทำ trend / YoY / **ยอดขายรายวัน** ได้ (ดู §5.5 และ §5.7 ฉ)
 
 **PO / STO (ai.fact_po_sto):** PO Qty = `PO_Quantity` | GR = `Total_GR_Quantity` | Open = `Open_Quantity` | PO Value = `PO_Value` | vendor = `Vendor_Text`
 - ✅ **"ค้างส่ง" = `Still_To_Delivery_Quantity` / `Still_To_Delivery_Amount`** (ยังต้องส่งอีกเท่าไหร่) — ⚠️ **ไม่ใช่ `Open_Quantity`** ซึ่งเป็น PO−GR ดิบ: 2026-09-23 PO open 2,707,621 vs still **2,704,900** ชิ้น (ต่าง 2,721) · STO 793,061 vs **766,744** (ต่าง 26,317) → ถาม "ค้างส่ง" ให้ใช้ `Still_To_Delivery_*`
@@ -275,7 +278,7 @@ WHERE Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 
 **วิธีที่ 1 (แนะนำ) — ใช้ canned YoY tool:**
 - Stock: เรียก `stock_on_hand_yoy_synapse(group_by)` → ได้ qty_curr/qty_prev + cost_curr/cost_prev (auto pin snapshot vs −1 ปี)
-- 🚫 **แต่ตอนนี้ใช้ไม่ได้ — ดูคำเตือนท้าย §5.5** (`qty_curr` = 0 ทุกกลุ่ม) → ใช้วิธีที่ 2 ไปก่อน
+- ✅ **ใช้ได้แล้ว (ตรวจ 2026-09-24)** — เคยคืน `qty_curr` = 0 ตอนที่ตารางรายวันหยุดที่ 2026-08-13 แต่ตารางถูกเติมครบถึง 2026-09-23 แล้ว · ถ้าเจอ 0 อีก ให้สงสัยข้อมูลล่าช้าแล้วใช้วิธีที่ 2
 - PO/Sales In: เรียก `max_po_date_synapse` ก่อน → แล้ว `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)`
 - คำนวณ YoY% = (curr − prev) / NULLIF(prev, 0) × 100 เอง
 
@@ -296,11 +299,11 @@ CROSS JOIN anchor a
 WHERE f.Date_Key IN (a.d, DATEADD(year, -1, a.d))
 GROUP BY f.Aging_Color_Text
 ```
-> ✅ ทดสอบแล้ว (2026-09-23): anchor ได้ `2026-08-13` เทียบ `2025-08-13` → ได้ข้อมูลทั้งสองฝั่ง (4,514,909 vs 4,245,996 ชิ้น · ฿1,114.0M vs ฿1,177.0M)
-> ℹ️ **ถ้าต้องการ YoY ระดับเดือน ให้ใช้ `fact_stock_month_ending`** ซึ่งใหม่กว่าและตรงเดือนกว่า → §5.7 (ง)
+> ✅ ทดสอบแล้ว (2026-09-24): anchor = `2026-09-23` เทียบ `2025-09-23` → ได้ข้อมูลทั้งสองฝั่ง
+> ℹ️ **ถ้าต้องการ YoY ระดับเดือน ให้ใช้ `fact_stock_month_ending`** ซึ่งตรงเดือนกว่า → §5.7 (ง)
 > ⚠️ `inventory_query_synapse` รับ **SELECT / WITH เท่านั้น — ห้ามใช้ `DECLARE`** (จะถูก reject) ถ้าต้องการตัวแปร ให้ใช้ CTE แทนตามตัวอย่างข้างบน
-> 🚫 **`stock_on_hand_yoy_synapse` ใช้ไม่ได้ตอนนี้ (ตรวจ 2026-09-23)** — tool anchor วันปัจจุบันจาก `fact_MB52` (**2026-09-22**) แต่ตารางรายวันหยุดที่ **2026-08-13** → ฝั่ง current ไม่มีแถว จึงคืน **`qty_curr` = 0 ทุกกลุ่ม** (ยิงจริง group_by='region': ทุก region ได้ 0 ขณะที่ `qty_prev` มีค่า) ถ้าใช้จะตอบว่า "สต็อกลด 100%" — **ห้ามใช้จนกว่าข้อมูลรายวันจะตามทัน**
-> ✅ **สูตร fallback ข้างบนต้องแก้ anchor** — ใช้ `MAX(Date_Key)` ของ `fact_sales_and_stock_daily` **เอง** ไม่ใช่ `MAX(Stock_Date)` ของ `fact_MB52` เพราะสองตาราง**ไม่ตรงวันกันแล้ว** (MB52 2026-09-22 vs รายวัน 2026-08-13) · และต้อง**บอก user ว่าข้อมูลรายวันล่าช้า ~40 วัน**
+> ✅ **`stock_on_hand_yoy_synapse` กลับมาใช้ได้แล้ว (ตรวจ 2026-09-24)** — เมื่อ 2026-09-23 tool นี้คืน `qty_curr` = 0 ทุกกลุ่ม เพราะตารางรายวันหยุดที่ 2026-08-13 (anchor จาก `fact_MB52` = 2026-09-22 จึงหาแถวไม่เจอ) · **ตารางรายวันถูกเติมถึง 2026-09-23 แล้ว** และ tool ตอบมีค่า ⇒ เลิกใช้คำเตือน "ห้ามใช้" · แต่ถ้าเจอ 0 อีก ให้กลับมาสงสัยข้อมูลล่าช้าและสลับไปวิธีที่ 2
+> ✅ **anchor ที่ปลอดภัยที่สุดคือ `MAX(Date_Key)` ของตารางรายวันเอง** — แม้ตอนนี้สองตารางจะตรงวันกันแล้ว การ anchor จากข้อมูลของตารางที่จะ query ยังกันปัญหานี้ซ้ำได้ · และต้อง**บอก as-of ทุกครั้ง**
 > ✅ qty ในสูตรนี้ใช้ `Stock_Quantity` = **ฐานคงเหลือ ซึ่งเป็น default ของธุรกิจ (§5.2)** → ถ้าหยิบค่าปัจจุบันเป็น `Stock_Quantity` จาก `fact_MB52` ด้วย จะเทียบกันได้ตรงเกณฑ์ — 🚫 อย่าเอาค่าปัจจุบันจาก `stock_on_hand_synapse` (ฐานรวมทั้งหมด) มาเทียบกับปีก่อน (ฐานคงเหลือ)
 
 **PO/STO YoY** — เทียบช่วงวันเท่ากัน (curr: fy_start→max_date, prev: −1 ปี) ด้วย conditional SUM บน `PO_Date` + filter `Item_Category`
@@ -390,6 +393,62 @@ GROUP BY Item_Category
   - ยังไม่ถึงกำหนด = 2,541,440 ชิ้น · ฿190.6M
 - ℹ️ **"ค้างส่ง" ≠ "เกินกำหนด"** — ค้างส่ง = ยังต้องส่ง (ส่วนใหญ่ยังไม่ถึงกำหนด) · เกินกำหนด = `Delivery_Date` < วันนี้ ต้องเทียบวันที่เสมอ
 - ℹ️ อย่าใช้ `PO_Value` ตอบ "ค้างส่ง" — นั่นคือมูลค่าใบสั่งซื้อ**เต็มใบ** ไม่ใช่ส่วนที่ยังค้าง (จะเกินจริงมาก)
+
+### (ฉ) ของค้างตามยอดขาย ("ของค้างเกิน 6 เดือน" / "ขายไม่ออก") — `fact_MB52` + `fact_sales_and_stock_daily`
+
+**นิยาม:** สินค้าที่**ไม่มียอดขายที่ร้าน OFFLINE** มานาน ≥ 30 / 60 / 90 วัน · **ตัดคลังออก** · นับเฉพาะบรรทัดที่มีสต็อก > 0
+> 🚫 **คนละความหมายกับ (ก)** — (ก) = "อายุสินค้า" (สี aging) · ข้อนี้ = "ขายไม่ออกกี่วัน" → **ให้แสดงคู่กันเสมอ** เพราะสองมุมนี้ให้ภาพต่างกันมาก
+
+```sql
+WITH sales AS (
+  SELECT f.Branch_Code_Key, f.Article_Key, MAX(f.Date_Key) AS last_sold
+  FROM ai.fact_sales_and_stock_daily f
+  WHERE f.Date_Key >= DATEADD(day, -90, '<as_of>') AND f.Total_Quantity > 0
+  GROUP BY f.Branch_Code_Key, f.Article_Key
+)
+SELECT
+  COUNT(*) AS lines,
+  SUM(CASE WHEN s.last_sold IS NULL OR DATEDIFF(day, s.last_sold, '<as_of>') >= 90 THEN 1 ELSE 0 END) AS b90_lines,
+  SUM(CASE WHEN s.last_sold IS NULL OR DATEDIFF(day, s.last_sold, '<as_of>') >= 90 THEN CAST(m.Stock_Quantity AS float) ELSE 0 END) AS b90_qty,
+  SUM(CASE WHEN s.last_sold IS NULL OR DATEDIFF(day, s.last_sold, '<as_of>') >= 90 THEN CAST(m.Stock_Amount AS float) ELSE 0 END) AS b90_mv
+  -- เพิ่ม 60–89 และ 30–59 ด้วย CASE แบบเดียวกัน
+FROM ai.fact_MB52 m
+LEFT JOIN sales s ON m.Branch_Code_Key = s.Branch_Code_Key AND m.Article_Key = s.Article_Key
+JOIN ai.dim_branch d ON m.Branch_Code_Key = d.Branch_Code_Key
+WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
+  AND m.Branch_Code_Group = 'Store'     -- 🚫 ตัดคลัง (MFC) ออก
+  AND d.Main_Channel = 'OFFLINE'        -- 🚫 "หน้าร้าน" = OFFLINE เท่านั้น
+  AND m.Stock_Quantity > 0
+```
+
+**ผลจริง (as_of 2026-09-23 · ไม่รวมคลัง · OFFLINE · สต็อก > 0):**
+
+| bucket | บรรทัด | ชิ้น | MV |
+|---|---|---|---|
+| < 30 วัน (ปกติ) | 163,786 | 438,103 | — |
+| 30–59 วัน | 100,388 | 202,329 | — |
+| 60–89 วัน | 68,906 | 135,559 | — |
+| **90+ วัน (ค้างหนัก)** | **814,654** | **1,545,854** | **฿432.7M** |
+
+**🔴 ตัว标记คลัง:** `fact_MB52.Branch_Code_Group = 'MFC'` = สาขา `1101` "MC Group" · หรือ `dim_branch.Channel_Store = 'MFC'` (ใช้ได้ทั้งสองฝั่งผ่าน join)
+⚠️ **คลังถือ 2,632,977 ชิ้น = 53% ของสต็อกทั้งบริษัท** — ไม่กรอง = ตัวเลขของค้างเพี้ยนทั้งหมด
+
+**🎨 สี aging ควบคู่ (เฉพาะกลุ่ม 90+ วัน):**
+
+| สี | บรรทัด | ชิ้น | MV |
+|---|---|---|---|
+| 🟢 GREEN | 617,473 | 1,180,413 | ฿321.1M |
+| 🟡 YELLOW | 120,613 | 228,621 | ฿48.0M |
+| 🟣 PURPLE | 48,000 | 86,829 | ฿46.9M |
+| 🔴 RED | 28,568 | 49,991 | ฿16.7M |
+
+> 💡 **ข้อค้นพบสำคัญ:** ในกลุ่ม "ไม่มีขาย 90 วัน" มากถึง **76% เป็นสี GREEN** (ของใหม่) ส่วน RED+PURPLE รวมแค่ **8.8%** → **"ขายไม่ออก" ≠ "ของเก่า"** สองนิยามคนละเรื่อง จึงต้องรายงานคู่กัน
+
+**กติกา:**
+- ✅ ระบุ **as-of** ทุกครั้ง และ **derive `<as_of>` จาก `MAX(Date_Key)` ของตารางรายวันเสมอ** อย่า hardcode (ข้อมูลเดินหน้าได้)
+- ℹ️ กลุ่ม 90+ รวมทั้ง "ขายล่าสุด 90–180 วัน" และ "ไม่มีขายเลย" → ถ้า user ถาม **"เกิน 6 เดือน"** ให้ตอบกลุ่ม 90+ และ**บอกว่าใช้เกณฑ์ 90 วัน** (ไม่แยก bucket 180)
+- ⚠️ ตัวเลขนี้กว้างโดยธรรมชาติของแฟชั่น (SKU×สาขาส่วนใหญ่ขายไม่ออกใน 180 วัน) → **อย่าตอบเป็นเปอร์เซ็นต์ลอย ๆ** ให้เสนอ bucket + มูลค่า และชี้กลุ่มมูลค่าสูง
+- ✅ ถ้า user ถามต่อว่า **"ควรโอนไปไหน"** → ไปที่ skill **stock-health** (ขั้น "แนะนำปลายทางโอน")
 
 ---
 

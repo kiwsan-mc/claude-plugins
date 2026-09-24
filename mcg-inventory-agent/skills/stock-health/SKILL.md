@@ -40,14 +40,14 @@ tools:
 ผลลัพธ์ให้ 4 measure มาตรฐานของสต็อกคงเหลือ: **[Stock QTY]**, **[Stock Amount MV]**, **[Stock Amount STD]**, **[Stock Selling Price]** + `sku_count`, `branch_count`
 > 📌 ดูนิยาม measure ที่ §5.2 ของ inventory-agent — ค่าที่ tool คืนเป็น **ฐานรวมทั้งหมด** (`Stock_Total_*`) ซึ่ง**ไม่ใช่** default ของธุรกิจ (default = ฐานคงเหลือ `Stock_Quantity`) → ต้องดึงฐานคงเหลือคู่ด้วยเสมอ และ cost มี 2 เกณฑ์ (MV / STD) ให้โชว์คู่ทุกครั้ง
 
-> 🚫 **ถ้า user ขอเทียบปีก่อน (YoY): `stock_on_hand_yoy_synapse` ใช้ไม่ได้ตอนนี้** — คืน `qty_curr` = 0 ทุกกลุ่ม (ตารางรายวันหยุด 2026-08-13 แต่ tool anchor ที่ 2026-09-22) → ดูวิธีที่ถูกใน §5.5 ของ inventory-agent (แก้ anchor เป็น `MAX(Date_Key)` ของตารางรายวันเอง + แจ้ง user ว่าข้อมูลล่าช้า ~40 วัน)
+> ✅ **ถ้า user ขอเทียบปีก่อน (YoY): `stock_on_hand_yoy_synapse` ใช้ได้แล้ว (ตรวจ 2026-09-24)** — เคยคืน `qty_curr` = 0 ตอนตารางรายวันหยุดที่ 2026-08-13 แต่ถูกเติมครบถึง 2026-09-23 · ถ้าเจอ 0 อีกให้ใช้วิธี fallback ใน §5.5 ของ inventory-agent (anchor = `MAX(Date_Key)` ของตารางรายวันเอง) และ**บอก as-of ทุกครั้ง**
 
 ## Step 3 — (ถ้าต้องการเจาะสินค้าเสี่ยง) High Risk RED+PURPLE
 
 ถ้า canned tool ไม่ให้ระดับที่ต้องการ → ใช้ `inventory_query_synapse` (T-SQL, pin snapshot):
 ```sql
 SELECT TOP 10
-  a.Aging_Color_Text AS aging_color,
+  s.Aging_Color_Text AS aging_color,
   a.Level3_Item_Category_Text AS category,
   SUM(CAST(s.Stock_Quantity AS float)) AS [Stock QTY (คงเหลือ)],
   SUM(CAST(s.Stock_Total_Quantity AS float)) AS [Stock QTY (รวมทั้งหมด)],
@@ -56,13 +56,58 @@ SELECT TOP 10
 FROM ai.fact_MB52 s
 JOIN ai.dim_article a ON s.Article_Key = a.Article_Key
 WHERE s.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
-  AND a.Aging_Color_Text IN ('RED','PURPLE')
-GROUP BY a.Aging_Color_Text, a.Level3_Item_Category_Text
+  AND s.Aging_Color_Text IN ('RED','PURPLE')   -- ⚠️ ใช้ของ fact row (โซน ณ วัน snapshot) ไม่ใช่ a.Aging_Color_Text ของ dim_article (ค่าคงที่ต่อ article คนละโซน)
+  AND s.Branch_Code_Group = 'Store'            -- 🚫 ตัดคลัง (MFC) ออก — คลังถือ 53% ของสต็อกทั้งบริษัท
+GROUP BY s.Aging_Color_Text, a.Level3_Item_Category_Text
 ORDER BY [Stock Amount STD] DESC
 ```
 > ⚠️ ตรวจชื่อคอลัมน์จริงด้วย `describe_table_inventory_synapse` ก่อนถ้าไม่แน่ใจ
 
-## Step 4 — Response
+## Step 4 — ของค้างตามยอดขาย + แนะนำปลายทางโอน
+
+ใช้เมื่อ user ถาม **"ของค้าง" "ขายไม่ออก" "ค้างเกิน 6 เดือน"** หรือถามต่อว่า **"ควรโอนไปไหน"**
+นิยาม + query หลักอยู่ที่ **§5.7 (ฉ)** ของ foundation
+
+**4.1 หาของค้าง** — สินค้าที่ไม่มีขายที่ร้าน **OFFLINE** ≥ 30 / 60 / 90 วัน · `Branch_Code_Group = 'Store'` (ตัดคลัง) · สต็อก > 0
+- 🎨 **แสดงสี aging ควบคู่เสมอ** — ของค้างส่วนใหญ่เป็นสี **GREEN** (ของใหม่ที่ขายไม่ออก) ไม่ใช่ของเก่า → สองมุมนี้ให้ภาพคนละเรื่อง
+
+**4.2 แนะนำปลายทางโอน** — สำหรับสินค้าที่ค้าง หาสาขาที่ **Salesman คนเดียวกัน** และสินค้านั้น**ยังขายได้**
+⚠️ **ต้องไล่เป็นขั้น (ladder) — ตัวกรองที่แคบเกินไปจะไม่เจออะไรเลย**
+
+| ขั้น | เงื่อนไข | หมายเหตุ |
+|---|---|---|
+| **T1** | Salesman เดียวกัน + **Channel เดียวกัน** + สินค้าเดียวกัน | เข้มสุด |
+| **T2** | Salesman เดียวกัน + **Channel ใดก็ได้** + สินค้าเดียวกัน | ⚠️ **มักจำเป็น — ดูหลักฐานล่าง** |
+| **T3** | Salesman เดียวกัน + Channel ใดก็ได้ + **รุ่นเดียวกัน** (`Article_Model`) | ขั้นสุดท้าย |
+| — | ไม่เจอทั้ง 3 ขั้น | บอกตามจริง · 🚫 **ห้ามเสนอข้ามคนขายเอง** |
+
+> 🔴 **หลักฐานว่าทำไมต้องมี T2 (ทดสอบ 2026-09-24):** สินค้า `XXM15Z001500F` ค้าง 67 ชิ้นที่ **D098 (CHAIN)** ใต้ salesman `002676` (ดูแล 11 สาขา)
+> - T1 (Channel เดียวกัน) → **ไม่เจอปลายทางเลย** (query ว่าง) ⇒ ถ้าหยุดแค่นี้จะตอบผิดว่า "ไม่มีที่โอน"
+> - T2 (ไม่จำกัด channel) → **เจอ C140 (SHOP) ขายได้ 22 ชิ้น ล่าสุด 26 ส.ค.** ✅ เป็นปลายทางที่ถูกต้องจริง
+> ⇒ **ห้ามสรุปว่า "ไม่มีที่โอน" จาก T1** ต้องไล่ถึง T2 · และ **บอก user ว่าใช้ขั้นไหน**
+
+```sql
+-- T2 (ใช้บ่อยสุด): salesman เดียวกัน ไม่จำกัด channel
+SELECT TOP 10 d.Branch_Code_Key, d.Branch_Code_And_Text, d.Channel_Store,
+  d.Salesman_Employee_Code, d.Salesman_Employee_Name,
+  SUM(CAST(f.Total_Quantity AS float)) AS sold_90d, MAX(f.Date_Key) AS last_sold
+FROM ai.fact_sales_and_stock_daily f
+JOIN ai.dim_branch d ON f.Branch_Code_Key = d.Branch_Code_Key
+WHERE f.Article_Key = '<article ที่ค้าง>'
+  AND f.Total_Quantity > 0
+  AND f.Date_Key >= DATEADD(day, -90, '<as_of>')
+  AND d.Salesman_Employee_Code = '<salesman ของสาขาต้นทาง>'
+  AND d.Channel_Store <> 'MFC'
+GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Channel_Store,
+  d.Salesman_Employee_Code, d.Salesman_Employee_Name
+ORDER BY sold_90d DESC
+```
+- ℹ️ **T1** = เติม `AND d.Channel_Store = '<channel ต้นทาง>'` — ลองก่อนได้ แต่ถ้าว่าง **ต้องไล่ T2 ต่อ**
+- 🚫 ตัด **สาขาต้นทาง** และ **คลัง (`Channel_Store = 'MFC'`)** ออกจากการเสนอเสมอ
+- ✅ เสนอ 3–5 สาขา เรียงตามยอดขาย 90 วัน พร้อมชื่อคนขาย · **แสดง "รหัสสาขา" + "ชื่อสาขา" เสมอ** (ตามกฎ foundation)
+- ⚠️ `Salesman_Employee_Code` populate ครบทุกสาขา (ตรวจแล้ว 2026-09-24)
+
+## Step 5 — Response
 
 **Headline** — สต็อกรวม (qty + cost value) + สัดส่วน aging เสี่ยง
 
