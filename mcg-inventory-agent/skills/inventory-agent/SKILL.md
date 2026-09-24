@@ -1,10 +1,11 @@
 ---
 name: inventory-agent
 description: >
-  MC Group Inventory Agent — คำถามทั่วไปเกี่ยวกับสินค้าคงคลัง สต็อกคงเหลือ มูลค่าสต็อก
-  สินค้าค้าง/aging การสั่งซื้อเข้า (PO / "Sales In") การโอนย้ายสต็อก (STO) การเติมสินค้า
-  **หมายเหตุศัพท์ MCG: "Sales In" = การสั่งซื้อเข้า/PO (skill นี้) | "Sales Out" = ยอดขาย → ใช้ mcg-sales-agent**
-  **หากคำถามตรงกับ specialized skill ต้องแนะนำให้ใช้ skill นั้นแทน**
+  MC Group Inventory Agent — กฎกลางของงานสินค้าคงคลัง (snapshot pinning, aging zones,
+  measure 2 ฐาน, tool priority) และคำถามภาพรวมที่ไม่ระบุเจาะจง
+  **บทบาท: เป็น foundation — ถ้าคำถามตรงกับ specialized skill ตัวใดตัวหนึ่ง
+  (stock-health / stock-trend / po-intake / sto-transfer / po-analysis) ต้องแนะนำให้ใช้ skill นั้นแทน**
+  **หมายเหตุศัพท์ MCG: "Sales In" = การสั่งซื้อเข้า/PO | "Sales Out" = ยอดขาย → ใช้ mcg-sales-agent**
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_on_hand_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_daily_trend_synapse
