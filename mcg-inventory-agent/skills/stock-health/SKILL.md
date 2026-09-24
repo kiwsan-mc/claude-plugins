@@ -27,6 +27,10 @@ tools:
 
 # Task: Stock on Hand & Health Analysis
 
+> ⚠️ **อ่านก่อนเลือกขั้น:** คำถาม **"ของค้าง" · "ของค้างมีเยอะไหม" · "ค้างเกิน 6 เดือน" · "ขายไม่ออก" · "เงินจมในสต็อก"**
+> ต้องตอบตาม **Step 4 + Step 5 ตาราง 3** เท่านั้น (นิยาม "**ไม่มีขายที่ร้าน OFFLINE ≥30/60/90 วัน**" + **ตารางบังคับ TOP 10 Model Color** + **ตารางปลายทางโอน**)
+> 🚫 **ไม่ใช่** จาก aging zone (Step 2/3) ซึ่งเป็นมุม "อายุสินค้า" คนละเรื่อง — "ของค้าง" ที่ธุรกิจหมายถึงคือ **ขายไม่ออกกี่วัน** ไม่ใช่ "สินค้าอายุมาก"
+
 ## Step 1 — เลือก dimension
 
 `stock_on_hand_synapse` รองรับ group_by เช่น: `aging`, `brand`, `category`, `region`, `branch`
@@ -43,6 +47,11 @@ tools:
 > ✅ **ถ้า user ขอเทียบปีก่อน (YoY): `stock_on_hand_yoy_synapse` ใช้ได้แล้ว (ตรวจ 2026-09-24)** — เคยคืน `qty_curr` = 0 ตอนตารางรายวันหยุดที่ 2026-08-13 แต่ถูกเติมครบถึง 2026-09-23 · ถ้าเจอ 0 อีกให้ใช้วิธี fallback ใน §5.5 ของ inventory-agent (anchor = `MAX(Date_Key)` ของตารางรายวันเอง) และ**บอก as-of ทุกครั้ง**
 
 ## Step 3 — (ถ้าต้องการเจาะสินค้าเสี่ยง) High Risk RED+PURPLE
+
+> 🚫 **ขั้นนี้ = มุม "อายุสินค้า" (aging) เท่านั้น — ไม่ใช่คำตอบของ "ของค้าง"**
+> ถ้า user ถาม **"ของค้างมีเยอะไหม" · "ของค้างเกิน 6 เดือนมีไหม" · "ขายไม่ออก" · "เงินจมในสต็อกเท่าไหร่"**
+> → **ห้ามตอบจากขั้นนี้** ต้องไป **Step 4** (ของค้างตามยอดขาย = ไม่มีขาย ≥30/60/90 วัน) **+ Step 5 ตาราง 3** (ตารางบังคับ TOP 10 Model Color) **+ ตารางปลายทางโอน**
+> ℹ️ ถ้า user ถาม **aging/RED/PURPLE ตรง ๆ** จึงใช้ขั้นนี้ (และยังต้องตอบ 2 ฐาน)
 
 ถ้า canned tool ไม่ให้ระดับที่ต้องการ → ใช้ `inventory_query_synapse` (T-SQL, pin snapshot):
 ```sql
@@ -95,8 +104,8 @@ ORDER BY [Stock Amount STD] DESC
 
 **Headline** — สต็อกรวม (qty + cost value) + สัดส่วน aging เสี่ยง
 
-**ตาราง 1: Stock by Aging Zone**
-| Zone | Stock QTY | Stock Amount MV | Stock Amount STD | Selling Price | SKU | สาขาที่มี |
+**ตาราง 1: Stock by Aging Zone** — ⚠️ ต้องมี **2 ฐาน** (ตาม §5.2) ห้ามโชว์ฐานเดียว
+| Zone | QTY คงเหลือ | QTY รวมทั้งหมด | MV คงเหลือ | STD คงเหลือ | MV รวม | STD รวม | SKU |
 
 **ตาราง 2 (ถ้ามี): Top High-Risk (RED+PURPLE)**
 | Category | Aging | Stock QTY | Stock Amount STD |
