@@ -8,8 +8,9 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v1.2.0** — ย้ายไป schema `[ai]` ของ Synapse
+**v1.3.0** — สต็อก 2 ฐาน + ของค้างตามยอดขาย + ตารางบังคับ TOP 10 Model Color
 
+- **v1.3.0**: สต็อกมี **2 ฐาน** — default ของธุรกิจคือ**ฐานคงเหลือ** (`Stock_Quantity`) ตอบคู่กับ**ฐานรวมทั้งหมด** (`Stock_Total_*`) เสมอ · **"ของค้าง" นิยามใหม่ = ไม่มีขายที่ร้าน OFFLINE ≥30/60/90 วัน** (แยกจาก aging สี) และ **ต้องแนบตาราง Stock QTY by TOP 10 Model Color** ใน 3 คำถาม (ของค้างมีเยอะไหม / เงินจมในสต็อกเท่าไหร่ / ของค้างเกิน 6 เดือนมีไหม) · **PO ค้างส่ง = `Still_To_Delivery_*`** ไม่ใช่ `Open_Quantity` · เพิ่ม skill `po-analysis` (มุมรวม PO+STO) · แก้คำเตือน "ตารางรายวันล่าช้า" ซึ่งหมดจริงแล้ว (ข้อมูลถึง 2026-09-23)
 - **v1.2.0**: ย้ายจาก `gold.script_stock_daily*` / `silver.sap_po` / `silver.sap_sto` ไป `ai.fact_MB52` / `ai.fact_sales_and_stock_daily` / `ai.fact_stock_month_ending` / `ai.fact_po_sto`; เพิ่มกฎต้อง filter `Item_Category` สำหรับ PO/STO
 - **v1.1.0**: เพิ่ม freshness + validation rules
 - **v1.0.0**: เริ่มต้น — inventory domain
@@ -19,7 +20,7 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 | Skill | Role | หน้าที่ |
 |-------|------|---------|
 | `inventory-agent` | Inventory Agent | กฎกลาง, tool priority, aging zones, snapshot rules (shared foundation) |
-| `stock-health` | Stock Health Analyst | สต็อกคงเหลือปัจจุบันแยก aging/brand/region + สินค้าเสี่ยง clearance |
+| `stock-health` | Stock Health Analyst | สต็อกคงเหลือปัจจุบันแยก aging/brand/region + สินค้าเสี่ยง clearance + ของค้าง/เงินจม + **ตารางบังคับ TOP 10 Model Color** |
 | `stock-trend` | Inventory Planner | สต็อกย้อนหลัง time series + เปรียบเทียบช่วงเวลา |
 | `po-intake` | Procurement Analyst | **Sales In** (PR/PO/GR/open qty) แยก vendor/สาขา + fulfillment — **PO เท่านั้น** |
 | `sto-transfer` | Distribution Analyst | โอนย้ายสต็อกระหว่างสาขา + open transfer — **STO เท่านั้น** |
