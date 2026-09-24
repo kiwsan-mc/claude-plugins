@@ -21,8 +21,9 @@ MC Group Inventory Analyst Agent plugin for Claude Code / Cowork.
 | `inventory-agent` | Inventory Agent | กฎกลาง, tool priority, aging zones, snapshot rules (shared foundation) |
 | `stock-health` | Stock Health Analyst | สต็อกคงเหลือปัจจุบันแยก aging/brand/region + สินค้าเสี่ยง clearance |
 | `stock-trend` | Inventory Planner | สต็อกย้อนหลัง time series + เปรียบเทียบช่วงเวลา |
-| `po-intake` | Procurement Analyst | **Sales In** (PR/PO/GR/open qty) แยก vendor/สาขา + fulfillment |
-| `sto-transfer` | Distribution Analyst | โอนย้ายสต็อกระหว่างสาขา + open transfer |
+| `po-intake` | Procurement Analyst | **Sales In** (PR/PO/GR/open qty) แยก vendor/สาขา + fulfillment — **PO เท่านั้น** |
+| `sto-transfer` | Distribution Analyst | โอนย้ายสต็อกระหว่างสาขา + open transfer — **STO เท่านั้น** |
+| `po-analysis` | Procurement & Transfer Analyst | **มุมรวม PO+STO** — ค้างส่ง, ตามรอบเวลา, Vendor Performance แยกชั้น PO/STO |
 
 ## Architecture
 
@@ -32,7 +33,8 @@ skills/
 ├── stock-health/       ← #[[file:../inventory-agent/SKILL.md]] + role prompt
 ├── stock-trend/        ← #[[file:../inventory-agent/SKILL.md]] + role prompt
 ├── po-intake/          ← #[[file:../inventory-agent/SKILL.md]] + role prompt
-└── sto-transfer/       ← #[[file:../inventory-agent/SKILL.md]] + role prompt
+├── sto-transfer/       ← #[[file:../inventory-agent/SKILL.md]] + role prompt
+└── po-analysis/        ← #[[file:../inventory-agent/SKILL.md]] + role prompt (มุมรวม PO+STO)
 ```
 
 แต่ละ skill ย่อย include กฎหลักผ่าน `#[[file:...]]` — แก้ที่เดียวมีผลทุก role.
@@ -86,3 +88,4 @@ skills/
 - "แนวโน้มสต็อก 30 วันล่าสุด" → `stock-trend`
 - "Sales In / PO ค้างส่งจาก vendor ไหนบ้าง" → `po-intake`
 - "การโอนสต็อกระหว่างสาขาเดือนนี้" → `sto-transfer`
+- "PO+STO ค้างส่งรวมเท่าไหร่" / "vendor performance ทั้ง PO และ STO" → `po-analysis`

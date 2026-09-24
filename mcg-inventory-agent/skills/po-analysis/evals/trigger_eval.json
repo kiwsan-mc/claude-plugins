@@ -1,0 +1,24 @@
+[
+  {"query": "PO+STO ค้างส่งรวมตอนนี้เท่าไหร่", "should_trigger": true},
+  {"query": "รวม PO กับ STO ให้หน่อย ว่าค้างส่งกันเท่าไหร่", "should_trigger": true},
+  {"query": "vendor performance ดูทั้ง PO และ STO", "should_trigger": true},
+  {"query": "เปรียบเทียบ PO กับ STO ปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "fulfilment rate ของ vendor ทั้งการสั่งซื้อและการโอน", "should_trigger": true},
+  {"query": "overdue ทั้งหมด รวมของที่โอนระหว่างสาขาด้วย", "should_trigger": true},
+  {"query": "ภาพรวมการสั่งซื้อและการโอนเข้า", "should_trigger": true},
+  {"query": "PO กับ STO ตามรอบเวลาไตรมาสนี้", "should_trigger": true},
+  {"query": "Sales In กับการโอนสต็อกรวมกัน ค้างส่งเท่าไหร่", "should_trigger": true},
+  {"query": "อยากเห็นการสั่งซื้อกับการกระจายสินค้าในภาพเดียว", "should_trigger": true},
+  {"query": "PO กับ STO รวมกันเป็นยังไง", "should_trigger": true},
+
+  {"query": "PO ค้างส่งจาก vendor ไหนบ้าง", "should_trigger": false},
+  {"query": "Sales In เดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "GR ของ PO ล่าสุดเท่าไหร่", "should_trigger": false},
+  {"query": "PO เกินกำหนดส่งมีอะไรบ้าง", "should_trigger": false},
+  {"query": "open PO มีเท่าไหร่", "should_trigger": false},
+  {"query": "โอนสต็อกระหว่างสาขาเดือนนี้", "should_trigger": false},
+  {"query": "STO ค้างรับปลายทางมีเท่าไหร่", "should_trigger": false},
+  {"query": "open transfer แยกตามสาขา", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false}
+]

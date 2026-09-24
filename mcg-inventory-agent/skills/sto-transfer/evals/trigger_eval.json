@@ -1,0 +1,23 @@
+[
+  {"query": "โอนสต็อกระหว่างสาขาเดือนนี้", "should_trigger": true},
+  {"query": "STO ค้างรับปลายทางมีเท่าไหร่", "should_trigger": true},
+  {"query": "open transfer แยกตามสาขา", "should_trigger": true},
+  {"query": "transfer qty ตามสาขาให้หน่อย", "should_trigger": true},
+  {"query": "การกระจายสินค้าไปสาขาเป็นยังไง", "should_trigger": true},
+  {"query": "ย้ายสินค้าระหว่างสาขา", "should_trigger": true},
+  {"query": "STO แยกตาม region", "should_trigger": true},
+  {"query": "โอนจากโรงงานไปสาขาเท่าไหร่", "should_trigger": true},
+  {"query": "GR ของ STO ล่าสุด", "should_trigger": true},
+  {"query": "โอนสต็อกแยกตามสถานะ", "should_trigger": true},
+
+  {"query": "PO ค้างส่งจาก vendor ไหนบ้าง", "should_trigger": false},
+  {"query": "Sales In เดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "open PO มีเท่าไหร่", "should_trigger": false},
+  {"query": "PO+STO ค้างส่งรวมตอนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "PO กับ STO รวมกันเป็นยังไง", "should_trigger": false},
+  {"query": "vendor performance ดูทั้ง PO และ STO", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false},
+  {"query": "แนวโน้มสต็อก 3 เดือน", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]

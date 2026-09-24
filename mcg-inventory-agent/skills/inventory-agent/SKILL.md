@@ -345,6 +345,7 @@ GROUP BY f.Aging_Color_Text
 ### (ข) เงินจมในสต็อก
 - = **มูลค่าต้นทุนฐานคงเหลือทั้งคลัง**: **MV ฿1,188.6M** (default) + โชว์ STD ฿1,200.2M คู่กัน
 - ✅ ให้แยก **"จมหนัก" = RED+PURPLE ฿187.9M (MV)** ≈ **15.8%** ของเงินจมทั้งหมด — นี่คือตัวเลขที่ธุรกิจต้องการจริง
+- ✅ **ต้องแนบตาราง §5.7 (ช) เสมอ** — Stock QTY by TOP 10 Model Color (ของที่กินเงินจมมากสุด)
 
 ### (ค) แนวโน้มสต็อก 3 เดือน — `ai.fact_stock_month_ending`
 ```sql
@@ -449,6 +450,61 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 - ℹ️ กลุ่ม 90+ รวมทั้ง "ขายล่าสุด 90–180 วัน" และ "ไม่มีขายเลย" → ถ้า user ถาม **"เกิน 6 เดือน"** ให้ตอบกลุ่ม 90+ และ**บอกว่าใช้เกณฑ์ 90 วัน** (ไม่แยก bucket 180)
 - ⚠️ ตัวเลขนี้กว้างโดยธรรมชาติของแฟชั่น (SKU×สาขาส่วนใหญ่ขายไม่ออกใน 180 วัน) → **อย่าตอบเป็นเปอร์เซ็นต์ลอย ๆ** ให้เสนอ bucket + มูลค่า และชี้กลุ่มมูลค่าสูง
 - ✅ ถ้า user ถามต่อว่า **"ควรโอนไปไหน"** → ไปที่ skill **stock-health** (ขั้น "แนะนำปลายทางโอน")
+- ✅ **ต้องแนบตาราง §5.7 (ช) เสมอ** — Stock QTY by TOP 10 Model Color
+
+### (ช) 🎯 ตารางบังคับ: Stock QTY by TOP 10 Model Color
+
+**ใช้กับ 3 คำถามนี้เสมอ** (user สั่ง 2026-09-24): **"ของค้างมีเยอะไหม"** · **"เงินจมในสต็อกเท่าไหร่"** · **"ของค้างเกิน 6 เดือนมีไหม"**
+→ **ต้องแนบตารางนี้ทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม
+
+**นิยาม:** รุ่น-สีที่ **(ไม่มีขายเลย ≥ 30 วัน) หรือ (ขายได้ ≤ 20% ของสต็อกคงเหลือ)** เรียงตาม Stock QTY มาก→น้อย เอา TOP 10
+· base = **ฐานคงเหลือ** · ตัดคลัง (`Branch_Code_Group = 'Store'`) · OFFLINE · สต็อก > 0
+
+```sql
+WITH sold AS (            -- ยอดขายต่อรุ่น-สี (ไม่รวมคลัง)
+  SELECT a.Article_Model_Color AS mc, MAX(a.Article_Model) AS mdl,
+    SUM(CAST(f.Total_Quantity AS float)) AS s90, MAX(f.Date_Key) AS last_sold
+  FROM ai.fact_sales_and_stock_daily f
+  JOIN ai.dim_article a ON f.Article_Key = a.Article_Key
+  WHERE f.Date_Key >= DATEADD(day, -90, '<as_of>') AND f.Total_Quantity > 0
+    AND f.Branch_Code_Key <> '1101'
+  GROUP BY a.Article_Model_Color
+),
+stock AS (                -- สต็อกคงเหลือต่อรุ่น-สี
+  SELECT a.Article_Model_Color AS mc, MAX(a.Article_Model) AS mdl,
+    SUM(CAST(m.Stock_Quantity AS float)) AS stock_qty, SUM(CAST(m.Stock_Amount AS float)) AS mv
+  FROM ai.fact_MB52 m
+  JOIN ai.dim_article a ON m.Article_Key = a.Article_Key
+  JOIN ai.dim_branch d ON m.Branch_Code_Key = d.Branch_Code_Key
+  WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
+    AND m.Branch_Code_Group = 'Store' AND d.Main_Channel = 'OFFLINE' AND m.Stock_Quantity > 0
+  GROUP BY a.Article_Model_Color
+)
+SELECT TOP 10 s.mc AS model_color, s.mdl AS model, s.stock_qty, s.mv,
+  ISNULL(d.s90, 0) AS sold_90, d.last_sold,
+  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty, 0) * 100 AS decimal(6,1)) AS pct_vs_stock,
+  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty + ISNULL(d.s90,0), 0) * 100 AS decimal(6,1)) AS pct_incl_sales
+FROM stock s LEFT JOIN sold d ON s.mc = d.mc
+WHERE (d.last_sold IS NULL OR DATEDIFF(day, d.last_sold, '<as_of>') >= 30)
+   OR (d.s90 <= 0.20 * s.stock_qty)
+ORDER BY s.stock_qty DESC
+```
+
+**ผลจริง (as_of 2026-09-23 · ไม่รวมคลัง · OFFLINE):**
+
+| รุ่น-สี | รุ่น | Stock QTY | MV | ขาย 90 วัน | ขายล่าสุด | ขาย ÷ สต็อก |
+|---|---|---|---|---|---|---|
+| XXMBDP13400 | XXMBDP134 | 9,234 | ฿3.06M | 619 | 2026-09-23 | **6.7%** |
+| XXMAMZ00900 | XXMAMZ009 | 7,331 | ฿3.95M | 433 | 2026-09-23 | **5.9%** |
+| XXMFSP2530B | XXMFSP253 | 7,247 | ฿2.56M | 995 | 2026-09-23 | 13.7% |
+| XXMBDP18520 | XXMBDP185 | 6,966 | ฿2.69M | 332 | 2026-09-23 | **4.8%** |
+| XXMFI31092B | XXMFI3109 | 6,916 | ฿2.72M | 1,074 | 2026-09-23 | 15.5% |
+
+- 📊 ทั้งคลัง **2,660 รุ่น** → เข้าเกณฑ์ **447 รุ่น** · ไม่ขายใน 90 วัน 467 · ตาย 30–89 วัน 285
+- ⚠️ **ต้องกรองก่อนแล้วค่อย TOP 10** — TOP 10 by stock ดิบ ๆ จะได้รุ่น**ขายดี** (sell-through 30–77%) ซึ่งไม่ใช่ของค้าง
+- ⚠️ **นิยาม 20% มี 2 แบบ — โชว์ทั้งคู่เสมอ**: `ขาย ÷ สต็อก` (ใช้กรอง default) และ `ขาย ÷ (สต็อก + ขาย)` · เปลี่ยนรายการอันดับ 1 เช่น XXMFIZ222 = **22.7% vs 18.5%**
+- ℹ️ **"Model Col." ตีความ = `Article_Model_Color`** · ถ้าต้องการระดับรุ่น → เปลี่ยน GROUP BY เป็น `Article_Model` (TOP 10 จะเป็น XXMFIZ222 18,572 · XXMCCZ037 13,943 · XXMFI3109 11,587 …)
+- ✅ แสดง **"รุ่น-สี" + "รุ่น"** ทั้งคู่ เพื่อให้ตามกลับไปที่ master ได้
 
 ---
 
@@ -477,6 +533,11 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 | "สต็อกย้อนหลัง" "แนวโน้มสต็อก" "stock trend" "สต็อกเดือนที่แล้ว" "แนวโน้ม 3 เดือน" "เทียบปีก่อน" "YoY" | **stock-trend** | Time series สต็อก + เทียบช่วงเวลา/ปีก่อน (§5.7 ค–ง) |
 | "Sales In" "PO" "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "ค้างส่ง" "PO ค้าง" | **po-intake** | PR/PO/GR/open qty แยก vendor/สาขา + delivery status + **ค้างส่ง/เกินกำหนด (§5.7 จ)** |
 | "โอนสต็อก" "STO" "transfer" "โอนระหว่างสาขา" | **sto-transfer** | Transfer qty + open transfer แยกสาขา/สถานะ |
+| "PO+STO" "รวม PO และ STO" "PO/STO ค้างส่ง" "vendor performance" "fulfilment rate" "เปรียบเทียบ PO กับ STO" — หรือไม่ได้ระบุว่าจะเจาะ PO หรือ STO | **po-analysis** | **มุมรวม PO+STO** — ค้างส่ง, ตามรอบเวลา, รับเข้าแล้ว, Vendor Performance แยกชั้น PO/STO |
+
+> ⚠️ **สาม skill นี้ทับกันที่คำว่า "PO" / "STO" / "ค้างส่ง" — แยกด้วยเจตนาของคำถาม ไม่ใช่ด้วยคำ**
+> เจาะ **PO อย่างเดียว** → `po-intake` · เจาะ **STO อย่างเดียว** → `sto-transfer` · **ต้องการเห็นทั้งคู่พร้อมกัน / เทียบกัน / ไม่ระบุ** → `po-analysis`
+> 🚫 ตัวเลขของ `po-intake` (PO เท่านั้น) กับ `po-analysis` (PO+STO) **ไม่เท่ากันโดยตั้งใจ** — ห้ามนำมาเทียบกันในบรรทัดเดียวโดยไม่บอกขอบเขต
 
 ### Template ตอบ:
 💡 คำถามนี้เหมาะกับ **[ชื่อ skill]** ซึ่งให้การวิเคราะห์เชิงลึกในด้าน **[specific area]**. ต้องการให้ผมวิเคราะห์ด้วย [ชื่อ skill] ไหมครับ? หรือให้ตอบเบื้องต้นก่อน?
