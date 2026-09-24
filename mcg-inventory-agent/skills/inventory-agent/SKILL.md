@@ -204,6 +204,8 @@ Flow การเลือก tool:
 - **CAST measures `AS float` ก่อนหารเสมอ** — ⚠️ ห้ามใช้ `::float` (PostgreSQL) — Synapse ใช้ `CAST(x AS float)`
 - SUM ก่อนหาร: `SUM(CAST(A AS float)) / NULLIF(SUM(CAST(B AS float)), 0)`
 - `APPROX_COUNT_DISTINCT(...)` สำหรับนับ SKU/สาขา (เร็วกว่า COUNT DISTINCT บนตารางใหญ่)
+- 🚫 **อย่าให้คอลัมน์ตัวเลขออกมาเป็น `decimal`** — tool serialize เป็น **base64** อ่านไม่ออก (ทดสอบ 2026-09-24: `CAST(x AS decimal(6,1))` → `"NS41"` และ `ROUND(x,1)` เปล่า ๆ → `"NS41MDAwMDA="` ซึ่งก็คือ 5.5 · แต่ `CAST(x AS float)` → `5.523` อ่านได้)
+  ✅ **ถ้าต้องการทศนิยม 1 ตำแหน่ง: `CAST(ROUND(x, 1) AS float)`** → ได้ `5.5` · ถ้าต้องการค่าดิบ ๆ ใช้ `CAST(x AS float)` · ตัวเลข `int`/`float` ปลอดภัย
 
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
@@ -488,8 +490,8 @@ stock AS (                -- สต็อกคงเหลือต่อรุ
 )
 SELECT TOP 10 s.mc AS model_color, s.mdl AS model, s.stock_qty, s.mv,
   ISNULL(d.s90, 0) AS sold_90, d.last_sold,
-  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty, 0) * 100 AS decimal(6,1)) AS pct_vs_stock,
-  CAST(ISNULL(d.s90,0) / NULLIF(s.stock_qty + ISNULL(d.s90,0), 0) * 100 AS decimal(6,1)) AS pct_incl_sales,
+  CAST(ROUND(ISNULL(d.s90,0) / NULLIF(s.stock_qty, 0) * 100, 1) AS float) AS pct_vs_stock,
+  CAST(ROUND(ISNULL(d.s90,0) / NULLIF(s.stock_qty + ISNULL(d.s90,0), 0) * 100, 1) AS float) AS pct_incl_sales,
   CASE                                   -- ✅ บังคับ: บอกว่าแถวนี้เข้าเกณฑ์ไหน
     WHEN d.last_sold IS NULL THEN 'ไม่เคยขาย'
     WHEN DATEDIFF(day, d.last_sold, '<as_of>') >= 90 THEN 'ไม่มีขาย 90+ วัน'
