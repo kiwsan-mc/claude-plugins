@@ -71,12 +71,13 @@ ORDER BY [Stock Amount STD] DESC
 **4.1 หาของค้าง** — สินค้าที่ไม่มีขายที่ร้าน **OFFLINE** ≥ 30 / 60 / 90 วัน · `Branch_Code_Group = 'Store'` (ตัดคลัง) · สต็อก > 0
 - 🎨 **แสดงสี aging ควบคู่เสมอ** — ของค้างส่วนใหญ่เป็นสี **GREEN** (ของใหม่ที่ขายไม่ออก) ไม่ใช่ของเก่า → สองมุมนี้ให้ภาพคนละเรื่อง
 
-**4.2 แนะนำปลายทางโอน** — สำหรับสินค้าที่ค้าง หาสาขาที่ **Salesman คนเดียวกัน** และสินค้านั้น**ยังขายได้**
+**4.2 แนะนำปลายทางโอน** — **ใช้ query ที่ §5.7 (ช) หัวข้อ "ปลายทางโอน" ของ foundation** (แหล่งความจริงเดียว) ซึ่งหา **สาขาต้นทาง + salesman + สาขาปลายทาง** จบในคำสั่งเดียว และ JOIN เฉพาะ **salesman เดียวกัน**
+
 ⚠️ **ต้องไล่เป็นขั้น (ladder) — ตัวกรองที่แคบเกินไปจะไม่เจออะไรเลย**
 
 | ขั้น | เงื่อนไข | หมายเหตุ |
 |---|---|---|
-| **T1** | Salesman เดียวกัน + **Channel เดียวกัน** + สินค้าเดียวกัน | เข้มสุด |
+| **T1** | Salesman เดียวกัน + **Channel เดียวกัน** + สินค้าเดียวกัน | เข้มสุด → เสนออันดับแรก |
 | **T2** | Salesman เดียวกัน + **Channel ใดก็ได้** + สินค้าเดียวกัน | ⚠️ **มักจำเป็น — ดูหลักฐานล่าง** |
 | **T3** | Salesman เดียวกัน + Channel ใดก็ได้ + **รุ่นเดียวกัน** (`Article_Model`) | ขั้นสุดท้าย |
 | — | ไม่เจอทั้ง 3 ขั้น | บอกตามจริง · 🚫 **ห้ามเสนอข้ามคนขายเอง** |
@@ -86,26 +87,9 @@ ORDER BY [Stock Amount STD] DESC
 > - T2 (ไม่จำกัด channel) → **เจอ C140 (SHOP) ขายได้ 22 ชิ้น ล่าสุด 26 ส.ค.** ✅ เป็นปลายทางที่ถูกต้องจริง
 > ⇒ **ห้ามสรุปว่า "ไม่มีที่โอน" จาก T1** ต้องไล่ถึง T2 · และ **บอก user ว่าใช้ขั้นไหน**
 
-```sql
--- T2 (ใช้บ่อยสุด): salesman เดียวกัน ไม่จำกัด channel
-SELECT TOP 10 d.Branch_Code_Key, d.Branch_Code_And_Text, d.Channel_Store,
-  d.Salesman_Employee_Code, d.Salesman_Employee_Name,
-  SUM(CAST(f.Total_Quantity AS float)) AS sold_90d, MAX(f.Date_Key) AS last_sold
-FROM ai.fact_sales_and_stock_daily f
-JOIN ai.dim_branch d ON f.Branch_Code_Key = d.Branch_Code_Key
-WHERE f.Article_Key = '<article ที่ค้าง>'
-  AND f.Total_Quantity > 0
-  AND f.Date_Key >= DATEADD(day, -90, '<as_of>')
-  AND d.Salesman_Employee_Code = '<salesman ของสาขาต้นทาง>'
-  AND d.Channel_Store <> 'MFC'
-GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Channel_Store,
-  d.Salesman_Employee_Code, d.Salesman_Employee_Name
-ORDER BY sold_90d DESC
-```
-- ℹ️ **T1** = เติม `AND d.Channel_Store = '<channel ต้นทาง>'` — ลองก่อนได้ แต่ถ้าว่าง **ต้องไล่ T2 ต่อ**
 - 🚫 ตัด **สาขาต้นทาง** และ **คลัง (`Channel_Store = 'MFC'`)** ออกจากการเสนอเสมอ
-- ✅ เสนอ 3–5 สาขา เรียงตามยอดขาย 90 วัน พร้อมชื่อคนขาย · **แสดง "รหัสสาขา" + "ชื่อสาขา" เสมอ** (ตามกฎ foundation)
-- ⚠️ `Salesman_Employee_Code` populate ครบทุกสาขา (ตรวจแล้ว 2026-09-24)
+- ✅ เสนอ 3–5 สาขา เรียงตามยอดขาย 90 วัน พร้อมชื่อคนขาย · **แสดง "รหัสสาขา" + "ชื่อสาขา" เสมอ**
+- ⚠️ `Salesman_Employee_Code` populate ครบทุกสาขา (ตรวจแล้ว 2026-09-24) · **ตารางปลายทางโอนต้องอยู่ในคำตอบด้วย** ไม่ใช่มีแค่ตาราง (ช)
 
 ## Step 5 — Response
 

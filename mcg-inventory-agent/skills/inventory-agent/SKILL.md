@@ -461,7 +461,10 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 ### (ช) 🎯 ตารางบังคับ: Stock QTY by TOP 10 Model Color
 
 **ใช้กับ 3 คำถามนี้เสมอ** (user สั่ง 2026-09-24): **"ของค้างมีเยอะไหม"** · **"เงินจมในสต็อกเท่าไหร่"** · **"ของค้างเกิน 6 เดือนมีไหม"**
-→ **ต้องแนบตารางนี้ทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม
+
+**โครงคำตอบบังคับ 4 ส่วน** — ต้องครบทุกส่วน ไม่ใช่ตอบแค่ยอดรวม:
+① ตัวเลขสรุป (+ bucket ของค้าง 30/60/90 และสี aging) → ② **ตาราง (ช) TOP 10 Model Color** → ③ **ตารางปลายทางโอน** (ภายใต้ Salesman + Channel) → ④ insight + footer
+> **stock** มาจาก snapshot ล่าสุด (`fact_MB52`) · **Sales Out** มาจากยอดขาย **90 วันย้อนหลัง** (`fact_sales_and_stock_daily`) ⇒ **ต้องระบุ as-of ของทั้งสองฝั่ง** และห้ามใช้ตัวเลขชุดเดียวแทนกัน
 
 **นิยาม:** รุ่น-สีที่ **(ไม่มีขายเลย ≥ 30 วัน) หรือ (ขายได้ ≤ 20% ของสต็อกคงเหลือ)** เรียงตาม Stock QTY มาก→น้อย เอา TOP 10
 > ⚙️ เกณฑ์ "ไม่มีขาย" ของตารางนี้ **ใช้ 30 วันคงที่** (แคบสุดใน 30/60/90 → จับของค้างได้กว้างสุด) · ถ้า user ระบุ 60/90 วัน ให้เปลี่ยน `>= 30` เป็น `>= 60` / `>= 90` **และบอกเกณฑ์ที่ใช้ในคำตอบ**
@@ -531,6 +534,57 @@ ORDER BY s.stock_qty DESC
 1. **`Main_Channel = 'OFFLINE'` ไม่ได้ตัดคลังออก** — สาขา `1101` (MFC) มี `Main_Channel = 'OFFLINE'` และถือ **53% ของทั้งบริษัท** ⇒ ตัดคลังด้วย **`d.Channel_Store <> 'MFC'`** แยกต่างหาก · 🚫 อย่าจำรหัส `1101` มาใช้ (เดิมใช้ literal แล้วจะเงียบ ๆ พังถ้าคลังเปลี่ยนชุด)
 2. **ยอดขายต้องกรอง OFFLINE ด้วย** — เวอร์ชันแรกกรองแค่ตัดคลัง ปล่อยให้ยอดออนไลน์ปนเข้ามา → `sold_90` สูงเกินทุกแถว (เช่น 619 แทน 510) และรุ่นที่ขายดีออนไลน์แต่ตายที่ร้านจะหายไป 43 รุ่น ⇒ **ขาย = OFFLINE เท่านั้น ให้ตรงกับ §5.7 (ฉ)**
 3. **`fact_MB52` ไม่ unique ที่ (Article_Key, Branch_Code_Key)** — ซ้ำ 29,608 คู่ ⇒ **ห้าม join ตารางยอดขายกับ MB52 ดิบ ๆ ที่คู่นี้** (fan-out) ให้ aggregate แยกกันแล้ว join ที่ระดับรุ่น-สี · และนับ "ขาย" จาก **ผลรวมของแถวที่ `Total_Quantity > 0`** ไม่ใช่การมีอยู่ของแถว (แถวส่วนใหญ่ในตารางรายวันมียอด 0/NULL)
+
+### ✅ ปลายทางโอน (บังคับสำหรับ 3 คำถามนี้)
+
+หลังตาราง (ช) **ต้องแนะนำปลายทางโอนเสมอ** สำหรับ 2–3 รุ่น-สีที่สต็อกมากสุด — หาสาขาที่**ขายรุ่น-สีนั้นได้** ภายใต้ **Salesman คนเดียวกับสาขาที่ถือของ** · ใช้ **stock + Sales Out** ร่วมกัน
+
+```sql
+-- ใส่ <model_color> จากตาราง (ช) และ <as_of>
+WITH src AS (        -- สาขาที่ถือของค้าง + salesman ที่ดูแล
+  SELECT d.Branch_Code_Key AS src_key, d.Branch_Code_And_Text AS src_name,
+         d.Salesman_Employee_Code AS sm, d.Salesman_Employee_Name AS sm_name,
+         d.Channel_Store AS src_ch, SUM(CAST(m.Stock_Quantity AS float)) AS src_stock
+  FROM ai.fact_MB52 m
+  JOIN ai.dim_article a ON m.Article_Key = a.Article_Key
+  JOIN ai.dim_branch d ON m.Branch_Code_Key = d.Branch_Code_Key
+  WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
+    AND a.Article_Model_Color = '<model_color>'
+    AND m.Branch_Code_Group = 'Store' AND d.Main_Channel = 'OFFLINE' AND m.Stock_Quantity > 0
+  GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Salesman_Employee_Code, d.Salesman_Employee_Name, d.Channel_Store
+),
+dst AS (             -- สาขาที่ขายรุ่น-สีนี้ได้ใน 90 วัน
+  SELECT d.Branch_Code_Key AS dst_key, d.Branch_Code_And_Text AS dst_name,
+         d.Salesman_Employee_Code AS sm, d.Channel_Store AS dst_ch,
+         SUM(CAST(f.Total_Quantity AS float)) AS sold_90d, MAX(f.Date_Key) AS last_sold
+  FROM ai.fact_sales_and_stock_daily f
+  JOIN ai.dim_article a ON f.Article_Key = a.Article_Key
+  JOIN ai.dim_branch d ON f.Branch_Code_Key = d.Branch_Code_Key
+  WHERE f.Date_Key >= DATEADD(day, -90, '<as_of>') AND f.Total_Quantity > 0
+    AND a.Article_Model_Color = '<model_color>'
+    AND d.Main_Channel = 'OFFLINE' AND d.Channel_Store <> 'MFC'
+  GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Salesman_Employee_Code, d.Channel_Store
+)
+SELECT TOP 12 s.src_key, s.src_name, s.sm, s.sm_name, s.src_ch, s.src_stock,
+       q.dst_key, q.dst_name, q.dst_ch, q.sold_90d, q.last_sold
+FROM src s
+JOIN dst q ON s.sm = q.sm AND s.src_key <> q.dst_key     -- ✅ Salesman เดียวกันเท่านั้น
+ORDER BY s.src_stock DESC, q.sold_90d DESC
+```
+
+**จัดอันดับปลายทาง (ladder — ⚠️ ต้องไล่ทุกลำดับ ไม่ใช่หยุดที่ลำดับแรก):**
+
+| ลำดับ | เงื่อนไข | เหตุผล |
+|---|---|---|
+| **T1** | `dst_ch = src_ch` (Channel เดียวกัน) | ตรงคำขอที่สุด → เสนออันดับแรก |
+| **T2** | Channel ต่าง **แต่ Salesman เดียวกัน** | ⚠️ **มักจำเป็น** — ของที่ค้างที่ร้าน CHAIN มักขายได้ที่ SHOP ในความดูแลคนเดียวกัน |
+| — | ไม่มีทั้ง T1/T2 | บอกตามจริง 🚫 **ห้ามเสนอข้าม salesman** · เสนอทางเลือกอื่น (clearance / โอนเข้าคลัง) |
+
+> 📏 **ตัวอย่างจริง (2026-09-24):** `XXMBDP13400` ค้าง 74 ชิ้นที่ **D170 โรบินสัน มุกดาหาร (CHAIN · salesman 005874 สิทธิศักดิ์ สูงเนินเขต)** → **T1: D163 (CHAIN, 4 ชิ้น)** · **T2: S010 / S110 / S131 (SHOP, 4/3/3 ชิ้น)** ⇒ ต้องเสนอทั้งสองชั้น
+> 🚫 หยุดแค่ T1 แล้วสรุปว่า "ไม่มีที่โอน" = **ผิด** (เคส D098/XXM15Z001500F เคยเจอ T1 ว่างสนิท แต่ T2 เจอ C140 ขายได้ 22 ชิ้น)
+
+- 🚫 ตัด **สาขาต้นทาง** และ **คลัง** ออกเสมอ · ✅ แสดง **รหัสสาขา + ชื่อสาขา** ทั้งต้นทางและปลายทาง · ระบุ **as-of** ของทั้งฝั่งสต็อกและฝั่งยอดขาย
+- ℹ️ ขั้นนี้ผูกกับ **Salesman + Channel** ตามที่ธุรกิจต้องการ — เรียงสาขาต้นทางตามสต็อกมากสุด และปลายทางตามยอดขาย 90 วันมากสุด
 
 ---
 
