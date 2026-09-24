@@ -13,6 +13,8 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_schema_cheatsheet_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__describe_table_inventory_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_slow_moving_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_transfer_candidates_synapse
 ---
 
 #[[file:../inventory-agent/SKILL.md]]
@@ -78,9 +80,10 @@ ORDER BY [Stock Amount STD] DESC
 นิยาม + query หลักอยู่ที่ **§5.7 (ฉ)** ของ foundation · และ **ต้องแนบตารางบังคับ §5.7 (ช)** ด้วย (ดู Step 5 ตาราง 3)
 
 **4.1 หาของค้าง** — สินค้าที่ไม่มีขายที่ร้าน **OFFLINE** ≥ 30 / 60 / 90 วัน · `Branch_Code_Group = 'Store'` (ตัดคลัง) · สต็อก > 0
+- ✅ **เรียก `stock_slow_moving_synapse(as_of, days, pct_threshold, top_n)`** → คืนตาราง (ช) ครบทุกคอลัมน์ (ไม่ต้องเขียน SQL เอง)
 - 🎨 **แสดงสี aging ควบคู่เสมอ** — ของค้างส่วนใหญ่เป็นสี **GREEN** (ของใหม่ที่ขายไม่ออก) ไม่ใช่ของเก่า → สองมุมนี้ให้ภาพคนละเรื่อง
 
-**4.2 แนะนำปลายทางโอน** — **ใช้ query ที่ §5.7 (ช) หัวข้อ "ปลายทางโอน" ของ foundation** (แหล่งความจริงเดียว) ซึ่งหา **สาขาต้นทาง + salesman + สาขาปลายทาง** จบในคำสั่งเดียว และ JOIN เฉพาะ **salesman เดียวกัน**
+**4.2 แนะนำปลายทางโอน** — ✅ **เรียก `stock_transfer_candidates_synapse(model_color, as_of, top_n)`** (แหล่งความจริงเดียว ตาม §5.7 (ช)) ใส่ `model_color` จากตาราง (ช) → คืนคู่ **ต้นทาง → ปลายทาง** ภายใต้ **salesman เดียวกัน** พร้อมคอลัมน์ `tier`
 
 ⚠️ **ต้องไล่เป็นขั้น (ladder) — ตัวกรองที่แคบเกินไปจะไม่เจออะไรเลย**
 
@@ -116,7 +119,7 @@ ORDER BY [Stock Amount STD] DESC
 
 > ✅ คอลัมน์ **"เกณฑ์ที่เข้า"** บังคับ — บอกว่าแถวนั้นเข้าเกณฑ์ "ไม่มีขาย 30/60/90+ วัน" หรือ "ขาย ≤20% ของสต็อก" (ส่วนใหญ่ของ TOP 10 จะเป็นแบบหลัง และยังขายอยู่จริง ไม่ใช่ของที่ไม่มีขาย)
 
-- นิยาม + query อยู่ที่ **§5.7 (ช)** ของ foundation · **ต้องแนบทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม
+- ✅ **เรียก `stock_slow_moving_synapse(...)`** (นิยามที่ **§5.7 (ช)**) · **ต้องแนบทุกครั้ง** ไม่ใช่ตอบแค่ยอดรวม · แล้วตามด้วย **ตารางปลายทางโอน** จาก `stock_transfer_candidates_synapse`
 - 🚫 **ต้องกรองก่อน แล้วค่อย TOP 10 by Stock QTY** — เกณฑ์: ไม่มีขาย ≥30 วัน **หรือ** ขาย ≤20% ของสต็อกคงเหลือ
   (ต้อง**กรองก่อน**แล้วค่อยจัดอันดับ — TOP 10 by stock ดิบ ๆ คละกันทั้งของค้างและของที่ขายดี)
 

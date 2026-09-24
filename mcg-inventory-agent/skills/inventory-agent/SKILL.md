@@ -23,6 +23,8 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_value_by_aging_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__po_overdue_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_yoy_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_slow_moving_synapse
+  - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_transfer_candidates_synapse
 ---
 
 # MC Group Inventory Agent v2
@@ -466,6 +468,11 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 ① ตัวเลขสรุป (+ bucket ของค้าง 30/60/90 และสี aging) → ② **ตาราง (ช) TOP 10 Model Color** → ③ **ตารางปลายทางโอน** (ภายใต้ Salesman + Channel) → ④ insight + footer
 > **stock** มาจาก snapshot ล่าสุด (`fact_MB52`) · **Sales Out** มาจากยอดขาย **90 วันย้อนหลัง** (`fact_sales_and_stock_daily`) ⇒ **ต้องระบุ as-of ของทั้งสองฝั่ง** และห้ามใช้ตัวเลขชุดเดียวแทนกัน
 
+**✅ ใช้ tool สำเร็จรูปก่อน — ไม่ต้องเขียน SQL เอง: `stock_slow_moving_synapse(as_of, days, pct_threshold, top_n)`**
+คืนครบ: รุ่น-สี · รุ่น · แบรนด์ · stock (ฐานคงเหลือ) · MV · ขาย 30/60/90 · ขายล่าสุด · pct ×2 · **เกณฑ์ที่เข้า** · snapshot_date · as_of
+· `as_of` เว้นว่างได้ (tool derive จาก `MAX(Date_Key)` เอง) · `days` default 30 · `pct_threshold` default 0.20
+> SQL ด้านล่างคือ **สำเนานิยาม** ของสิ่งที่ tool ทำ — ใช้เมื่อ tool ไม่พอเท่านั้น (เช่น ต้องการระดับ `Article_Model` แทนรุ่น-สี)
+
 **นิยาม:** รุ่น-สีที่ **(ไม่มีขายเลย ≥ 30 วัน) หรือ (ขายได้ ≤ 20% ของสต็อกคงเหลือ)** เรียงตาม Stock QTY มาก→น้อย เอา TOP 10
 > ⚙️ เกณฑ์ "ไม่มีขาย" ของตารางนี้ **ใช้ 30 วันคงที่** (แคบสุดใน 30/60/90 → จับของค้างได้กว้างสุด) · ถ้า user ระบุ 60/90 วัน ให้เปลี่ยน `>= 30` เป็น `>= 60` / `>= 90` **และบอกเกณฑ์ที่ใช้ในคำตอบ**
 · base = **ฐานคงเหลือ** · ตัดคลัง (`Branch_Code_Group = 'Store'`) · OFFLINE · สต็อก > 0
@@ -538,6 +545,10 @@ ORDER BY s.stock_qty DESC
 ### ✅ ปลายทางโอน (บังคับสำหรับ 3 คำถามนี้)
 
 หลังตาราง (ช) **ต้องแนะนำปลายทางโอนเสมอ** สำหรับ 2–3 รุ่น-สีที่สต็อกมากสุด — หาสาขาที่**ขายรุ่น-สีนั้นได้** ภายใต้ **Salesman คนเดียวกับสาขาที่ถือของ** · ใช้ **stock + Sales Out** ร่วมกัน
+
+**✅ ใช้ tool: `stock_transfer_candidates_synapse(model_color, as_of, top_n)`** — ใส่ `model_color` จากตาราง (ช)
+คืนครบ: ต้นทาง (รหัส/ชื่อ/ช่องทาง/สต็อก) · salesman (รหัส/ชื่อ) · ปลายทาง (รหัส/ชื่อ/ช่องทาง/sold_90d/ขายล่าสุด) · **`tier`** = `T1 same channel` หรือ `T2 same salesman` — เรียงต้นทางตามสต็อก แล้วปลายทางตามยอดขายให้แล้ว
+> SQL ด้านล่างคือสำเนานิยามของสิ่งที่ tool ทำ
 
 ```sql
 -- ใส่ <model_color> จากตาราง (ช) และ <as_of>
