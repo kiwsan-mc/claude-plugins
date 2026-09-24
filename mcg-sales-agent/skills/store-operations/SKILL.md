@@ -98,7 +98,7 @@ ORDER BY net_sales DESC
 | Status | Branches | Net Sales |
 
 **Table 2: New Stores (FY27)**
-| # | Branch | Province | Open Date | SQM | Net Sales | Active Days |
+| # | รหัสสาขา | ชื่อสาขา | Province | Open Date | SQM | Net Sales | Active Days |
 
 **Table 3: Cluster Performance**
 | Cluster | Size Range | Branches | Net Sales | Avg/Branch | ATV |

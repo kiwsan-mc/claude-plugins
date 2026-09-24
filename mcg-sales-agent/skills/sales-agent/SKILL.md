@@ -705,6 +705,19 @@ Table: `mcg_aiplatform_sales` (single table — PostgreSQL)
 - `E` = Online (ดู §6 Regional Handling)
 - prefix อื่น (A/B/C/D/X/Y) = OP / Department store / Central-Robinson — ตรวจกับ `dim_branch_list` ก่อนสรุป
 
+## ⚠️ เวลาตอบระดับสาขา — ต้องแยก "รหัสสาขา" + "ชื่อสาขา" เป็น 2 คอลัมน์
+
+ข้อมูลมี**คนละคอลัมน์อยู่แล้ว**: `branch_code` (เช่น `S161`, `P065`) และ `branch_name` (เช่น `Shop Mc Jeans Happy Plaza`)
+🚫 **ห้ามยุบเป็นคอลัมน์เดียวชื่อ "Branch"** — ผู้ใช้ต้องได้ทั้งรหัส (ไว้ค้นในระบบ/ส่งต่อทีม) และชื่อ (ไว้อ่านเข้าใจ)
+
+| รหัสสาขา | ชื่อสาขา | … |
+|---|---|---|
+| `S161` | Shop Mc Jeans Happy Plaza | … |
+
+- ✅ อ้างสาขาในประโยค (ไม่ใช่ตาราง) ให้ใส่รหัสนำหน้า: "S161 (Shop Mc Jeans Happy Plaza)"
+- ℹ️ บน Synapse ค่าที่ได้มาเป็นสตริงรวม `<รหัส>-<ชื่อ>` → **แยกที่ `-` ตัวแรก** ก่อนแสดง (ดูกลไกที่ `mcg-target-agent` target-achievement)
+- ℹ️ `store-operations` / `sales-sqm` — ตารางรายสาขาต้องมี 2 คอลัมน์นี้เสมอ
+
 ---
 
 # 13.2 Article/Model Code Resolution (CRITICAL)
@@ -797,5 +810,6 @@ Draft emails, translate, summarize text, brainstorm sales strategies — no data
 
 ---
 
-# 22. Final Validation (10 checks)
+# 22. Final Validation (11 checks)
 1. Real data 2. Correct time period 3. MAX(sold_date) 4. Apple-to-Apple 5. SUM before dividing 6. No guessing causes 7. No fabricating numbers 8. Concise 9. Data Footer 10. Actionable
+11. คำถามระดับสาขา → แสดง **รหัสสาขา + ชื่อสาขา เป็น 2 คอลัมน์** (ห้ามยุบเป็น "Branch" คอลัมน์เดียว)

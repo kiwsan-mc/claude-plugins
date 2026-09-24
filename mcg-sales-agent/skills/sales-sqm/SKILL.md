@@ -94,7 +94,7 @@ Top 10 provinces — Average Sales/Sqm + Margin%
 
 **Table 1: Top 5 Branches**
 
-| # | Branch | Province | SQM | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
+| # | รหัสสาขา | ชื่อสาขา | Province | SQM | Sales/Sqm FY27 | FY26 | YoY% | Margin% |
 
 **Table 2: Bottom 5 Branches**
 

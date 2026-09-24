@@ -58,7 +58,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | เป้าขาย / Company sales | mcg-target-agent | Synapse |
 | ภาพรวมข้าม domain | **mcg-executive-agent** | **Synapse (5 servers)** ← ที่นี่ |
 
-**กฎ 5 ข้อ**
+**กฎ 9 ข้อ**
 1. **ติด source ทุกคำตอบ/ทุกส่วน** — `📊 Source: Synapse | <domain>` เสมอ
 2. **ห้าม mix ข้าม platform** — ที่นี่เป็น Synapse ล้วน ถ้าผู้ใช้เทียบกับตัวเลขจาก sales-agent (Postgres) ต้อง flag ว่า **คนละ platform**
 3. **อะไรตรง/ไม่ตรง** (ยืนยันจากข้อมูลจริง):
@@ -66,6 +66,22 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
    - ⚠️ **ไม่ตรง**: Discount, Gross · **Member** (Postgres ~55% ทุกสาขา vs CRM ~16% / 88 สาขา) · **Tickets/ATV** (Postgres มี, Synapse sales ไม่มี)
 4. **Anchor ต้องมาจาก platform เดียวกับ tool** — ที่นี่ใช้ 4 anchor ของ Synapse เท่านั้น (ดู §2)
 5. **คำถามข้าม platform** → ตอบแยกส่วน ระบุ source ของแต่ละส่วน
+6. **🚫 ห้ามนำยอดขาย invoice (Company/Account) กับยอดขาย POS มาเทียบ / บวก / เฉลี่ยกัน** — คนละระบบต้นทาง (`silver.sap_zsdr006` vs `gold.script_daily_sales_snapshot`) และคนละ population ⇒ ตัวเลขไม่ตรงกัน**โดยธรรมชาติ ไม่ใช่ข้อมูลผิด**
+7. **🚫 ห้ามนำยอด Member/CRM (subset ~88 สาขา) มาเทียบกับยอดรวมทั้งบริษัท** — ต้องระบุว่าเป็น subset เสมอ
+8. **เทียบ `max_date` ของแต่ละแหล่งก่อนวางตัวเลขไว้ตาราง/ประโยคเดียวกัน** — ตารางคนละ job เคยหยุดไม่พร้อมกันจริง (สต็อก: `fact_sales_and_stock_daily` หยุด 2026-08-13 ขณะที่ `fact_MB52` อยู่ 2026-09-22) ⇒ ขอบไม่ตรงวัน = ต้องแยกแสดงและกำกับวันที่
+9. **ทุกตัวเลขต้องมี 2 ป้ายกำกับ: แหล่ง + ช่วงวันที่** — ✅ "ยอดขายบริษัท (invoice) 1–23 ก.ย. 2026" · ❌ "ยอดขาย ฿X"
+
+### ตารางอ้างอิง — ภายใน Synapse เองก็มีหลายแหล่ง
+
+| ตัวเลข | ตาราง | ระบบต้นทาง | grain / ขอบเขต | เทียบกับใครได้ |
+|---|---|---|---|---|
+| ยอดขาย POS รายวัน | `fact_sales_and_stock_daily` | **gold** (POS) | วัน × สินค้า × สาขา | ใช้คิด achievement ของเป้าได้ |
+| **ยอดขาย invoice (Company/Account)** | `fact_daily_sales_account` | **silver** (invoice) | ใบกำกับ · population **แคบกว่า** | 🚫 เทียบกับ POS ไม่ได้ |
+| เป้าขาย | `dim_target_main_lines` | gold | สาขา × วัน · **ไม่มี category** | ใช้กับ POS |
+| สต็อก | `fact_MB52` | gold | **snapshot วันเดียว** | ใช้กับยอดขายไม่ได้ (คนละช่วง) |
+| Member / CRM | `poc_fact_sales_with_crm` | CRM | **~88 สาขา** เท่านั้น | 🚫 ใช้แทนยอดทั้งบริษัทไม่ได้ |
+
+> 📌 ยอดเป้าและยอด POS ที่ใช้คิด achievement **ต้องเป็นช่วงวันที่เดียวกัน** เสมอ — ดูรายละเอียดกลไกที่ `mcg-target-agent` (target-achievement Step 2): เป้าเต็มเดือน ÷ ยอดจริงบางส่วน ให้ achievement ต่ำเกินจริง (วัดจริง 2026-09-24: 64.35% vs 85.61%)
 
 ---
 
@@ -279,5 +295,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | "สต็อกสาขา <code>" | mcg-inventory-agent |
 | "member รายตัว" / "RFM" / "top member" / "tier" / "return" (เจาะลึก) | mcg-crm-agent |
 | domain เดียวเจาะลึกอื่น ๆ | agent เฉพาะ (mcg-sales-agent / mcg-inventory-agent / mcg-product-agent / mcg-target-agent / mcg-crm-agent) |
+| "ยอดขายบริษัท" เทียบกับ "ยอดขาย POS" · "ยอดเป้า" เทียบกับ "ยอดขายบริษัท" · "member คิดเป็นกี่ % ของทั้งบริษัท" | 🚫 **ไม่มีการเทียบให้** — คนละระบบต้นทาง / คนละ population (ดูกฎ 6–9) · ตอบแยกส่วนพร้อมกำกับ **แหล่ง + ช่วงวันที่** แล้วอธิบายว่าทำไมเทียบกันตรง ๆ ไม่ได้ |
 
 ⚠️ **ห้ามตอบเอง** — executive overview ไม่มี tool ดู branch master (`dim_branch_list`) และไม่ควรลงลึกระดับสาขา/SKU รายตัว ภาพรวมนี้คือ summary ระดับ executive เท่านั้น
+⚠️ **ห้ามเทียบข้ามแหล่งที่ว่ามา** แม้ทั้งหมดจะอยู่บน Synapse เหมือนกัน — "อยู่ platform เดียวกัน" ไม่ได้แปลว่า "เทียบกันได้"
