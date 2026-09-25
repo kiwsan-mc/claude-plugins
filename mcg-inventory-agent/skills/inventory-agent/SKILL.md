@@ -457,6 +457,7 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 **กติกา:**
 - ✅ ระบุ **as-of** ทุกครั้ง และ **derive `<as_of>` จาก `MAX(Date_Key)` ของตารางรายวันเสมอ** อย่า hardcode (ข้อมูลเดินหน้าได้)
 - ℹ️ กลุ่ม 90+ รวมทั้ง "ขายล่าสุด 90–180 วัน" และ "ไม่มีขายเลย" → ถ้า user ถาม **"เกิน 6 เดือน"** ให้ตอบกลุ่ม 90+ และ**บอกว่าใช้เกณฑ์ 90 วัน** (ไม่แยก bucket 180)
+  · 🚫 **ห้ามตั้งเกณฑ์ 180 วันขึ้นเอง** — 180 เป็นสับเซตของ 90+ และจะเหลือแต่รุ่น-สีที่**ไม่เคยขายเลย** ซึ่งหาปลายทางโอนไม่ได้ (เคสจริง 2026-09-25) · ตาราง (ช) ใช้ `days` = 30 ตามปกติ แล้วอ่านคอลัมน์ **`ขายล่าสุด`** เพื่อชี้ว่ามีของค้างเกิน 6 เดือนจริงกี่รายการ
 - ⚠️ ตัวเลขนี้กว้างโดยธรรมชาติของแฟชั่น (SKU×สาขาส่วนใหญ่ขายไม่ออกใน 180 วัน) → **อย่าตอบเป็นเปอร์เซ็นต์ลอย ๆ** ให้เสนอ bucket + มูลค่า และชี้กลุ่มมูลค่าสูง
 - ✅ ถ้า user ถามต่อว่า **"ควรโอนไปไหน"** → ไปที่ skill **stock-health** (ขั้น "แนะนำปลายทางโอน")
 - ✅ **ต้องแนบตาราง §5.7 (ช) เสมอ** — Stock QTY by TOP 10 Model Color
@@ -473,6 +474,7 @@ WHERE m.Stock_Date = (SELECT MAX(Stock_Date) FROM ai.fact_MB52)
 คืนครบ: รุ่น-สี · รุ่น · แบรนด์ · stock (ฐานคงเหลือ) · MV · ขาย 30/60/90 · ขายล่าสุด · pct ×2 · **เกณฑ์ที่เข้า** · snapshot_date · as_of
 · `as_of` ใส่ `'auto'` ได้ (tool derive จาก `MAX(Date_Key)` เอง) · `days` default 30 · **`pct_threshold` default `20` = 20% (เปอร์เซ็นต์เต็ม ไม่ใช่ 0.20)**
 > SQL ด้านล่างคือ **สำเนานิยาม** ของสิ่งที่ tool ทำ — ใช้เมื่อ tool ไม่พอเท่านั้น (เช่น ต้องการระดับ `Article_Model` แทนรุ่น-สี)
+- 🚫 **ห้ามเขียน query เองเพื่อ "กรองให้แคบกว่า tool"** (เช่น เฉพาะรุ่น-สีที่ *ไม่เคยขายเลย* หรือค้าง ≥180 วัน) — เกณฑ์ 30 วันของ tool **แคบสุดแล้วโดยเจตนา** ⇒ การกรองเพิ่มจะเหลือแต่ของที่ไม่เคยขาย ซึ่ง**หาปลายทางโอนไม่ได้** และทำให้คำตอบทั้งกระดานว่าง (เคสจริง 2026-09-25 — ดูหัวข้อ "ปลายทางโอน")
 - ⚠️ **ถ้า tool ค้าง/timeout → ยิงซ้ำ 1 ครั้งก่อน** — หลักฐาน 2026-09-25: ทั้ง `stock_slow_moving_synapse` และ `stock_transfer_candidates_synapse` ค้างในครั้งแรก แล้ว**ผ่านทันทีเมื่อยิงซ้ำ** (เป็นชั้นรับส่งผลลัพธ์ ไม่ใช่ query หนัก) · 🚫 ห้ามตีความว่าค้าง = "ไม่มีข้อมูล"
 
 **นิยาม:** รุ่น-สีที่ **(ไม่มีขายเลย ≥ 30 วัน) หรือ (ขายได้ ≤ 20% ของสต็อกคงเหลือ)** เรียงตาม Stock QTY มาก→น้อย เอา TOP 10
@@ -546,14 +548,18 @@ ORDER BY s.stock_qty DESC
 
 ### ✅ ปลายทางโอน (บังคับสำหรับ 3 คำถามนี้)
 
-หลังตาราง (ช) **ต้องแนะนำปลายทางโอนเสมอ** สำหรับ 2–3 รุ่น-สีที่สต็อกมากสุด — หาสาขาที่**ขายรุ่น-สีนั้นได้** ภายใต้ **Salesman คนเดียวกับสาขาที่ถือของ** · ใช้ **stock + Sales Out** ร่วมกัน
+หลังตาราง (ช) **ต้องแนะนำปลายทางโอนเสมอ** สำหรับ 3–5 รุ่น-สีที่สต็อกมากสุด — หาสาขาที่**ขายรุ่น-สีนั้นได้** ภายใต้ **Salesman คนเดียวกับสาขาที่ถือของ** · ใช้ **stock + Sales Out** ร่วมกัน
+
+> 🚫 **ห้ามเขียน SQL เองสำหรับตาราง (ช) และตารางปลายทางโอน — ต้องเรียก tool เท่านั้น**
+> 🔴 **หลักฐาน 2026-09-25 (เคสจริงที่ตอบไม่ได้):** agent เขียน SQL เองด้วยเกณฑ์ "ไม่เคยขาย ≥180 วัน" → TOP 10 ออกมาเป็นรุ่น-สีที่**ไม่เคยขายที่ร้านใดเลยทั้งเครือ** (ทั้งกลุ่มมีสต็อกรวม **3,595 ชิ้น**) → ยิงหาปลายทาง 3 รุ่น-สี ได้ **ว่างทั้ง 3** แล้วสรุปกับ user ว่า *"ไม่เจอปลายทางโอนในระบบ (T1 และ T2 ไม่มี)"* ⇒ คำตอบดูเหมือนระบบพัง ทั้งที่ tool ทำงานปกติ (ตาราง (ช) ที่ tool คืนมีรุ่น-สีสต็อก **9,220 ชิ้น** ซึ่งหาปลายทางเจอทันที)
+> ⇒ **ตัวเลข TOP 10 ต้องมาจาก `stock_slow_moving_synapse` · ปลายทางต้องมาจาก `stock_transfer_candidates_synapse`** 🚫 ไม่ใช่ query ที่เขียนขึ้นเอง
 
 **✅ ใช้ tool: `stock_transfer_candidates_synapse(model_color, as_of, top_n)`** — ใส่ `model_color` จากตาราง (ช)
-คืนครบ: ต้นทาง (รหัส/ชื่อ/ช่องทาง/สต็อก) · salesman (รหัส/ชื่อ) · ปลายทาง (รหัส/ชื่อ/ช่องทาง/sold_90d/ขายล่าสุด) · **`tier`** = `T1 same channel` หรือ `T2 same salesman` — เรียงต้นทางตามสต็อก แล้วปลายทางตามยอดขายให้แล้ว
+คืนครบ: ต้นทาง (รหัส/ชื่อ/ช่องทาง/สต็อก) · salesman (รหัส/ชื่อ) · ปลายทาง (รหัส/ชื่อ/ช่องทาง/`sold_90d`/`last_sold`) · **`tier`** = `T1 same channel` / `T2 same salesman` / `T3 same model (other colour)` — เรียงต้นทางตามสต็อก แล้วปลายทางตามยอดขายให้แล้ว
 > SQL ด้านล่างคือสำเนานิยามของสิ่งที่ tool ทำ
 
 ```sql
--- ใส่ <model_color> จากตาราง (ช) และ <as_of>
+-- ใส่ <model_color> จากตาราง (ช) และ <as_of>  (คัดลอกจาก tool: มี T1/T2/T3 + guard)
 WITH src AS (        -- สาขาที่ถือของค้าง + salesman ที่ดูแล
   SELECT d.Branch_Code_Key AS src_key, d.Branch_Code_And_Text AS src_name,
          d.Salesman_Employee_Code AS sm, d.Salesman_Employee_Name AS sm_name,
@@ -566,38 +572,54 @@ WITH src AS (        -- สาขาที่ถือของค้าง + sa
     AND m.Branch_Code_Group = 'Store' AND d.Main_Channel = 'OFFLINE' AND m.Stock_Quantity > 0
   GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Salesman_Employee_Code, d.Salesman_Employee_Name, d.Channel_Store
 ),
-dst AS (             -- สาขาที่ขายรุ่น-สีนี้ได้ใน 90 วัน
+dst AS (             -- สาขาที่ "ขายรุ่นนี้" (สีเดียวกัน หรือคนละสีของรุ่นเดียวกัน)
   SELECT d.Branch_Code_Key AS dst_key, d.Branch_Code_And_Text AS dst_name,
          d.Salesman_Employee_Code AS sm, d.Channel_Store AS dst_ch,
-         SUM(CAST(f.Total_Quantity AS float)) AS sold_90d, MAX(f.Date_Key) AS last_sold
+         SUM(CASE WHEN a.Article_Model_Color = '<model_color>' THEN CAST(f.Total_Quantity AS float) ELSE 0 END) AS c_same,
+         SUM(CASE WHEN a.Article_Model_Color <> '<model_color>' THEN CAST(f.Total_Quantity AS float) ELSE 0 END) AS c_other,
+         MAX(f.Date_Key) AS last_any
   FROM ai.fact_sales_and_stock_daily f
   JOIN ai.dim_article a ON f.Article_Key = a.Article_Key
   JOIN ai.dim_branch d ON f.Branch_Code_Key = d.Branch_Code_Key
   WHERE f.Date_Key >= DATEADD(day, -90, '<as_of>') AND f.Total_Quantity > 0
-    AND a.Article_Model_Color = '<model_color>'
+    AND a.Article_Model = (SELECT MAX(Article_Model) FROM ai.dim_article WHERE Article_Model_Color = '<model_color>')
     AND d.Main_Channel = 'OFFLINE' AND d.Channel_Store <> 'MFC'
   GROUP BY d.Branch_Code_Key, d.Branch_Code_And_Text, d.Salesman_Employee_Code, d.Channel_Store
 )
 SELECT TOP 12 s.src_key, s.src_name, s.sm, s.sm_name, s.src_ch, s.src_stock,
-       q.dst_key, q.dst_name, q.dst_ch, q.sold_90d, q.last_sold
+       q.dst_key, q.dst_name, q.dst_ch, q.c_same, q.c_other,
+       CASE WHEN q.c_same > 0 THEN q.c_same ELSE q.c_other END AS sold_90d,
+       CASE WHEN q.c_same > 0 AND q.dst_ch = s.src_ch THEN 'T1' WHEN q.c_same > 0 THEN 'T2' ELSE 'T3' END AS tier
 FROM src s
 JOIN dst q ON s.sm = q.sm AND s.src_key <> q.dst_key     -- ✅ Salesman เดียวกันเท่านั้น
-ORDER BY s.src_stock DESC, q.sold_90d DESC
+WHERE q.c_same > 0
+   OR (q.c_other > 0 AND q.dst_key NOT IN (SELECT src_key FROM src))   -- 🚫 T3: ปลายทางต้องไม่มีสีนี้ค้างเอง
+ORDER BY s.src_stock DESC, CASE WHEN q.c_same > 0 THEN 0 ELSE 1 END, (q.c_same + q.c_other) DESC
 ```
 
 **จัดอันดับปลายทาง (ladder — ⚠️ ต้องไล่ทุกลำดับ ไม่ใช่หยุดที่ลำดับแรก):**
 
-| ลำดับ | เงื่อนไข | เหตุผล |
+| ลำดับ | เงื่อนไข | หมายเหตุ |
 |---|---|---|
-| **T1** | `dst_ch = src_ch` (Channel เดียวกัน) | ตรงคำขอที่สุด → เสนออันดับแรก |
-| **T2** | Channel ต่าง **แต่ Salesman เดียวกัน** | ⚠️ **มักจำเป็น** — ของที่ค้างที่ร้าน CHAIN มักขายได้ที่ SHOP ในความดูแลคนเดียวกัน |
-| — | ไม่มีทั้ง T1/T2 | บอกตามจริง 🚫 **ห้ามเสนอข้าม salesman** · เสนอทางเลือกอื่น (clearance / โอนเข้าคลัง) |
+| **T1** | Salesman เดียวกัน + **Channel เดียวกัน** + **สีเดียวกัน** | ตรงคำขอที่สุด → เสนออันดับแรก |
+| **T2** | Salesman เดียวกัน + Channel ใดก็ได้ + **สีเดียวกัน** | ⚠️ **มักจำเป็น** — ของที่ค้างที่ร้าน CHAIN มักขายได้ที่ SHOP ในความดูแลคนเดียวกัน |
+| **T3** | Salesman เดียวกัน + Channel ใดก็ได้ + **รุ่นเดียวกัน คนละสี** | ขั้นสุดท้าย — ใช้เมื่อไม่มีใครขายสีนี้ · 🔴 ตรวจ 2026-09-25: **17,212 คู่ / 310 รุ่น-สี** ที่ T1/T2 ว่างแต่ T3 เจอ ⇒ ถ้าไม่มี T3 จะตอบ "ไม่มีปลายทาง" ผิด ๆ เป็นวงกว้าง |
+| — | ไม่เจอทั้ง 3 | บอกตามจริง 🚫 **ห้ามเสนอข้าม salesman** · เสนอทางเลือกอื่น (clearance / คืน vendor / โอนเข้าคลัง) |
 
 > 📏 **ตัวอย่างจริง (2026-09-24):** `XXMBDP13400` ค้าง 74 ชิ้นที่ **D170 โรบินสัน มุกดาหาร (CHAIN · salesman 005874 สิทธิศักดิ์ สูงเนินเขต)** → **T1: D163 (CHAIN, 4 ชิ้น)** · **T2: S010 / S110 / S131 (SHOP, 4/3/3 ชิ้น)** ⇒ ต้องเสนอทั้งสองชั้น
 > 🚫 หยุดแค่ T1 แล้วสรุปว่า "ไม่มีที่โอน" = **ผิด** (เคส D098/XXM15Z001500F เคยเจอ T1 ว่างสนิท แต่ T2 เจอ C140 ขายได้ 22 ชิ้น)
+> 🚫 **T3 ปลายทางที่ถือสีเดียวกันค้างอยู่จะถูกตัดออก** — เคส `XXM02Z16308` (ไม่เคยขายเลย · สต็อก 6–10 ชิ้นกระจาย ~100 สาขา) → T3 ว่าง เพราะสาขาที่ขายรุ่นนี้ได้ (S057/S016/S088) **ถือสีนี้อยู่เองแล้ว** ⇒ กรณีนี้ตอบ "ไม่มีปลายทาง" + fallback (ถูกต้อง ไม่ใช่ระบบพัง)
+
+**วิธีตอบ (บังคับ — กันคำตอบ "ว่างทั้งกระดาน"):**
+1. ✅ ยิง `stock_transfer_candidates_synapse` สำหรับ **3–5 แถวแรกของตาราง (ช) ที่มีขายจริง (`ขาย 90 วัน > 0`)** — ตรวจ 2026-09-25: `XXMBDP13400` → 12 คู่ · `XXMAMZ00900` → 4 คู่ (มีปลายทางจริงทุกครั้ง)
+2. ℹ️ ถ้าแถวไหนคืน **ว่าง** → ยิงซ้ำ 1 ครั้งก่อน (ตามหมายเหตุ timeout ด้านบน) · ถ้ายังว่างและแถวนั้นเป็น **`ไม่เคยขาย`** ให้ **หยุดยิงแถวประเภทเดียวกันที่เหลือ** แล้วสรุปรวมเป็น **1 บรรทัด**: "อีก N รุ่น-สี (ไม่เคยขายเลย · รวม X ชิ้น · มูลค่า ฿Y) ไม่มีปลายทางโอนในเครือ"
+3. 🚫 **ห้ามสรุป "ไม่มีปลายทาง" จาก T1 อย่างเดียว** · ✅ **บอก tier ที่ใช้ทุกครั้ง**
+4. ✅ ถ้าไม่มีปลายทางทั้ง T1–T3 **ต้องเขียนประโยค fallback ให้เห็นในคำตอบ** (ห้ามปล่อยตารางว่างแล้วเงียบ): *"ทั้งรุ่นไม่มีความต้องการในร้านใดในเครือ → ไม่ใช่ปัญหาการกระจายสินค้า → เสนอ clearance / คืน vendor"*
 
 - 🚫 ตัด **สาขาต้นทาง** และ **คลัง** ออกเสมอ · ✅ แสดง **รหัสสาขา + ชื่อสาขา** ทั้งต้นทางและปลายทาง · ระบุ **as-of** ของทั้งฝั่งสต็อกและฝั่งยอดขาย
 - ℹ️ ขั้นนี้ผูกกับ **Salesman + Channel** ตามที่ธุรกิจต้องการ — เรียงสาขาต้นทางตามสต็อกมากสุด และปลายทางตามยอดขาย 90 วันมากสุด
+- ⚠️ `last_sold` ของแถว **T3 = วันขายล่าสุดของ "รุ่น" (สีใดก็ได้)** ไม่ใช่ของสีนี้ → ต้องกำกับเวลาอ้างอิง
+- ℹ️ **`salesman_scope`** — `assigned` = รหัสคนขายจริง · `pooled (OTHERS)` = **รหัสรวม `999999`** ซึ่งใช้ร่วมกัน **1,070 สาขา (1,065 เป็นหน้าร้าน OFFLINE)** ตรวจ 2026-09-25 ⇒ กลุ่มนี้ "Salesman เดียวกัน" **ไม่ใช่พื้นที่เดียวกันจริง** → ยังเสนอได้ แต่ **ต้องกำกับในคำตอบ** ว่าอยู่ใต้รหัสรวม (ไม่ใช่เขตของคนขายคนนั้น) 🚫 ห้ามกล่าวอ้างว่า "อยู่ใต้ Salesman คนเดียวกัน" แบบไม่มีเงื่อนไข
 
 ### ✅ ยืนยัน Sales Out กับ mcg-sales (บังคับ)
 
