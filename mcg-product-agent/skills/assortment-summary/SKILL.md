@@ -34,17 +34,19 @@ tools:
 
 ## Step 1 — เลือก dimension
 
-`product_dimension_summary_synapse` รองรับ group_by เช่น: `brand`, `level1`-`level4`, `category`, `gender`, `season`, `new_season`, `color`, `color_tone`, `size`, `aging`, `sales_type`, `status`, `fashion_grade`, `price_band`, `design`, `theme`, `product_group`, `family`, `collection`, `vendor`
+`product_dimension_summary_synapse` รองรับ group_by เช่น: `brand`, `level1`-`level5`, `category`, `gender`, `season`, `new_season`, `color`, `size`, `aging`, `sales_type`, `status`, `fashion_grade`, `price_band`, `design`, `theme`, `product_group`, `family`, `collection`, `vendor`
+> ⚠️ `color_tone` **ใช้ไม่ได้** (tool ไม่รับค่านี้ → error) ให้ใช้ `color` แทน · รายการที่รองรับจริงดูจากข้อความ error ของ tool
 - ถ้า user ไม่ระบุ → default `brand`
-- ⚠️ หน่วยของจำนวน: ถ้า user ถาม "จำนวน"/"กี่" ลอย ๆ โดยไม่ระบุหน่วย → **ถามกลับก่อน** ว่า SKU / รุ่น-สี / รุ่น — ห้าม default เป็น SKU เอง (ต่างจาก dimension ที่ default ได้)
+- ⚠️ หน่วยของจำนวน: ถ้า user ถาม "จำนวน"/"กี่" ลอย ๆ โดยไม่ระบุหน่วย → **ถามกลับก่อนเสมอ** ว่า **SKU / รุ่น (รุ่น-สี) / ชิ้น** — 🚫 ห้าม default เป็น SKU เอง · ถ้า user ตอบสั้นว่า "รุ่น" ให้อ่านเป็น **รุ่น-สี** เสมอ (ต่างจาก dimension ที่ default ได้)
 
 ## Step 2 — ดึงสรุป
 
 เรียก `product_dimension_summary_synapse(group_by=<dimension>)`
 (filter ได้ด้วย filter_column/filter_value ถ้า user เจาะเฉพาะกลุ่ม)
 
-ผลลัพธ์ให้: sku_count, model_count, avg_tag_price, avg_selling_price, margin_pct
-- ⚠️ canned tool คืนจำนวน **SKU** และ **รุ่น** เท่านั้น — **ไม่มีจำนวนรุ่น-สี** ถ้าต้องตอบ "จำนวนรุ่น" ให้ใช้ `product_query_synapse` นับ `APPROX_COUNT_DISTINCT(Article_Model_Color)` (เรียก `product_schema_cheatsheet_synapse` ก่อนตาม §5.0) และ **ห้ามเอา model_count ไปตอบคำถาม "จำนวนรุ่น"**
+ผลลัพธ์ให้: `sku_count` (SKU) · `model_count` (รุ่น) · **`model_color_count` (รุ่น-สี)** · avg_tag_price · avg_selling_price · margin_pct
+- ✅ **คำตอบของ "จำนวนรุ่น" = `model_color_count` (รุ่น-สี)** — canned tool คืนคอลัมน์นี้มาแล้ว **ทุก group_by** ⇒ 🚫 ห้ามเอา `model_count` (รุ่น) หรือ `sku_count` ไปตอบคำถาม "จำนวนรุ่น"
+- ℹ️ ใช้ `product_query_synapse` เฉพาะเมื่อต้องการ grain ที่ canned tool ไม่มี (เช่น นับรายไซส์/รายสี) — **ไม่ต้องใช้เพื่อนับรุ่น-สี**
 
 ## Step 3 — Response
 

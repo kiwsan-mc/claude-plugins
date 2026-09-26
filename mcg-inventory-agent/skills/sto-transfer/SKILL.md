@@ -58,6 +58,8 @@ SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Cat
 
 ผลลัพธ์ให้: ปริมาณ **(ชิ้น)** แยก สั่งโอน (PO) / รับเข้าแล้ว (GR) / ค้างส่ง (still-to-deliver) — นำด้วย **จำนวนชิ้น** เสมอ · มูลค่า (฿) แสดง**เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง** และต้องกำกับ "(มูลค่า ฿)" ทุกครั้ง
 
+> ⚠️ **"ค้างส่ง" ของ STO ใช้ `Still_To_Delivery_Quantity` / `Still_To_Delivery_Amount`** (query ตรงด้วย `inventory_query_synapse`) — 🚫 **ไม่ใช่ `Open_Quantity`** ที่ tool `sto_summary_synapse` คืนมา (คนละตัวจริง: 2026-09-23 STO open 793,061 vs still **766,744** = ต่าง 26,317 ชิ้น) ⇒ ถ้าจะรายงาน "ค้างส่ง" ต้องดึงด้วย `Still_To_Delivery_*` และบอกเกณฑ์ที่ใช้ · ส่วน `sto_summary_synapse` รายงานได้ทั้ง โอน (`transfer_qty`) · รับเข้า (`gr_qty`) · ยังเปิด (`open_qty`) เป็นจำนวนชิ้น
+
 ## Step 4 — Response
 
 **Headline** — ยอดโอนรวม **กี่ชิ้น** + สัดส่วนค้างส่ง (ยังไม่รับปลายทาง) — 🚫 ห้ามเขียน "ยอดโอนรวม" ลอย ๆ · ถ้าจะพูดมูลค่า ให้เขียน "มูลค่า ฿X" (แสดงเพราะผู้ใช้ถามมูลค่า)

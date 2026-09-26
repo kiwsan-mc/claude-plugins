@@ -52,8 +52,9 @@ tools:
 - ถาม vendor → group_by `vendor`
 - ถาม open/pending → group_by `status` หรือ `delivery_completed`
 - ⚠️ **นับ "จำนวนรุ่น" = รุ่น-สี (`Article_Model_Color`) เท่านั้น** — ไม่ใช่รุ่น (`Article_Model`) และไม่ใช่ SKU (`Article_Key`) · as-of 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 (ต่างกัน ~32% ⇒ ผิดหน่วย = ตัวเลขผิดจริง)
-  - `po_summary_synapse` ไม่มี group_by ระดับรุ่น/รุ่น-สี → ถ้าถามจำนวนรุ่น-สี ต้องใช้ `inventory_query_synapse` นับ `APPROX_COUNT_DISTINCT(a.Article_Model_Color)` (join `ai.dim_article a`) พร้อมกรอง `Item_Category <> '7'` และช่วง `PO_Date` ให้ตรงกับยอดที่อ้าง
-  - 🚫 **ห้ามใช้ `sku_count` (`Article_Key`) ตอบเป็น "จำนวนรุ่น"**
+  - ✅ `po_summary_synapse` / `po_summary_yoy_synapse` **คืน `model_color_count` = จำนวนรุ่น-สี (`Article_Model_Color`) แล้วทุก group_by** → ใช้ฟิลด์นี้ตอบ "จำนวนรุ่น" เป็นค่าแรก
+  - ℹ️ ใช้ `inventory_query_synapse` เป็น fallback เฉพาะเมื่อต้องการระดับ `Article_Model` (รุ่น ไม่แยกสี) หรือรายรุ่น-สี พร้อมกรอง `Item_Category <> '7'` และช่วง `PO_Date` ให้ตรงกับยอดที่อ้าง
+  - 🚫 **ห้ามใช้ `sku_count` (`Article_Key`) หรือ `model_count` ตอบเป็น "จำนวนรุ่น"**
 
 ## Step 3 — ดึงข้อมูล
 
