@@ -43,7 +43,7 @@ SELECT
   SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN total_exc_vat_price ELSE 0 END)::float AS ns_curr,
   SUM(CASE WHEN sold_date BETWEEN '{{fy_prev_start}}' AND '{{same_day_prev}}' THEN total_exc_vat_price ELSE 0 END)::float AS ns_prev,
   SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN ticket_count ELSE 0 END) AS tickets_curr,
-  SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN total_quantity ELSE 0 END)::float AS qty_curr,
+  SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN total_quantity ELSE 0 END)::float AS qty_curr_units, -- total_quantity = จำนวนชิ้น
   SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN total_discount_amount ELSE 0 END)::float / NULLIF(SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN price_sign ELSE 0 END)::float, 0) * 100 AS disc_pct
 FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '{{fy_prev_start}}' AND '{{max_date}}'
@@ -68,7 +68,7 @@ ORDER BY ns_curr DESC
 **query ที่ถูกสำหรับ Mcshop.com:**
 ```sql
 SELECT SUM(total_exc_vat_price)::float AS ns,
-       SUM(total_quantity) AS qty,
+       SUM(total_quantity) AS qty_units, -- จำนวนชิ้น
        SUM(ticket_count) AS tickets
 FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
@@ -112,7 +112,7 @@ SELECT
   channel_store_sub_2 AS platform,
   COALESCE(product, 'Unknown') AS product,
   SUM(total_exc_vat_price)::float AS net_sales,
-  SUM(total_quantity)::float AS qty
+  SUM(total_quantity)::float AS qty_units
 FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
   AND main_channel = 'ONLINE'
@@ -121,6 +121,28 @@ ORDER BY net_sales DESC
 LIMIT 10
 ```
 
+> ⚠️ `product` = **ประเภทสินค้า** (TROUSERS / JEANS / BASIC CARE) **ไม่ใช่รุ่น** — ถ้า user ถาม "รุ่นไหนขายดี" / "มีกี่รุ่น" **ห้ามตอบด้วย `product`** และห้ามนับ `item_code` (SKU) แทนรุ่น
+
+### Step 4.1 — ระดับรุ่น-สี (`model_color`) เมื่อถามเรื่อง "รุ่น"
+
+```sql
+SELECT
+  model_color,                              -- 1 แถว = 1 รุ่น-สี
+  SUM(total_exc_vat_price)::float AS net_sales,
+  SUM(total_quantity)::float AS qty_units   -- จำนวนชิ้น
+FROM mcg_aiplatform_sales
+WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
+  AND main_channel = 'ONLINE'
+  AND channel_store_sub_2 = '<platform>'
+GROUP BY model_color
+ORDER BY net_sales DESC
+LIMIT 10
+```
+
+- ⚠️ platform = **Mcshop.com** → ห้ามใช้ `channel_store_sub_2` ให้ใช้ `channel_store = 'Mcshop.com'` ตาม Step 2.1
+- **"จำนวนรุ่น" = รุ่น-สี → `COUNT(DISTINCT model_color)`** (ห้ามใช้ `COUNT(*)` หรือ `COUNT(DISTINCT item_code)`)
+- ถ้า user ระบุชัด "กี่ SKU" → `COUNT(DISTINCT item_code)` · "กี่สี" → `COUNT(DISTINCT color)` · ไม่ระบุหน่วย → **ถามกลับก่อน** (ดู Output Rules)
+
 ---
 
 ## Step 5 — Response
@@ -128,13 +150,18 @@ LIMIT 10
 **Headline** — Fastest growing platform + YoY%
 
 **Table 1: Platform Performance**
-| Platform | Net Sales FY27 | YoY% | Tickets | ATV | Discount% |
+| Platform | Net Sales FY27 | YoY% | จำนวนชิ้น | Tickets (ใบเสร็จ) | ATV | Discount% |
 
 **Table 2: Campaign Type Breakdown**
-| Platform | Campaign | Net Sales | Tickets | ATV |
+| Platform | Campaign | Net Sales | จำนวนชิ้น | Tickets (ใบเสร็จ) | ATV |
+
+> จำนวนชิ้น = `total_quantity` (ชิ้น) · Tickets = จำนวนใบเสร็จ (`ticket_count` — คนละหน่วยกับจำนวนชิ้น)
 
 **Table 3: Top Products per Platform**
-| Platform | Product | Net Sales | Qty |
+| Platform | Product (ประเภทสินค้า) | Net Sales | จำนวนชิ้น |
+
+**Table 3.1: Top รุ่น-สี per Platform** — ใช้เมื่อถาม "รุ่นไหนขายดี" (นับเป็นรุ่น-สี)
+| Platform | รุ่น-สี | Net Sales | จำนวนชิ้น |
 
 **Key Insights** — Platform growth, campaign ROI, product-platform fit
 
@@ -147,3 +174,7 @@ LIMIT 10
 - main_channel = 'ONLINE' always
 - CTEs forbidden
 - sold_date filter always
+- จำนวนทุกตัวในคำตอบต้องมี **หน่วย** กำกับ (กี่ SKU / กี่รุ่น-สี / กี่ชิ้น) พร้อมบอกขอบเขตที่กรอง (platform · ช่วงวันที่) — ถ้า user ถาม "กี่รุ่น" / "มีกี่ตัว" / "จำนวนเท่าไหร่" ลอย ๆ **ถามกลับก่อน** ห้ามเดาแล้วตอบตัวเลขเดียว
+- **"จำนวนรุ่น" = รุ่น-สี (`model_color`)** เท่านั้น — ไม่ใช่รุ่น (`model`) และไม่ใช่ SKU (`item_code`)
+  - อ้างอิง ณ 2026-09-26 (ทั้งบริษัท): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 — นับผิดหน่วยตัวเลขผิดจริง (รุ่น vs รุ่น-สี ต่างกัน ~32%)
+- **"รับของเข้า" / "Sales In" / ปริมาณรับเข้า (GR)** → **จำนวนชิ้น** เป็นตัวเลขหลัก (ต้องแยก สั่ง PO · รับเข้าแล้ว GR · ค้างส่ง พร้อม as-of) ห้ามยกมูลค่า (บาท / PO value) ขึ้นนำ — ข้อมูลนี้ไม่มีในตารางชุดนี้ → ส่งต่อ **mcg-inventory-agent**

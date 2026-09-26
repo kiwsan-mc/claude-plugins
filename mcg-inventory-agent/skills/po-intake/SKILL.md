@@ -3,7 +3,7 @@ name: po-intake
 description: >
   Purchase Order & Intake Analysis (MCG "Sales In") — ใช้เมื่อผู้ใช้ถาม: "Sales In" "PO"
   "การสั่งซื้อ" "goods receipt" "GR" "ของเข้า" "เติมสินค้า" "open PO" "PR" "สั่งซื้อจาก vendor" "delivery"
-  วิเคราะห์การสั่งซื้อเข้า (Sales In) PR/PO/GR/open qty + PO value แยก vendor/สาขา/สถานะ — เฉพาะฝั่ง PO
+  วิเคราะห์การสั่งซื้อเข้า (Sales In) **ปริมาณ PR/PO/GR เป็นจำนวนชิ้น** (ตอบ "รับของเข้าเท่าไหร่" ด้วยจำนวนชิ้น) แยก vendor/สาขา/สถานะ — มูลค่า (บาท) แสดงเมื่อถาม — เฉพาะฝั่ง PO
   ⚠️ skill นี้ครอบคลุม PO เท่านั้น (ไม่รวม STO/การโอนระหว่างสาขา) — ถ้าผู้ใช้ต้องการเห็น PO และ STO
   พร้อมกัน เทียบกัน หรือรวมยอดกัน ให้ใช้ po-analysis · ถ้าถาม STO อย่างเดียว ให้ใช้ sto-transfer
 tools:
@@ -44,25 +44,35 @@ tools:
 รองรับ group_by เช่น: `vendor`, `status`, `category`, `branch`, `month`, `delivery_completed`, `approve_status`
 - ถาม vendor → group_by `vendor`
 - ถาม open/pending → group_by `status` หรือ `delivery_completed`
+- ⚠️ **นับ "จำนวนรุ่น" = รุ่น-สี (`Article_Model_Color`) เท่านั้น** — ไม่ใช่รุ่น (`Article_Model`) และไม่ใช่ SKU (`Article_Key`) · as-of 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 (ต่างกัน ~32% ⇒ ผิดหน่วย = ตัวเลขผิดจริง)
+  - `po_summary_synapse` ไม่มี group_by ระดับรุ่น/รุ่น-สี → ถ้าถามจำนวนรุ่น-สี ต้องใช้ `inventory_query_synapse` นับ `APPROX_COUNT_DISTINCT(a.Article_Model_Color)` (join `ai.dim_article a`) พร้อมกรอง `Item_Category <> '7'` และช่วง `PO_Date` ให้ตรงกับยอดที่อ้าง
+  - 🚫 **ห้ามใช้ `sku_count` (`Article_Key`) ตอบเป็น "จำนวนรุ่น"**
 
 ## Step 3 — ดึงข้อมูล
 
 เรียก `po_summary_synapse(start_date=..., end_date=..., group_by=<dimension>)`
 
-ผลลัพธ์ให้: PR/PO/GR/open quantities + PO value
+ผลลัพธ์ให้: ปริมาณ PR/PO/GR/open (**หน่วย = ชิ้น**) + PO value (บาท — ใช้เมื่อ user ถามเรื่องมูลค่าเท่านั้น)
+· tool ยังคืนจำนวนใบ PO และจำนวน SKU มาด้วย — ⚠️ `sku_count` = จำนวน **SKU** ห้ามนำไปตอบเป็น "จำนวนรุ่น"
 
-> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** (1) เรียก `max_po_date_synapse` → ได้ fy_curr_start, max_date, fy_prev_start, same_day_prev แล้ว (2) เรียก `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)` → ได้ po_qty/po_value curr vs prev (Apple-to-Apple) แล้วคำนวณ YoY% เอง
+> ⚠️ **ถ้า user ขอเทียบปีก่อน (YoY):** (1) เรียก `max_po_date_synapse` → ได้ fy_curr_start, max_date, fy_prev_start, same_day_prev แล้ว (2) เรียก `po_summary_yoy_synapse(curr_start, max_date, prev_start, same_day_prev, group_by)` → ได้ po_qty (**ชิ้น**) curr vs prev (Apple-to-Apple) แล้วคำนวณ YoY% จาก **จำนวนชิ้น** เป็นหลัก · มูลค่า (บาท) เป็นบรรทัดรอง หรือแสดงเมื่อ user ถามมูลค่าเอง
 
 ## Step 4 — Response
 
-**Headline** — ยอดสั่งซื้อรวม (PO value) + **ค้างส่ง** (ยังต้องส่งอีก — qty + มูลค่า) + ส่วนที่**เลยกำหนดแล้ว**
+**Headline** — **จำนวนชิ้น** เป็นตัวเลขหลัก แยก 3 ก้อน: สั่ง (PO Qty) · **รับเข้าแล้ว (GR Qty)** · **ค้างส่ง (Qty)** + ส่วนที่**เลยกำหนดแล้ว (Qty)** · ระบุ as-of
+
+> ⚠️ **ถ้าถาม "รับของเข้าเท่าไหร่" / "Sales In" / GR → ตอบ `GR Qty` (จำนวนชิ้น) เป็นตัวเลขหลัก** — มูลค่า (บาท / PO value) เป็นบรรทัดรอง หรือใส่เมื่อ user ถามเรื่องมูลค่าเอง
 
 **ตาราง: PO Summary**
-| Dimension | PO Qty | GR Qty | **ค้างส่ง Qty** | **ค้างส่ง Amount** | PO Value | %รับเข้าแล้ว |
+| Dimension | PO Qty (ชิ้น) | **GR Qty (ชิ้น)** | **ค้างส่ง Qty (ชิ้น)** | %รับเข้าแล้ว | PO Value (บาท) | ค้างส่ง Amount (บาท) |
+
+> ℹ️ ทุกคอลัมน์ที่เป็นจำนวน = **จำนวนชิ้น** (ไม่ใช่ SKU และไม่ใช่รุ่น-สี) · ถ้าถาม "รับของเข้าเท่าไหร่" ให้อ่าน `GR Qty (ชิ้น)` เป็นตัวเลขหลัก · คอลัมน์มูลค่า (บาท) เป็นข้อมูลรอง — 🚫 ห้ามยก PO Value / ค้างส่ง Amount ขึ้นนำ
 
 > ⚠️ **"ค้างส่ง" ใช้ `Still_To_Delivery_Quantity` / `Still_To_Delivery_Amount`** — 🚫 ไม่ใช่ `Open_Quantity` (PO−GR ดิบ ต่างกันเล็กน้อย) และ 🚫 ไม่ใช่ `PO_Value` (มูลค่าเต็มใบ ไม่ใช่ส่วนที่ค้าง) · query shape + ตัวเลขที่ **§5.7 (จ)**
 
-**Key Insights** — vendor ที่**ค้างส่ง**เยอะ · ส่วนที่**เลยกำหนดแล้ว** (มีค้างตั้งแต่ปี 2023 — ควร flag) · fulfillment rate · ของกำลังเข้าที่ต้องเตรียมพื้นที่
+**Key Insights** — vendor ที่**ค้างส่งเยอะ (กี่ชิ้น)** · ส่วนที่**เลยกำหนดแล้ว (กี่ชิ้น)** (มีค้างตั้งแต่ปี 2023 — ควร flag) · fulfillment rate · ของกำลังเข้าที่ต้องเตรียมพื้นที่
+
+> ℹ️ ทุกตัวเลขใน Insight ต้องมีหน่วยกำกับ — จำนวน = **ชิ้น** · มูลค่า = **บาท**
 
 **Data Footer**
 
@@ -70,6 +80,10 @@ tools:
 
 # Output Rules
 - ต้องมี date range เสมอ
+- ✅ **"รับของเข้าเท่าไหร่" / "Sales In" / GR → ตอบจำนวนชิ้น (qty) เป็นตัวเลขหลัก** — 🚫 ห้ามยกมูลค่า (PO Value / Amount) ขึ้นเป็นตัวเลขหลักหรือ headline · มูลค่าใส่ได้เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง
+- ✅ **ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วยเสมอ** — "กี่ชิ้น" / "กี่ SKU" / "กี่รุ่น-สี" (ห้ามปล่อยตัวเลขลอย ๆ)
+- ✅ **"จำนวนรุ่น" = จำนวนรุ่น-สี (`Article_Model_Color`)** ไม่ใช่รุ่น (`Article_Model`) และไม่ใช่ SKU (`Article_Key`)
+- ✅ ถ้า user ถาม "จำนวน/กี่" **โดยไม่ระบุหน่วย → ถามกลับว่า SKU / รุ่น-สี / ชิ้น ก่อนตอบ** (ห้ามเดาแล้วตอบตัวเลขเดียว)
 - แยก PO (สั่ง) vs GR (รับเข้าจริง) vs **ค้างส่ง** (`Still_To_Delivery_*`) ให้ชัด — และแยก **"ค้างส่ง" ออกจาก "เกินกำหนด"** (`Delivery_Date` < วันนี้): ค้างส่งส่วนใหญ่ยังไม่ถึงกำหนด
 - ⚠️ **ต้องกรอง `Item_Category`** เสมอ: PO = `<> '7'` (ไม่กรอง = พอง ~28% เพราะ STO ปนเข้ามา)
 - ค้างส่งสูง = สัญญาณ supply delay · เลยกำหนดสูง = ปัญหาที่ต้องตาม vendor

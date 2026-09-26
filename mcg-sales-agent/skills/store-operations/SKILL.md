@@ -52,6 +52,8 @@ ORDER BY net_sales DESC
 
 ## Step 3 — New Stores (opened within current FY)
 
+> ⚠️ "รับของเข้า" / Sales In / ปริมาณรับเข้า (GR) ไม่มีใน platform นี้ (ที่นี่มีแค่ Sales Out) → ส่งต่อไป mcg-inventory-agent · ถ้าต้องตอบปริมาณรับเข้า ให้ตอบ **จำนวนชิ้น** เป็นตัวเลขหลัก ห้ามยกมูลค่า (บาท / PO value) ขึ้นนำ และต้องแยก สั่ง (PO) · รับเข้าแล้ว (GR) · ค้างส่ง + ระบุ as-of
+
 ```sql
 SELECT
   branch_code, branch_name, region_analysis,
@@ -92,7 +94,7 @@ ORDER BY net_sales DESC
 
 ## Step 5 — Response
 
-**Headline** — Active/Inactive count + new stores
+**Headline** — Active/Inactive count (หน่วย: สาขา) + new stores (หน่วย: สาขา)
 
 **Table 1: Store Status**
 | Status | Branches | Net Sales |
@@ -114,3 +116,7 @@ ORDER BY net_sales DESC
 - OFFLINE only
 - CTEs forbidden
 - sold_date filter always
+- จำนวนทุกตัวต้องระบุหน่วยให้ชัด — สาขา / รุ่น / รุ่น-สี / SKU / ชิ้น (เช่น "12 สาขา" ไม่ใช่ "12")
+- ถ้าผู้ใช้ถาม "จำนวน" / "กี่" ลอย ๆ ไม่ระบุหน่วย → **ถามกลับก่อน** ว่า ต้องการนับเป็น SKU / รุ่น (รุ่น-สี) / ชิ้น — ห้ามเดาแล้วตอบตัวเลขเดียว
+- "จำนวนรุ่น" = จำนวน **รุ่น-สี** (`model_color`) เท่านั้น — ไม่ใช่รุ่น (`model`) และไม่ใช่ SKU (`item_code`) · ถ้าตอบเป็นจำนวนรุ่นไม่แยกสีหรือจำนวน SKU ต้องเขียนชื่อหน่วยให้ชัด (as-of 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418)
+- "รับของเข้า" / Sales In / GR ไม่ใช่ข้อมูลของ skill นี้ → route ไป mcg-inventory-agent (po-intake) · ถ้าตอบปริมาณรับเข้า ให้ยึด **จำนวนชิ้น** เป็นตัวเลขหลัก ห้ามยกมูลค่า (บาท / PO value) ขึ้นนำ

@@ -6,6 +6,7 @@ description: >
   Calculates 12 KPIs with 3 Key Takeaways.
   **ถ้าถามภาพรวมธุรกิจครบทุกด้าน (Sales + สต็อก + Product + Target + Member/CRM) → ใช้ mcg-executive-agent (business-overview) แทน — ที่นี่เป็น SALES ONLY (Postgres, ทุกสาขา)**
   **ถ้าถามเป้า / target / %Achievement → ใช้ mcg-target-agent — ที่นี่ไม่มีข้อมูลเป้าเลยแม้แต่ตารางเดียว ห้ามเดาหรือประมาณ**
+  **ถ้าถาม "รับของเข้า" / "Sales In" / ปริมาณรับเข้า (GR) → ไม่ใช่ขอบเขตของ skill นี้ ให้ส่งต่อ mcg-inventory-agent (po-intake) — และ 🚫 ห้ามยกยอดขาย/มูลค่า (บาท) ของที่นี่มาตอบเป็นยอดรับเข้า**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall
@@ -47,16 +48,18 @@ You are a Data Analyst specializing in summarizing Sales Performance overviews f
 | Net Sales | `SUM(total_exc_vat_price)::float` |
 | Discount% | `SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100` |
 | Margin% | `(SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
-| Tickets | `SUM(ticket_count)` |
-| **ATV** | 🚫 Never use CASE WHEN — `SUM(total_exc_vat_price)::float / NULLIF(SUM(ticket_count)::float, 0)` |
-| **UPT** | 🚫 Never use CASE WHEN — `SUM(total_quantity)::float / NULLIF(SUM(ticket_count)::float, 0)` |
-| ASP | `SUM(total_exc_vat_price)::float / NULLIF(SUM(total_quantity)::float, 0)` |
+| Tickets | `SUM(ticket_count)` — หน่วย: **ใบเสร็จ** (ไม่ใช่ชิ้น) |
+| **ATV** | 🚫 Never use CASE WHEN — `SUM(total_exc_vat_price)::float / NULLIF(SUM(ticket_count)::float, 0)` — หน่วย: **บาท/ใบเสร็จ** |
+| **UPT** | 🚫 Never use CASE WHEN — `SUM(total_quantity)::float / NULLIF(SUM(ticket_count)::float, 0)` — หน่วย: **ชิ้น/ใบเสร็จ** |
+| ASP | `SUM(total_exc_vat_price)::float / NULLIF(SUM(total_quantity)::float, 0)` — หน่วย: **บาท/ชิ้น** |
 | Member Ticket% | Use `member_count` — `SUM(member_count)::float / NULLIF(SUM(ticket_count)::float, 0) * 100` |
 | **Member Sales%** | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
 | Non-Member Sales% | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100` |
 | Member ATV | `SUM(CASE WHEN member_type='Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF(SUM(member_count)::float, 0)` |
 | Non-Member ATV | `SUM(CASE WHEN member_type='Non-Member' THEN total_exc_vat_price ELSE 0 END)::float / NULLIF((SUM(ticket_count) - SUM(member_count))::float, 0)` |
 | YoY% | `(FY27 - FY26) / NULLIF(FY26, 0) * 100` |
+
+⚠️ ตารางสูตรนี้ **ไม่มี KPI นับสินค้าเลย** — ถ้าผู้ใช้ถามจำนวน SKU / รุ่น / รุ่น-สี ต้อง **ถามกลับก่อนว่าจะนับหน่วยไหน** แล้วนับตามหน่วยที่เลือก (`item_code` = SKU · `model_color` = รุ่น-สี) — 🚫 ห้ามใช้ `item_code` ตอบเป็น "จำนวนรุ่น" (ดู § กฎการนับจำนวน ใน base skill)
 
 ---
 
@@ -72,11 +75,16 @@ You are a Data Analyst specializing in summarizing Sales Performance overviews f
 
 **Table 1: KPI Summary (Organization)**
 
-| KPI | FY27 | FY26 | Change |
+| KPI | หน่วย | FY27 | FY26 | Change |
+
+- **ต้องมีคอลัมน์ "หน่วย" และระบุครบทุกแถว** — Net Sales / ATV / ASP = **บาท** · Tickets = **ใบเสร็จ** · UPT = **ชิ้น/ใบเสร็จ** · Discount% / Margin% / YoY% / Member% = **%**
+- KPI ที่เป็นจำนวน ต้องมีหน่วยกำกับทุกแถว — 🚫 ห้ามปล่อยตัวเลขจำนวนลอย ๆ ไม่มีหน่วย
 
 **Table 2: KPI by Main Channel**
 
 | Channel | Net Sales FY27 | YoY% | Discount% | Margin% | ATV | UPT |
+
+- ATV = **บาท/ใบเสร็จ** · UPT = **ชิ้น/ใบเสร็จ** (ตารางนี้มีแต่ KPI หน่วยบาท/ใบเสร็จ/%)
 
 **Table 3: Net Sales by Channel Store (Top 10)**
 
@@ -93,9 +101,13 @@ You are a Data Analyst specializing in summarizing Sales Performance overviews f
 # Output Rules
 
 - ≤3 tables
+- **"จำนวนรุ่น" = จำนวนรุ่น-สี (`model_color`) เท่านั้น** — ไม่ใช่รุ่นไม่แยกสี (`model`) และไม่ใช่ SKU (`item_code`) · ตรวจ 2026-09-26 (as-of): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 ⇒ นับผิดหน่วย = ตัวเลขคลาดจริง ~32%
+- **"จำนวน" / "กี่" ที่ไม่ระบุหน่วย → 🚫 ห้ามเดา ต้องถามกลับก่อน** ว่า SKU / รุ่น (รุ่น-สี) / ชิ้น แล้วจึงดึงข้อมูล
+- **ทุกคำตอบที่เป็นจำนวน ต้องมีหน่วยกำกับเสมอ** (เช่น "1,240 รุ่น-สี" · "8,530 ชิ้น" · "315 SKU" · "12,450 ใบเสร็จ") และบอกขอบเขตที่กรอง (แบรนด์/หมวด/ช่วงวันที่) — 🚫 ห้ามปล่อยตัวเลขจำนวนลอย
 - CAST AS FLOAT → use `::float` for all KPIs
 - 🟢🟡🔴 per Thresholds
 - ATV/UPT use direct SUM — 🚫 never use CASE WHEN ticket_count > 0
 - Member% includes all channels
 - Use member_count for Member tickets
 - **ตารางเปรียบเทียบ (FY27/FY26) ต้องมีค่าครบทั้งสองคอลัมน์ทุกแถว** — KPI ที่ไม่มีค่าปีก่อน (เช่น Member Ticket% / Member Sales%) ให้แยกแสดงเป็น "current only" ไม่ใช่ใส่ "—" ในคอลัมน์เปรียบเทียบ
+- **"รับของเข้า" / "Sales In" / ปริมาณรับเข้า (GR) ไม่อยู่ในขอบเขตของ skill นี้** → ส่งต่อ **mcg-inventory-agent (po-intake)** · 🚫 ห้ามเอายอดขาย/มูลค่า (บาท) ของที่นี่มาตอบเป็นยอดรับเข้า · ถ้าต้องรายงานยอดรับเข้า ให้ **จำนวนชิ้นเป็นตัวเลขหลัก** แยก **สั่ง (PO) · รับเข้าแล้ว (GR) · ค้างส่ง** และระบุ as-of — โชว์มูลค่าเฉพาะเมื่อผู้ใช้ถามเรื่องเงิน/มูลค่าเอง

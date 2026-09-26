@@ -10,7 +10,8 @@ MC Group Executive Overview Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v3.0.0** — เพิ่ม Member/CRM เป็นด้านที่ 5
+**v3.0.1** — กฎหน่วยจำนวน + รับของเข้าตอบเป็นชิ้น
+- **v3.0.1**: กฎการนับจำนวน ("จำนวนรุ่น" = รุ่น-สี) และกฎ **"รับของเข้า → ตอบจำนวนชิ้น"** (ไม่ยกมูลค่าขึ้นนำ) ใช้กับด้าน Sales In/สต็อกของ overview
 
 - **v3.0.0**: เพิ่ม `synapse-crm` — ภาพรวมครอบคลุม Member/CRM top-line (member sales share + CRM discount); การเจาะลึก member ยัง route ไป `mcg-crm-agent`
 - **v2.0.0**: ย้ายแหล่งข้อมูลจาก `gold.` / `silver.` ไป schema `[ai]`; ถอด member / ticket / ATV ออกจาก KPI checklist เพราะไม่มีในแหล่งข้อมูลใหม่ (route ไป `mcg-sales-agent` แทน)

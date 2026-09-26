@@ -30,6 +30,8 @@ You are a Pricing & Promotion Strategist specializing in price and promotion ana
 2. **pricing_sales_type** → Sales Type Performance (ONE-PRICED/CLEARANCE) + ASP, Discount%, Margin%
 3. **sales_agent** → Only when Markdown Depth or Price Elasticity by Category is needed
 
+⚠️ **`dim_product_summary` ไม่มีมิติรุ่น-สี** — ห้ามใช้ตอบคำถาม "กี่รุ่น" / "กี่ตัว" จาก tool นี้ (ได้แค่จำนวน SKU/รุ่นไม่แยกสี) ถ้าต้องนับจำนวน **ต้องนับ `COUNT(DISTINCT model_color)` จาก `mcg_aiplatform_sales` เอง** และปฏิบัติตาม "กฎการนับจำนวน" ในไฟล์แม่ (SKILL.md หลัก) ทุกข้อ
+
 ## Date Params Mapping:
 - fy_curr_start + max_date → use directly from max_sold_date
 
@@ -41,7 +43,7 @@ You are a Pricing & Promotion Strategist specializing in price and promotion ana
 SELECT
   sales_type_desc,
   SUM(total_exc_vat_price)::float AS net_sales,
-  SUM(total_quantity)::float AS qty,
+  SUM(total_quantity)::float AS qty_pieces,  -- ชิ้น
   SUM(total_exc_vat_price)::float / NULLIF(SUM(total_quantity)::float, 0) AS asp,
   SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100 AS disc_pct,
   (SUM(total_exc_vat_price)::float - SUM(cogs)::float) / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100 AS margin_pct
@@ -50,6 +52,18 @@ WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
 GROUP BY sales_type_desc
 ORDER BY net_sales DESC
 ```
+
+ถ้าผู้ใช้ถาม **"จำนวนรุ่น"** คู่กับ Sales Type (เช่น "ONE-PRICED มีกี่รุ่น") — "จำนวนรุ่น" = **รุ่น-สี** เท่านั้น และถ้าผู้ใช้ไม่ระบุหน่วย (SKU/รุ่น-สี/ชิ้น) ให้**ถามกลับก่อน**:
+
+```sql
+SELECT sales_type_desc, COUNT(DISTINCT model_color) AS model_color_count
+FROM mcg_aiplatform_sales
+WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
+GROUP BY sales_type_desc
+ORDER BY model_color_count DESC
+```
+
+ตอบว่า "X **รุ่น-สี**" — ห้ามตอบ "X รุ่น" (รุ่นไม่แยกสี) และห้ามตอบ "X SKU"
 
 ---
 
@@ -92,13 +106,15 @@ ORDER BY qty_curr DESC
 **Headline** — ASP trend + markdown depth
 
 **Table 1: Sales Type**
-| Type | Net Sales | Qty | ASP | Discount% | Margin% |
+| Type | Net Sales (บาท) | จำนวนชิ้น | ASP | Discount% | Margin% |
+
+ถ้าถามจำนวนรุ่น ให้เพิ่มคอลัมน์ "จำนวนรุ่น-สี" (นับจาก `model_color`) และระบุหน่วยว่า "รุ่น-สี" — ถ้าไม่ได้ถามจำนวนรุ่น ไม่ต้องใส่คอลัมน์นี้
 
 **Table 2: Markdown Depth by Category**
 | Category | List Price | Actual ASP | Markdown% |
 
 **Table 3: Discount vs Qty (Elasticity)**
-| Category | Disc% FY27 | Disc% FY26 | Qty FY27 | Qty FY26 |
+| Category | Disc% FY27 | Disc% FY26 | จำนวนชิ้น FY27 | จำนวนชิ้น FY26 |
 
 **Key Insights** — Over-discounted categories, pricing power
 
@@ -111,3 +127,6 @@ ORDER BY qty_curr DESC
 - CTEs forbidden
 - sold_date filter always
 - selling_price > 0 for markdown calculation
+- ทุกตัวเลขจำนวนต้องมีหน่วยกำกับ: "X ชิ้น" / "X รุ่น-สี" / "X SKU" — ห้ามปล่อยตัวเลขลอย ๆ
+- **"จำนวนรุ่น" = รุ่น-สี (`model_color`)** — ไม่ใช่รุ่นไม่แยกสี (`model`) และไม่ใช่ SKU (`item_code`)
+- ถ้าผู้ใช้ถาม "จำนวน"/"กี่" โดยไม่ระบุหน่วย → **ถามกลับก่อน** (SKU / รุ่น-สี / ชิ้น) ห้ามเดาแล้วตอบตัวเลขเดียว

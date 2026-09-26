@@ -11,6 +11,10 @@
   {"query": "สต็อกแยกแบรนด์", "should_trigger": true},
   {"query": "สาขาไหนสต็อกล้น", "should_trigger": true},
   {"query": "คลังกลางมีของเท่าไหร่", "should_trigger": true},
+  {"query": "สต็อกมีกี่รุ่น", "should_trigger": true},
+  {"query": "มีกี่รุ่น-สีในสต็อก", "should_trigger": true},
+  {"query": "จำนวนรุ่นที่ขายไม่ออก", "should_trigger": true},
+  {"query": "สต็อกมีกี่ชิ้น", "should_trigger": true},
 
   {"query": "Sales In เดือนนี้เป็นยังไง", "should_trigger": false},
   {"query": "PO ค้างส่งจาก vendor ไหนบ้าง", "should_trigger": false},

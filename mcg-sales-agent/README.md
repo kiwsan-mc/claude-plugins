@@ -8,7 +8,8 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v3.0.0** — Migrated from MSSQL to PostgreSQL (pgvector-enabled)
+**v5.19.1** — กฎหน่วยจำนวน + รับของเข้าให้ตอบเป็นชิ้น
+- **v5.19.1**: กฎการนับจำนวน — "จำนวนรุ่น" = **รุ่น-สี** (ไม่ใช่รุ่น ไม่ใช่ SKU) · "จำนวน/กี่" ที่ไม่ระบุหน่วยต้อง **ถามกลับ** (SKU / รุ่น-สี / ชิ้น) · ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วย — วางกฎที่ `sales-agent` (ไฟล์แม่) และปรับหน่วย/ตารางในสกิลลูก
 
 ### Changelog
 - **v3.0.0**: Migrated to PostgreSQL + pgvector. New tools: `sales_agent`, `pg_describe_table`, `pg_list_tables`. SQL syntax updated to PostgreSQL. Added `FY_Year` column support. SQM threshold ≥50.

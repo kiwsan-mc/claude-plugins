@@ -66,7 +66,9 @@ GROUP BY
 ORDER BY ns_fy28 DESC
 ```
 
-Calculate: Net Sales, Sales Ratio%, Tickets, Margin%
+Calculate: Net Sales, Sales Ratio%, Tickets, Margin%, Qty (ชิ้น)
+
+ถ้าคำตอบต้องมี «จำนวนรุ่น» → GROUP BY `model_color` แล้วนับเป็น «จำนวนรุ่น-สี» เท่านั้น — ห้ามนับ `model` แทน (2026-09-26: รุ่น-สี 31,418 · รุ่น 23,815 · SKU 128,121) และติดหน่วยทุกครั้งที่ตอบเป็นจำนวน
 
 ---
 
@@ -90,7 +92,9 @@ Calculate: Net Sales, Sales Ratio%, Tickets, Margin%
 
 **Table 3: Top 10 Provinces** | Province | Net Sales | OFFLINE% | ONLINE% | YoY% |
 
-**Stock Allocation suggestions** — based on actual data
+**Stock Allocation suggestions** — based on actual data (ระบุเป็นจำนวน «ชิ้น» เท่านั้น)
+
+ถ้าผู้ใช้ถาม «รับของเข้า» / «Sales In» / ปริมาณรับเข้า (GR) — ไม่ใช่ขอบเขตของ skill นี้ → ตอบจำนวน «ชิ้น» เป็นตัวเลขหลัก แล้วส่งต่อ mcg-inventory-agent (po-intake) · ห้ามยกมูลค่า (บาท / PO value) ขึ้นเป็นตัวเลขหลัก เว้นแต่ผู้ใช้ถามเรื่องมูลค่าเอง · ต้องแยก สั่ง (PO) · รับเข้าแล้ว (GR) · ค้างส่ง พร้อมระบุช่วงวันที่ (as-of)
 
 **Data Footer**
 
@@ -101,3 +105,6 @@ Calculate: Net Sales, Sales Ratio%, Tickets, Margin%
 - Regional mapping must not display NULL
 - ≤3 tables
 - Stock suggestions must reference actual data
+- ทุกตัวเลขที่เป็นจำนวน ต้องติดหน่วยกำกับเสมอ (กี่ SKU / กี่รุ่น / กี่รุ่น-สี / กี่ชิ้น) พร้อมบอกขอบเขตที่กรอง — ห้ามปล่อยตัวเลขจำนวนลอย ๆ
+- «จำนวนรุ่น» = «รุ่น-สี» (`model_color`) เท่านั้น — ไม่ใช่ `model` และไม่ใช่ SKU (`item_code`) (2026-09-26: รุ่น-สี 31,418 · รุ่น 23,815 · SKU 128,121 — ต่างกัน ~32% ⇒ ผิดหน่วย = ตัวเลขผิดจริง)
+- «จำนวน» / «กี่» ที่ไม่ระบุหน่วย → ถามกลับก่อนว่าจะนับเป็น SKU / รุ่น / รุ่น-สี / ชิ้น (ดู §1.1.1) ห้ามเดาแล้วตอบตัวเลขเดียว

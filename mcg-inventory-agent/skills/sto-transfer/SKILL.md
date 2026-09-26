@@ -3,7 +3,7 @@ name: sto-transfer
 description: >
   Stock Transfer Order (STO) Analysis — ใช้เมื่อผู้ใช้ถาม: "โอนสต็อก" "STO" "transfer"
   "โอนระหว่างสาขา" "ย้ายสินค้า" "การกระจายสินค้า" "open transfer"
-  วิเคราะห์การโอนย้ายสต็อกระหว่างสาขา PO/GR/open transfer qty + value
+  วิเคราะห์การโอนย้ายสต็อกระหว่างสาขา PO/GR/open transfer — ปริมาณเป็น **ชิ้น** (รับเข้า GR = จำนวนชิ้น) · มูลค่าแสดงเฉพาะเมื่อผู้ใช้ถามมูลค่า
 tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sto_summary_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__inventory_query_synapse
@@ -37,23 +37,27 @@ SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Cat
 
 `sto_summary_synapse` กรองด้วย transfer date (`PO_Date` ในตาราง `fact_po_sto` ที่ filter `Item_Category = '7'`) — ต้องมี start/end date (รูปแบบ `YYYY-MM-DD`)
 - ถ้า user ไม่ระบุ → default: `max_date` ย้อนหลัง 30 วัน (จาก anchor — แจ้ง user) หรือถามกลับ
+- ⚠️ ถ้าผู้ใช้ถาม **"จำนวน"/"กี่"** ลอย ๆ ไม่ระบุหน่วย (ชิ้น / SKU / รุ่น-สี) → **ถามกลับก่อน** ว่าจะนับเป็นอะไร 🚫 ห้ามเดาแล้วตอบตัวเลขเดียว
 
 ## Step 2 — เลือก dimension
 
 รองรับ group_by เช่น: `status`, `branch`, `region`, `category`, `brand`, `month`, `approve_status`
 
+⚠️ ถ้าผู้ใช้ถาม **"จำนวนรุ่น"** → ตีความ = **จำนวนรุ่น-สี** (`Article_Model_Color`) เท่านั้น 🚫 ไม่ใช่ `Article_Model` และ 🚫 ไม่ใช่ SKU — นับด้วย `COUNT(DISTINCT a.Article_Model_Color)` (join `ai.dim_article` ด้วย `Article_Key`) โดย `group_by` ของ `sto_summary_synapse` ไม่มีมิติรุ่น ต้องใช้ `inventory_query_synapse` และ**ระบุหน่วยในคำตอบเสมอ** เช่น "120 รุ่น-สี" · อ้างอิง 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
+
 ## Step 3 — ดึงข้อมูล
 
 เรียก `sto_summary_synapse(start_date=..., end_date=..., group_by=<dimension>)`
 
-ผลลัพธ์ให้: PO/GR/open transfer quantities + value
+ผลลัพธ์ให้: ปริมาณ **(ชิ้น)** แยก สั่งโอน (PO) / รับเข้าแล้ว (GR) / ค้างส่ง (still-to-deliver) — นำด้วย **จำนวนชิ้น** เสมอ · มูลค่า (฿) แสดง**เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง** และต้องกำกับ "(มูลค่า ฿)" ทุกครั้ง
 
 ## Step 4 — Response
 
-**Headline** — ยอดโอนรวม + สัดส่วน open (ยังไม่รับปลายทาง)
+**Headline** — ยอดโอนรวม **กี่ชิ้น** + สัดส่วนค้างส่ง (ยังไม่รับปลายทาง) — 🚫 ห้ามเขียน "ยอดโอนรวม" ลอย ๆ · ถ้าจะพูดมูลค่า ให้เขียน "มูลค่า ฿X" (แสดงเพราะผู้ใช้ถามมูลค่า)
 
 **ตาราง: STO Summary**
-| Dimension | Transfer Qty | GR Qty | Open Qty | Value | %รับแล้ว |
+| Dimension | โอน (ชิ้น) | รับเข้า GR (ชิ้น) | ค้างส่ง (ชิ้น) | %รับแล้ว | มูลค่า ฿ (แสดงเมื่อถาม) |
+ℹ️ ทุกช่องเป็น **จำนวนชิ้น** ยกเว้นช่องที่กำกับ "(มูลค่า ฿)" · ช่องมูลค่าใส่เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง
 
 **Key Insights** — สาขา/สถานะที่ค้างรับเยอะ, การกระจายสินค้าไปพื้นที่ที่ต้องการ, transfer ที่ค้างนาน
 
@@ -62,6 +66,10 @@ SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Cat
 ---
 
 # Output Rules
-- ต้องมี date range เสมอ
-- แยก transfer (โอน) vs GR (รับปลายทาง) vs open (ค้าง) ให้ชัด
+- ต้องมี date range และระบุ **as-of** ของช่วงวันนั้นเสมอ
+- แยก **สั่งโอน (PO)** vs **รับเข้าแล้ว (GR)** vs **ค้างส่ง (still-to-deliver)** ให้ชัด
 - ห้ามตีความ NULL เป็น 0
+- ทุกคำตอบที่เป็นจำนวน **ต้องระบุหน่วยให้ชัด** ("กี่ชิ้น" / "กี่ SKU" / "กี่รุ่น-สี") — 🚫 ห้ามปล่อยตัวเลขลอย
+- คำว่า **"จำนวน"/"กี่"** ที่ไม่ระบุหน่วย → **ถามกลับก่อน** ว่าจะนับเป็น SKU / รุ่น-สี / ชิ้น 🚫 ห้ามเดาแล้วตอบตัวเลขเดียว
+- **"จำนวนรุ่น" = จำนวนรุ่น-สี** (`Article_Model_Color`) — 🚫 ไม่ใช่ `Article_Model` และไม่ใช่ SKU · อ้างอิง 2026-09-26 (as-of): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
+- ถาม **"รับของเข้าเท่าไหร่" / "Sales In" / ปริมาณรับเข้า (GR)** → ตอบ **จำนวนชิ้น** เป็นตัวเลขหลักพอ · 🚫 ห้ามยกมูลค่า (บาท / PO value) ขึ้นเป็นตัวเลขหลัก — ใส่ได้เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง
