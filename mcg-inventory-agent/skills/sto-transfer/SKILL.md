@@ -63,7 +63,7 @@ SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Cat
 
 รองรับ group_by เช่น: `status`, `branch`, `region`, `category`, `brand`, `month`, `approve_status`
 
-⚠️ ถ้าผู้ใช้ถาม **"จำนวนรุ่น"** → ตีความ = **จำนวนรุ่น-สี** (`Article_Model_Color`) เท่านั้น 🚫 ไม่ใช่ `Article_Model` และ 🚫 ไม่ใช่ SKU — นับด้วย `COUNT(DISTINCT a.Article_Model_Color)` (join `ai.dim_article` ด้วย `Article_Key`) โดย `group_by` ของ `sto_summary_synapse` ไม่มีมิติรุ่น ต้องใช้ `inventory_query_synapse` และ**ระบุหน่วยในคำตอบเสมอ** เช่น "120 รุ่น-สี" · อ้างอิง 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
+⚠️ ถ้าผู้ใช้ถาม **"จำนวนรุ่น"** → ตีความ = **จำนวนรุ่น-สี** เท่านั้น 🚫 ไม่ใช่ `Article_Model` และ 🚫 ไม่ใช่ SKU — นับด้วย `COUNT(DISTINCT a.Article_Model_Color)` (join `ai.dim_article` ด้วย `Article_Key`) โดย `group_by` ของ `sto_summary_synapse` ไม่มีมิติรุ่น ต้องใช้ `inventory_query_synapse` และ**ระบุหน่วยในคำตอบเสมอ** เช่น "120 รุ่น-สี" · อ้างอิง 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
 
 ## Step 3 — ดึงข้อมูล
 
@@ -93,5 +93,5 @@ SELECT CAST(MAX(PO_Date) AS date) AS max_date FROM ai.fact_po_sto WHERE Item_Cat
 - ห้ามตีความ NULL เป็น 0
 - ทุกคำตอบที่เป็นจำนวน **ต้องระบุหน่วยให้ชัด** ("กี่ชิ้น" / "กี่ SKU" / "กี่รุ่น-สี") — 🚫 ห้ามปล่อยตัวเลขลอย
 - คำว่า **"จำนวน"/"กี่"** ที่ไม่ระบุหน่วย → **ถามกลับก่อน** ว่าจะนับเป็น SKU / รุ่น-สี / ชิ้น 🚫 ห้ามเดาแล้วตอบตัวเลขเดียว
-- **"จำนวนรุ่น" = จำนวนรุ่น-สี** (`Article_Model_Color`) — 🚫 ไม่ใช่ `Article_Model` และไม่ใช่ SKU · อ้างอิง 2026-09-26 (as-of): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
+- **"จำนวนรุ่น" = จำนวนรุ่น-สี** — 🚫 ไม่ใช่ `Article_Model` และไม่ใช่ SKU · อ้างอิง 2026-09-26 (as-of): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418
 - ถาม **"รับของเข้าเท่าไหร่" / "Sales In" / ปริมาณรับเข้า (GR)** → ตอบ **จำนวนชิ้น** เป็นตัวเลขหลักพอ · 🚫 ห้ามยกมูลค่า (บาท / PO value) ขึ้นเป็นตัวเลขหลัก — ใส่ได้เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง

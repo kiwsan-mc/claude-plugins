@@ -269,4 +269,4 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 1. Real data 2. Correct period 3. anchor เรียกแล้ว 4. ส่ง start_date/end_date 5. แยก channel ใน member analysis (ยกเว้นการ์ดสมาชิกรายคน — ใช้ช่องทางที่ซื้อมากสุด 1 ค่า) 6. ไม่ทำ YoY (ยังไม่มี base) 7. ไม่ fabricate 8. กระชับ 9. Data Footer 10. Actionable
 11. คำถามที่ระบุรหัสลูกค้า → exact match `Member_Code` เท่านั้น (ไม่ใช่ top members, ไม่ใช่ LIKE)
 12. จำนวนทุกตัวมีหน่วยกำกับ (SKU / รุ่น-สี / ชิ้น) — ถ้า user ถาม "จำนวน"/"กี่" ลอย ๆ ต้องถามกลับก่อน ไม่เดา
-13. "จำนวนรุ่น" = **รุ่น-สี** (`Article_Model_Color`) เท่านั้น — ไม่ใช้ `Article_Model` (รุ่น) หรือ `Article_Key` (SKU) แทน
+13. "จำนวนรุ่น" = **รุ่น-สี** เท่านั้น — ไม่ใช้ `Article_Model` (รุ่น) หรือ `Article_Key` (SKU) แทน

@@ -4,7 +4,7 @@ description: >
   Size & Color Analysis — Use when user asks: "Size" "Color" "Tone"
   "which size sells best" "which color is stagnant" "size mix" "color trend" "assortment"
   Analyze size distribution, color preference, design trend
-  ⚠️ ยอดขายแยก size/color — "จำนวนรุ่น" = รุ่น-สี (Article_Model_Color) ไม่ใช่ SKU · ถ้าหมายถึง "assortment"/โครงสร้างสินค้า/นับจำนวนเป็น SKU หรือรุ่น-สี → mcg-product-agent (assortment-summary)
+  ⚠️ ยอดขายแยก size/color — "จำนวนรุ่น" = รุ่น-สี ไม่ใช่ SKU · ถ้าหมายถึง "assortment"/โครงสร้างสินค้า/นับจำนวนเป็น SKU หรือรุ่น-สี → mcg-product-agent (assortment-summary)
 
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
@@ -143,5 +143,5 @@ LIMIT 10
 - CTEs forbidden
 - sold_date filter always
 - NULL size/color → exclude
-- ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วย (จำนวน**ชิ้น** / **รุ่น-สี** / **SKU**) + ขอบเขตที่กรอง — "จำนวนรุ่น" = รุ่น-สี (Article_Model_Color) ไม่ใช่ SKU · ถ้าผู้ใช้ถาม "จำนวน"/"กี่" ลอย ๆ ไม่ระบุหน่วย → ถามกลับก่อน ห้ามเดาแล้วตอบตัวเลขเดียว
+- ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วย (จำนวน**ชิ้น** / **รุ่น-สี** / **SKU**) + ขอบเขตที่กรอง — "จำนวนรุ่น" = รุ่น-สี ไม่ใช่ SKU · ถ้าผู้ใช้ถาม "จำนวน"/"กี่" ลอย ๆ ไม่ระบุหน่วย → ถามกลับก่อน ห้ามเดาแล้วตอบตัวเลขเดียว
 - ถาม "รับของเข้า"/"Sales In"/ปริมาณรับ (GR) → ตอบจำนวน**ชิ้น** เป็นตัวเลขหลัก และแยก สั่ง (PO) · รับแล้ว (GR) · ค้างส่ง พร้อมช่วงวันที่ — ห้ามยกมูลค่า (บาท/PO value) ขึ้นนำ ใส่ได้เฉพาะเมื่อผู้ใช้ถามเรื่องมูลค่าเอง และ route ไป mcg-inventory-agent (po-intake)
