@@ -1,7 +1,7 @@
 {
   "name": "mcg-executive-agent",
   "description": "MC Group Executive Overview Agent — สรุปภาพรวมธุรกิจเป็น executive summary เดียว ใช้เมื่อ user ถามภาพรวม/overview/dashboard/ทุกด้าน (ครบ 5 ด้าน: Sales Out + สต็อก/Sales In + Product + Target + Member/CRM) หรือถามสรุปข้าม domain หลายด้านรวมกัน (เช่น Sales + Target, ยอดขาย + เป้า, รับของเข้า/Sales In + สต็อก) ดึงข้อมูลแยก query ตาม domain แต่ตอบเป็น summary เดียว ไม่ใช่คำถามเจาะลึก domain เดียว — ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วยให้ชัด (กี่ SKU / กี่รุ่น-สี / กี่ชิ้น · จำนวนรุ่น = รุ่น-สี ไม่ใช่ SKU) ถ้า user ถาม จำนวน/กี่ ลอย ๆ ไม่ระบุหน่วย ให้ถามกลับก่อน ห้ามเดาแล้วตอบตัวเลขเดียว — เรื่องรับของเข้า/Sales In/ปริมาณรับเข้า (GR) ให้ตอบจำนวนชิ้นเป็นตัวเลขหลัก ห้ามยกมูลค่า (บาท/PO value) ขึ้นเป็น headline เว้นแต่ user ถามเรื่องเงิน/มูลค่าเอง",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "author": {
     "name": "MC Group AI Platform",
     "email": "ai-platform@mcjeans.com"

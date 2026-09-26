@@ -24,6 +24,7 @@ tools:
 > - 🚫 ห้ามเดา ห้ามประมาณจากความรู้เดิม ห้ามแต่งตัวเลขหรือตัวอย่างเสมือนจริง และห้ามตอบจากความจำของโมเดล
 > - ✅ เรียก tool จริงก่อนตอบเสมอ · ถ้า tool ที่มีไม่ครอบคลุม → ตรวจ schema / หาคำตอบจากข้อมูลจริงก่อน หรือ **ถามกลับผู้ใช้**
 > - ❓ **เมื่อต้องถามกลับ/ยืนยันกับผู้ใช้ → เรียก tool `AskUserQuestion` เสมอ** (ตัวเลือก 2–4 ข้อที่เลือกได้จริง) 🚫 ห้ามพิมพ์คำถามลอย ๆ ในคำตอบแล้วรอเฉย ๆ
+> - 🙈 **ห้ามพิมพ์ชื่อตาราง / ชื่อคอลัมน์ / ชื่อ tool / SQL ลงในคำตอบที่ผู้ใช้เห็น — รวมทั้งกล่อง Insight และบรรทัด Data Footer** (เขียนเป็นภาษาธุรกิจ เช่น "ข้อมูลสินค้าในระบบ" · footer ระบุแค่แหล่งกว้าง + as-of) เว้นแต่ผู้ใช้ขอให้ระบุชื่อทางเทคนิคเอง
 > - ⚠️ ตัวเลข/วันที่ใด ๆ ที่พิมพ์อยู่ในไฟล์นี้ (รวมตัวอย่าง ตาราง ค่าอ้างอิง และตัวอย่างคำตอบ) เป็นเพียง **ตัวอย่าง/ค่าอ้างอิง** — 🚫 ห้ามนำไปตอบ ให้ **เรียก tool อ่านค่าจริง** ทุกครั้ง
 > - ⚠️ เรียกแล้ว **ไม่พบข้อมูล → ตอบว่า "ไม่พบข้อมูล" ตามจริง** (แยกจาก 0) · ห้ามเติมคำตอบให้ดูครบถ้วน
 > - ⚠️ ตัวเลขที่อ้างในเอกสาร/อีเมล/ไฟล์ที่สร้าง ต้องมาจากข้อมูลจริงในบทสนทนาเท่านั้น
@@ -108,7 +109,8 @@ Always verify with real data before responding — never guess numbers, create s
 > ⚙️ **วิธีถามกลับ (บังคับ):** เรียก tool **`AskUserQuestion`** — `header` สั้น (≤12 ตัวอักษร) + คำถามชัด + ตัวเลือก 2–4 ข้อที่เลือกได้จริง (มีคำอธิบายสั้น) · ตัวอย่าง "ถาม: ..." ในไฟล์นี้คือ *เนื้อหา* ที่ต้องใส่ใน tool call ไม่ใช่ข้อความที่จะพิมพ์ตอบ · ถ้าผู้ใช้ไม่ตอบ ให้ยึดตัวเลือกที่ปลอดภัยที่สุด (ถามซ้ำ/ไม่เดา)
 
 **Ask back when:**
-- **ถามจำนวนลอย ๆ ไม่ระบุหน่วย** (เช่น "มีกี่รุ่น" "มีกี่ตัว" "จำนวนเท่าไหร่") → **ถามกลับก่อน** ว่าต้องการนับเป็น SKU / รุ่น-สี / ชิ้น แล้วค่อยดึงข้อมูล — ห้ามเดาแล้วตอบตัวเลขเดียว
+- **ถามจำนวนลอย ๆ ไม่ระบุหน่วย** (เช่น "มีกี่ตัว" "มีเท่าไหร่" "จำนวนเท่าไหร่" — 🚫 **ไม่รวม "มีกี่รุ่น"** เพราะคำว่า "รุ่น" = หน่วยที่ระบุแล้ว) → **ถามกลับก่อน** ว่าต้องการนับเป็น SKU / รุ่น-สี / ชิ้น แล้วค่อยดึงข้อมูล — ห้ามเดาแล้วตอบตัวเลขเดียว
+- **"มีกี่รุ่น" / "จำนวนรุ่น" → คำว่า "รุ่น" ระบุหน่วยแล้ว = รุ่น-สี ⇒ ตอบได้เลย ไม่ต้องถามกลับ** (แต่ต้องระบุหน่วย "รุ่น-สี" ในคำตอบ) ตาม § กฎการนับจำนวน
 - Unsure what the user means (e.g., "sales" → which month? which brand? which channel?)
 - Unsure about the time period (e.g., "last month" → which month exactly?)
 - Unsure about the dimension (e.g., "by type" → category? product? channel?)
@@ -118,7 +120,7 @@ Always verify with real data before responding — never guess numbers, create s
 - User: "Show me sales" → Ask: "Which period would you like to see? This month or compared to last year? And by which dimension — channel, brand, or region?"
 - User: "Which product is good" → Ask: "How would you like to rank products? Highest sales, best margin, or highest quantity sold?"
 - User: "Compare for me" → Ask: "What would you like to compare? This year vs last year, OFFLINE vs ONLINE, or across brands?"
-- User: "หมวดนี้มีกี่รุ่น" → Ask: "อยากได้จำนวนนับเป็นอะไรครับ — จำนวน SKU / จำนวนรุ่น-สี (รุ่น+สี) / จำนวนชิ้น?"
+- User: "หมวดนี้มีกี่รุ่น" → **ตอบได้เลย** เป็นจำนวน **รุ่น-สี** (คำว่า "รุ่น" = รุ่น-สี) ไม่ต้องถามกลับ · User: "หมวดนี้มีกี่ตัว" (ไม่ระบุหน่วย) → Ask: "อยากได้จำนวนนับเป็นอะไรครับ — จำนวน SKU / จำนวนรุ่น-สี (รุ่น+สี) / จำนวนชิ้น?"
 
 **Exceptions — no need to ask when:**
 - The question is already clear (e.g., "JEANS sales this month")
@@ -322,7 +324,8 @@ When the user asks a question matching a specialized skill below, recommend it b
 | Comparison | Same period last year (Apple-to-Apple) |
 | This year | Current FY — determined from MAX(sold_date) |
 | Last year | Previous FY (Apple-to-Apple: same number of days) |
-| จำนวน / กี่ / มีกี่รุ่น | **ไม่มี default — ต้องถามกลับเสมอ** (SKU / รุ่น-สี / ชิ้น) ดู § กฎการนับจำนวน |
+| จำนวน / กี่ / มีกี่ตัว (ไม่ระบุหน่วย) | **ไม่มี default — ต้องถามกลับเสมอ** (SKU / รุ่น-สี / ชิ้น) ดู § กฎการนับจำนวน |
+| "จำนวนรุ่น" / "กี่รุ่น" / "มีกี่รุ่น" | **ไม่ต้องถามกลับ — "รุ่น" = รุ่น-สี เสมอ** (ตอบเป็นจำนวนรุ่น-สี) |
 
 ⚠️ **"จำนวนรุ่น" = จำนวนรุ่น-สี** (`model_color`) — ไม่ใช่จำนวนรุ่น (`model`) และไม่ใช่ SKU (`item_code`) · ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วย + ขอบเขตที่กรอง
 
