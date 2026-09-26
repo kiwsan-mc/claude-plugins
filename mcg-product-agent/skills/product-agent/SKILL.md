@@ -133,6 +133,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 1. **นับ/สรุปแยก dimension + ราคา + margin** → `product_dimension_summary_synapse`
 2. **อยากรู้ว่ามีค่าอะไรบ้าง (distinct values)** → `product_attribute_values_synapse`
+> ⚡ **คำถาม "นับจำนวน" (กี่รุ่น/กี่ SKU) ให้ยิงนับโดยตรง** — ใช้ `product_query_synapse` นับแบบไม่ซ้ำ (COUNT DISTINCT) หรือ `product_dimension_summary_synapse` · 🚫 **ไม่ต้องเรียก `product_attribute_values_synapse` (list ค่า distinct) ก่อน** — ค่ามีเป็นหมื่น แพงและช้าโดยไม่จำเป็น (เคสจริง: เรียก list ก่อนแล้วต้องเปลี่ยนไปนับ ⇒ เสีย 2 รอบ)
 3. **list รายการ SKU จริง** → `product_list_synapse`
 4. **canned ไม่ครอบคลุม** → `product_query_synapse` (raw T-SQL)
 5. **ไม่แน่ใจชื่อคอลัมน์** → `describe_table_product_synapse` / `search_columns_product_synapse`
