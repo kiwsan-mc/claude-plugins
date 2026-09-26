@@ -159,7 +159,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 ตอบ: "ข้อมูลล่าสุด ณ วันที่ {max_date} (แยกตาม domain)" + footer
 
-`📊 Data: MC Group Overview (Synapse) | As of: {max_date}`
+`📊 Data: MC Group Overview (Synapse) | As of: Sales {max_sold_date} · Stock {max_stock_date} · Member/CRM {max_member_date}`
 
 ---
 
@@ -211,6 +211,8 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 📌 **เรื่อง "รับของเข้า" / "Sales In" / "ปริมาณรับเข้า (GR)" — ตอบจำนวนชิ้นเป็นตัวเลขหลัก** 🚫 ห้ามยกมูลค่า (บาท / PO value) ขึ้นเป็นตัวเลขหลักหรือ headline — โชว์มูลค่าเมื่อ user ถามเรื่องเงิน/มูลค่าเอง · แยกให้ชัด **สั่ง (PO) · รับเข้าแล้ว (GR) · ค้างส่ง (still-to-deliver)** และระบุช่วงวันที่ (as-of) — ดูกฎการตอบเรื่อง "รับของเข้า" ใน §1
 
+> ⚠️ **skill นี้ไม่มี tool ฝั่ง "รับเข้า" (GR) ในชุด tools** — มีแค่ `po_overdue_synapse` (PO เกินกำหนด) กับ tool สต็อก ⇒ ถ้า user ถาม **"รับของเข้าเท่าไหร่" / "Sales In" / "ค้างส่งเท่าไหร่"** ให้ตอบเท่าที่ชุดนี้มี (PO เกินกำหนดเป็นจำนวนชิ้น) แล้ว **ส่งคำถามฝั่งรับเข้า/Sales In ไปที่ `mcg-inventory-agent` (po-intake)** ซึ่งมี `po_summary_synapse` (คืน po_qty/gr_qty/still_qty เป็นจำนวนชิ้น) — 🚫 ห้ามเดาตัวเลขรับเข้าเอง
+
 - `stock_on_hand_synapse(group_by="aging")` → สต็อกคงเหลือ + มูลค่า แยก aging
 - `stock_value_by_aging_synapse()` → มูลค่าสต็อกแยก aging zone (qty + cost + selling)
 - 📌 **สต็อกคงเหลือใช้ 4 measure นี้:** **Stock QTY** (`Stock_Total_Quantity`) · **Stock Amount MV** · **Stock Amount STD** · **Stock Selling Price** — ⚠️ ห้ามใช้ `Stock_Quantity` แทน (คนละ measure: snapshot 2026-09 = 4.94M vs 5.02M ชิ้น) และเมื่อรายงานมูลค่าต้นทุนต้องบอกว่าใช้เกณฑ์ **MV** หรือ **STD**
@@ -219,7 +221,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - `po_overdue_synapse(as_of=<max_stock_date>, group_by="vendor")` → PO เกินกำหนด — รายงาน **จำนวนชิ้น** เป็นหลัก (มูลค่า PO ที่เป็นบาทแสดงเมื่อ user ถามเรื่องมูลค่า)
 
 ## 5.3 Product (assortment)
-- `product_dimension_summary_synapse(group_by="brand")` → **จำนวน + avg price + margin%** — ⚠️ จำนวนต้องระบุหน่วยเสมอ ("กี่ SKU" / "กี่รุ่น-สี")
+- `product_dimension_summary_synapse(group_by="brand")` → **จำนวน + avg price + margin%** — ⚠️ จำนวนต้องระบุหน่วยเสมอ ("กี่ SKU" / "กี่รุ่น-สี") · tool คืน **`model_color_count`** = จำนวน **รุ่น-สี** (ใช้ตอบคำว่า "จำนวนรุ่น") แยกจาก `sku_count` และ `model_count` (ตรวจ 2026-09-26: แบรนด์ MC = SKU 85,891 · รุ่น 12,516 · **รุ่น-สี 17,291**)
 - 📌 **"จำนวนรุ่น" = "รุ่น-สี" เท่านั้น** — ถ้า user ถาม "กี่รุ่น" ให้ตอบเป็น **รุ่น-สี** ไม่ใช่ SKU และไม่ใช่จำนวนรุ่น · ถ้าไม่ระบุหน่วยให้ถามกลับ (ดูกฎการนับจำนวนใน §1)
 
 ## 5.4 Target (เป้า)
@@ -294,7 +296,9 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ⚠️ **ทุกจำนวนต้องมีหน่วยกำกับ** — "กี่ SKU" / "กี่รุ่น-สี" / "กี่ชิ้น" (คำว่า "จำนวนรุ่น" = รุ่น-สี) · ถ้า user ถาม "จำนวน/กี่" ลอย ๆ ไม่ระบุหน่วย → **ถามกลับก่อนตอบ** (ดูกฎการนับจำนวนใน §1)
 ⚠️ **รับของเข้า (Sales In / GR) ตอบจำนวนชิ้นเป็นหลัก** — มูลค่าแสดงเมื่อ user ถามเรื่องเงิน/มูลค่า (ดู §5.2)
 
-`📊 Data: MC Group Overview (Synapse) | Period: [...] | As of: [max_date]`
+`📊 Data: MC Group Overview (Synapse) | Period: [...] | As of: Sales/Company/Stock {d1} · Member/CRM {d2}`
+
+> ⚠️ **As-of ต้องแยกตาม domain** เมื่อรายงานมากกว่า 1 ด้าน (แต่ละ domain มีวันข้อมูลล่าสุดของตัวเอง — ดู §1.5) 🚫 ห้ามใช้ as-of ค่าเดียวทั้งรายงาน
 
 ---
 
@@ -312,7 +316,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | "สาขา <code>" / "<ชื่อร้าน> dashboard" / "ร้าน <ชื่อ>" | mcg-sales-agent (store-operations / sales-dashboard) |
 | "SKU <code>" / "สินค้ารายตัว" | mcg-product-agent |
 | "สต็อกสาขา <code>" | mcg-inventory-agent |
-| "รับของเข้า" / "Sales In" / "ปริมาณรับเข้า (GR)" | ตอบ **จำนวนชิ้น** ตาม §5.2 (ห้ามยกค่าบาทเป็นตัวเลขหลัก) — ถ้าต้องการรายละเอียดรายใบ PO/STO → mcg-inventory-agent |
+| "รับของเข้า" / "Sales In" / "ปริมาณรับเข้า (GR)" / "ค้างส่งเท่าไหร่" | **mcg-inventory-agent (po-intake)** — skill นี้ไม่มี tool ฝั่งรับเข้า · ตอบได้แค่ PO เกินกำหนด (`po_overdue_synapse`, จำนวนชิ้น) |
 | "member รายตัว" / "RFM" / "top member" / "tier" / "return" (เจาะลึก) | mcg-crm-agent |
 | domain เดียวเจาะลึกอื่น ๆ | agent เฉพาะ (mcg-sales-agent / mcg-inventory-agent / mcg-product-agent / mcg-target-agent / mcg-crm-agent) |
 | "ยอดขายบริษัท" เทียบกับ "ยอดขาย POS" · "ยอดเป้า" เทียบกับ "ยอดขายบริษัท" · "member คิดเป็นกี่ % ของทั้งบริษัท" | 🚫 **ไม่มีการเทียบให้** — คนละระบบต้นทาง / คนละ population (ดูกฎ 6–9) · ตอบแยกส่วนพร้อมกำกับ **แหล่ง + ช่วงวันที่** แล้วอธิบายว่าทำไมเทียบกันตรง ๆ ไม่ได้ |
