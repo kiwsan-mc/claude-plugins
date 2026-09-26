@@ -1,7 +1,7 @@
 {
   "name": "mcg-office-documents",
   "description": "MCG Office & Output plugin — spreadsheet automation (ms-excel), live/interactive HTML dashboards as Cowork artifacts (artifact-creator), and Outlook email (email-digest สำหรับสรุปกล่องขาเข้า, email-template สำหรับส่งรายงาน). ใช้เมื่อ user ขอสร้างไฟล์ Excel, สร้าง Dashboard เป็น Artifact, สรุปอีเมล, หรือส่งรายงานทางอีเมล",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "author": {
     "name": "MCG AI Team",
     "email": "ai@mcgrouppcl.com"
