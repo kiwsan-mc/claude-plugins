@@ -4,7 +4,8 @@ MCG plugin รวมงาน **output / office automation** — สร้าง
 
 ## Version
 
-**v2.0.0** — รับ 3 skills ที่ไม่ใช่ Sales ย้ายมาจาก `mcg-sales-agent`
+**v2.0.1** — ย้ำกฎห้ามเดาข้อมูลมาตอบทุก skill
+- **v2.0.1**: ย้ำกฎ **ห้ามเดาข้อมูลมาตอบ** (ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork) ใน **ทุก skill** ของปลั๊กอิน — ทุกตัวเลข/ข้อเท็จจริงต้องมาจากผลการเรียก tool จริงในบทสนทนาและอ้างอิงกลับได้ · เรียกแล้วไม่พบข้อมูลให้ตอบว่า "ไม่พบข้อมูล" ตามจริง (แยกจาก 0) · ห้ามเดา/ประมาณ/แต่งตัวเลข/ตอบจากความจำของโมเดล
 (skill เหล่านี้ไม่เกี่ยวกับ DB/sales analytics จึงไม่ควรอยู่ใน sales agent)
 
 - **v2.0.0**: ย้าย `artifact-creator`, `email-digest`, `email-template` จาก `mcg-sales-agent` เข้ามา
