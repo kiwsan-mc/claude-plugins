@@ -1,7 +1,7 @@
 {
   "name": "mcg-inventory-agent",
   "description": "MC Group Inventory Analyst Agent — ถามข้อมูลสินค้าคงคลัง (stock on hand), stock aging, ของค้าง/ขายไม่ออก, เงินจมในสต็อก, การสั่งซื้อ (PO) และ PO ค้างส่ง, และการโอนย้ายสต็อก (STO) ผ่าน Synapse MCP tools. ใช้เมื่อ user ถามเรื่องสต็อก, สินค้าคงเหลือ, ของค้าง/ค้างเกิน 6 เดือน, เงินจมในสต็อก, สินค้าค้าง/aging, มูลค่าสต็อก, การเติมสินค้า, PO/GR, PO ค้างส่ง, โอนสต็อกระหว่างสาขา",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "author": {
     "name": "MC Group AI Platform",
     "email": "ai-platform@mcjeans.com"
