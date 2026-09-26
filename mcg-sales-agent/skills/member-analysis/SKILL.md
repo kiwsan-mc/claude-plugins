@@ -10,6 +10,7 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__member_vs_nonmember
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

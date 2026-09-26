@@ -26,6 +26,7 @@ tools:
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_slow_moving_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__stock_transfer_candidates_synapse
   - mcp__plugin_mcg-inventory-agent_synapse-inventory__sales_out_by_model_color
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

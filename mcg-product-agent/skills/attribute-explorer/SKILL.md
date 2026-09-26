@@ -10,6 +10,7 @@ tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_schema_cheatsheet_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__describe_table_product_synapse
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

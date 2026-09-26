@@ -14,6 +14,7 @@ tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_branch_summary
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dim_channel_list
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

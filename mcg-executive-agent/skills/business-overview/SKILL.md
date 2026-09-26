@@ -31,6 +31,7 @@ tools:
   - mcp__plugin_mcg-executive-agent_synapse-crm__max_member_date_synapse
   - mcp__plugin_mcg-executive-agent_synapse-crm__member_kpi_overview_synapse
   - mcp__plugin_mcg-executive-agent_synapse-crm__member_by_channel_synapse
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

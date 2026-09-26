@@ -16,6 +16,7 @@ tools:
   - mcp__plugin_mcg-target-agent_synapse-target__promotion_sales_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__rebate_analysis_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__target_sales_mix_synapse
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

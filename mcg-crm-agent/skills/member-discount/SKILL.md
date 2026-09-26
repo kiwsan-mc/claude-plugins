@@ -11,6 +11,7 @@ tools:
   - mcp__plugin_mcg-crm-agent_synapse-crm__member_discount_synapse
   - mcp__plugin_mcg-crm-agent_synapse-crm__member_return_analysis_synapse
   - mcp__plugin_mcg-crm-agent_synapse-crm__member_sales_agent_synapse
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)

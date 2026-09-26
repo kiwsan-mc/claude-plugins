@@ -12,6 +12,7 @@ tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__company_sales_schema_cheatsheet_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
+  - AskUserQuestion
 ---
 > 🚫 **ห้ามเดาข้อมูลมาตอบ — ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork (CRITICAL)**
 > ทุกตัวเลขและข้อเท็จจริงในคำตอบ **ต้องมาจากผลการเรียก tool ในบทสนทนานี้เท่านั้น** และอ้างอิงกลับได้ (ระบุแหล่ง + ช่วงวันที่ / as-of)
