@@ -117,7 +117,7 @@ SHOP ≥80%=🟢, Mc Outlet ≥70%=🟢, Marketplace ≥20%=🟢, Others ≥60%=
 
 **Table 3: Member Group & Generation**
 
-| Group | Generation | Net Sales | Tickets | ATV | UPT |
+| Group | Generation | Net Sales (฿) | Tickets (ใบ) | ATV (฿/ใบ) | UPT (ชิ้น/ใบ) |
 
 **Key Insights** — ATV premium, channels below threshold, upsell potential
 

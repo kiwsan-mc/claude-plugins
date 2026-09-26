@@ -61,6 +61,7 @@ ORDER BY net_sales DESC
 LIMIT 15
 ```
 
+> ⚠️ **ตัวนับทั้งสอง (Step 3) นับเฉพาะช่วง FY ปัจจุบัน** (`FILTER (WHERE sold_date BETWEEN fy_curr_start AND max_date)`) ให้ตรงกับหัวตาราง "จำนวน SKU / จำนวนรุ่น-สี" — ถ้าต้องการของปีก่อนด้วย ให้เพิ่มคอลัมน์ `*_prev` ด้วย FILTER ช่วงก่อน
 > 🔢 หน่วยของการนับ — "จำนวนรุ่น" = **รุ่น-สี** (`model_color`) เท่านั้น 🚫 ไม่ใช่ SKU (`item_code`) และ 🚫 ไม่ใช่รุ่น (`model`) · `qty` = **ชิ้น** · ถ้าถาม "จำนวน/กี่" ลอย ๆ ไม่ระบุหน่วย → **ถามกลับก่อน** (SKU / รุ่น (รุ่น-สี) / ชิ้น) ห้ามเดาแล้วตอบตัวเลขเดียว
 > (อ้างอิง 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 — ต่างกัน ~32% ⇒ ผิดหน่วย = ตัวเลขผิดจริง)
 
@@ -75,8 +76,8 @@ SELECT
   sub_brand_text,
   SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}' THEN total_exc_vat_price ELSE 0 END)::float AS ns_curr,
   SUM(CASE WHEN sold_date BETWEEN '{{fy_prev_start}}' AND '{{same_day_prev}}' THEN total_exc_vat_price ELSE 0 END)::float AS ns_prev,
-  COUNT(DISTINCT item_code) AS sku_count,
-  COUNT(DISTINCT model_color) AS model_color_count
+  COUNT(DISTINCT item_code) FILTER (WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}') AS sku_count, -- ✅ เฉพาะ FY ปัจจุบัน ให้ตรงกับหัวตาราง
+  COUNT(DISTINCT model_color) FILTER (WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}') AS model_color_count
 FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '{{fy_prev_start}}' AND '{{max_date}}'
   AND product_group_text IS NOT NULL

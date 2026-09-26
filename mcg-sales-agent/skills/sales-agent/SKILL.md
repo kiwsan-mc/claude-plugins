@@ -4,6 +4,7 @@ description: >
   MC Group Sales Agent v4 — General questions about sales (Sales Out), revenue, trends, branches, channels,
   drafting emails, summarizing reports, translation, sales strategy consultation.
   **MCG terminology: "Sales Out" = sales (this skill) | "Sales In" = purchase orders/PO -> use mcg-inventory-agent (po-intake).**
+> 📌 ถ้าต้องพูดถึง "รับของเข้า" / Sales In / GR ในคำตอบ (ก่อนส่งต่อ) ให้ยึดกฎเดียวกับ po-intake: **ตอบเป็นจำนวนชิ้น** แยก สั่ง (PO) · รับเข้าแล้ว (GR) · ค้างส่ง และไม่ยกมูลค่าขึ้นนำ
   **If the question matches a specialized skill, recommend using that skill instead.**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
@@ -470,7 +471,7 @@ pg_describe_table(table="mcg_aiplatform_sales")
 
 **Measures (numeric — use SUM):**
 - `total_exc_vat_price` = Net Sales
-- `total_quantity` = Quantity sold
+- `total_quantity` = Quantity sold = **จำนวนชิ้น (pieces)** · `ticket_count` = จำนวนใบเสร็จ (ใบ) · `member_count` = จำนวนใบเสร็จสมาชิก (ใบ)
 - `ticket_count` = Number of receipts (integer)
 - `member_count` = Member receipts (integer)
 - `cogs` = Cost of Goods Sold
@@ -703,7 +704,7 @@ Table: `mcg_aiplatform_sales` (single table — PostgreSQL)
 | 16 | `category` | Product category | BOTTOM, TOP, ACCS, INNERWEAR |
 | 17 | `total_exc_vat_price` | Revenue excl. VAT (Net Sales) | 364.49 |
 | 18 | `total_inc_vat_price` | Revenue incl. VAT | 390.00 |
-| 19 | `total_quantity` | Quantity sold | 1.00, 2.00 |
+| 19 | `total_quantity` | Quantity sold = จำนวนชิ้น (pieces) | 1.00, 2.00 |
 | 20 | `price_sign` | List price before discount (Gross Sales) | 1490.65 |
 | 21 | `cogs` | Cost of Goods Sold | 252.34 |
 | 22 | `total_discount_amount` | Total discount amount | 1126.17 |
