@@ -5,6 +5,7 @@ description: >
   "Company sales" "Sales Account" "บัญชีลูกค้า" "GP" "gross profit" "invoice" "moving cost"
   "ยอดขายระดับใบกำกับ" "กำไรขั้นต้น"
   วิเคราะห์ยอดขาย invoice-level + GP% + discount แยก account/channel/region/brand
+  🔴 เกณฑ์คอลัมน์ (2026-09-28): **ยอดขาย = `Net_Sales_BGP`** · **COGS = `COGS`** · GP = ยอดขาย − COGS (🚫 ไม่ใช้ `Net_Sales_Exclude_VAT` / `Moving_Cost_Amount`)
 tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_company_summary_yoy_synapse
@@ -84,7 +85,7 @@ tools:
 
 ## Step 3 — Response
 
-**Headline** — ยอดขายรวม + GP% เฉลี่ย (ถ้าคำถามเป็นเชิงปริมาณ เช่น "กี่ชิ้น" / "รับของเข้าเท่าไหร่" → นำ **จำนวนชิ้น** ขึ้นเป็นตัวเลขหลัก 🚫 ไม่ยกมูลค่า/PO value ขึ้นนำ เว้นแต่ user ถามเรื่องมูลค่าเอง)
+**Headline** — ยอดขายรวม (**Net Sales BGP**) + GP% เฉลี่ย (ถ้าคำถามเป็นเชิงปริมาณ เช่น "กี่ชิ้น" / "รับของเข้าเท่าไหร่" → นำ **จำนวนชิ้น** ขึ้นเป็นตัวเลขหลัก 🚫 ไม่ยกมูลค่า/PO value ขึ้นนำ เว้นแต่ user ถามเรื่องมูลค่าเอง)
 
 **ตาราง: Company Sales by [dimension]**
 | Dimension | ยอดขาย (BGP) | Qty (ชิ้น) | COGS | Gross Profit | GP% |

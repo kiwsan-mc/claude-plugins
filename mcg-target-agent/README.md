@@ -6,7 +6,8 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v2.1.14** — แก้คอลัมน์เป้าให้ตรงตารางจริง (Target_exc_vat)
+**v2.1.15** — เกณฑ์ยอดขาย BGP ระบุครบใน metadata ของ skill
+- **v2.1.15**: เติมเกณฑ์คอลัมน์ (ยอดขาย = `Net_Sales_BGP` · COGS = `COGS`) ลงใน frontmatter description + Headline ของ `company-account-sales` ให้ agent เห็นก่อนอ่านเนื้อไฟล์
 - **v2.1.14**: 🔴 **แก้ bug สำคัญ** — ตาราง `ai.dim_target_main_lines` มีคอลัมน์จริง 5 ตัว (`Target_Year` · `Target_Month` · `Branch_Code` · `Target_Date` · **`Target_exc_vat`**) แต่ tool/skill อ้าง `Target_Value` · `Target_Weight` · `Date_Key` ที่ **ไม่มีจริง** ⇒ tool เป้า error ทุกครั้ง · แก้ tool 2 ตัว (`sales_target_vs_actual_synapse`, `target_sales_mix_synapse`) ให้ใช้ `Target_exc_vat` + join ฝั่งเป้าด้วย `Target_Date` และตัดคอลัมน์ target weight ออก (verified: ก.ย. 2026 เป้ารวม ฿390.97M · 586 สาขา)
 - **v2.1.13**: แก้ตามคำสั่ง: **"ยอดขาย" ใช้ `Net_Sales_BGP`** (ไม่ใช่ `Net_Sales_Exclude_VAT`) และ **COGS/GP% ใช้ `COGS`** — GP = BGP − COGS · GP% = GP ÷ BGP × 100 (จริง 1-20 ก.ย. 2026: ใหม่ 153.38M/66.30% vs เก่า 149.34M/65.89%) · **กลับกฎเดิมที่ห้ามใช้ COGS** · `company-account-sales` ปรับตาราง/สูตร + ระบุเกณฑ์ทุกครั้ง
 - **v2.1.12**: เพิ่ม 2 กฎจากเคสจริงรอบล่าสุด: (1) 🚫 **ห้ามวงเล็บชื่อทางเทคนิคต่อท้ายคำธุรกิจ** — รูปแบบที่หลุดซ้ำ ๆ คือ "รุ่น-สี (ชื่อคอลัมน์)" / "Product Master (ชื่อตาราง)" ⇒ ห้ามวงเล็บคำที่ขึ้นต้น `ai.` หรือ snake_case ต่อท้ายคำธุรกิจ (2) 🧮 **กระทบยอดก่อนส่ง** — ผลรวมของแถวในตารางต้องเท่ากับยอดรวมที่เขียน ถ้าไม่ตรงให้หาสาเหตุ/ระบุขอบเขต/แก้ตัวเลข และห้ามสร้างกลุ่ม "อื่น ๆ" ที่ยอดเกินส่วนที่เหลือ (เคสจริง: ตารางรายแบรนด์บวกได้ 27,141 แต่ยอดที่เขียน 26,541)
