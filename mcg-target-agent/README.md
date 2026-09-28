@@ -6,7 +6,8 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v2.1.19** — แก้ตามผลรีวิว: ฐานสต็อก · footer · schema · บล็อกกฎ
+**v2.1.20** — ย่อบล็อกกฎในสกิลลูก (P1)
+- **v2.1.20**: ใช้ข้อเสนอ P1: ย่อบล็อกกฎใน **27 สกิลลูก** จาก ~21 บรรทัด (8 KB) → 5 บรรทัด (~1.4 KB) โดย **คงกฎที่ใช้งานจริงครบทุกข้อ** (ห้ามเดา · ห้ามเปิดไส้ใน + เกณฑ์จับคำ + footer · หน่วย/ถามกลับ/ค่าจริง · กระทบยอด + ตัวอย่างห้ามใช้ตอบ) แล้วชี้ไปที่ "§1 ของ skill แม่" ซึ่ง include อยู่แล้ว ⇒ ไฟล์แม่ 6 ไฟล์และไฟล์ที่ไม่มี include (5 ไฟล์ office/software) ยังพกฉบับเต็มไว้
 - **v2.1.19**: แก้ตามผลรีวิวความซ้ำ: (1) **ฐานสต็อก** — `business-overview` สอนให้ใช้ Stock_Total_* และห้าม Stock_Quantity ซึ่ง **ตรงข้ามกับกฎธุรกิจ** (คงเหลือ = Stock_Quantity) ⇒ แก้ให้ตรง inventory-agent (2) **footer 3 จุดยังพิมพ์ชื่อตาราง** `mcg_aiplatform_sales` (ขัดกฎห้ามเปิดไส้ใน) ⇒ เปลี่ยนเป็น "Sales Out (Postgres)" (3) **schema ปลดระวาง** `gold`/`silver` ในตารางแหล่งข้อมูล ⇒ `ai` (4) บล็อกกฎของ `sales-agent` ถูกตัดขาดกลาง (มีบรรทัดลอยแทรก) ⇒ ต่อกลับเป็นบล็อกเดียว (5) `generate-srs` เพิ่ม `AskUserQuestion` ใน allowed-tools (เดิมกฎสั่งให้เรียกแต่ tool ไม่อยู่ใน allowlist) (6) ตัวอย่าง "หน่วยผิด" ในบล็อกทุกไฟล์ใช้เลขจริง 126,395/31,418 ⇒ เปลี่ยนเป็นเลขสมมติ (7) เติมสถานะล่าสุดของตารางรายวันใน business-overview
 - **v2.1.18**: ตามผลรีวิว: `target-achievement` เลิกอ้างคอลัมน์ `target_weight` ที่ tool ไม่คืน · `target-agent` แก้ 3 จุด — rebate (ตารางนี้ rebate เป็น 0 ⇒ ไม่มีตัวเลข rebate) · sales mix (ตารางเป้ามีแค่สาขา×วัน ⇒ ไม่มี category/LY) · Step 1 เลิกเขียน SQL หา anchor เอง ให้เรียก `max_invoice_date_synapse`
 - **v2.1.17**: เพิ่ม `sales_vs_target_by_subchannel_synapse` reproduce รายงานบริษัท (Target · Net Sales BGP · Ach% · LY · YoY ตาม Sub_Channel) ตรงกับรายงานจริงทุกหลัก · **แก้กฎ VAT ให้ตรงรายงาน: Ach% = Net ÷ Target โดยไม่แปลง VAT** (คอลัมน์ ×1.07 เก็บไว้เป็นข้อมูลเสริม) · เพิ่ม Step 0.6 อธิบายนิยามคอลัมน์ + สูตร ASP/ATV/UPT
