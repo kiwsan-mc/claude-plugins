@@ -1,0 +1,18 @@
+[
+  {"query": "margin ปีนี้เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "หมวดไหน discount สูงเกินไป", "should_trigger": true},
+  {"query": "High Risk Zone มีหมวดอะไรบ้าง", "should_trigger": true},
+  {"query": "กำไรขั้นต้นแยกหมวดสินค้า", "should_trigger": true},
+  {"query": "ควรควบคุม discount ยังไง", "should_trigger": true},
+  {"query": "หมวดไหน margin ต่ำกว่า 50%", "should_trigger": true},
+  {"query": "Discount% กับ Margin% เทียบปีก่อน", "should_trigger": true},
+  {"query": "หมวดไหน profitability แย่ที่สุด", "should_trigger": true},
+  {"query": "วิเคราะห์ discount sensitivity ให้หน่อย", "should_trigger": true},
+  {"query": "หมวดไหนให้ส่วนลดเยอะจนกำไรหาย", "should_trigger": true},
+
+  {"query": "ราคาเฉลี่ยต่อชิ้นเป็นเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย ONE-PRICED เท่าไหร่", "should_trigger": false},
+  {"query": "ต้นทุนสินค้าแยก vendor", "should_trigger": false},
+  {"query": "ของค้างในสต็อกมีเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขายรวมเดือนนี้เท่าไหร่", "should_trigger": false}
+]

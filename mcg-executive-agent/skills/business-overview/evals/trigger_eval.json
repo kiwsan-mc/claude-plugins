@@ -1,0 +1,21 @@
+[
+  {"query": "ภาพรวมธุรกิจเป็นยังไง", "should_trigger": true},
+  {"query": "overview ทั้งบริษัท", "should_trigger": true},
+  {"query": "executive summary ให้หน่อย", "should_trigger": true},
+  {"query": "business health ตอนนี้", "should_trigger": true},
+  {"query": "สรุปภาพรวมธุรกิจทุกด้าน", "should_trigger": true},
+  {"query": "ขอดูทุกด้านครบทุกมุม", "should_trigger": true},
+  {"query": "Sales + Target เดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขาย + เป้า สรุปให้หน่อย", "should_trigger": true},
+  {"query": "สรุปยอดขายพร้อมสต็อกให้หน่อย", "should_trigger": true},
+  {"query": "ภาพรวมเพิ่มเรื่อง member ด้วย", "should_trigger": true},
+  {"query": "รวมยอดขายกับสต็อกไว้ในรายงานเดียว", "should_trigger": true},
+  {"query": "Sales Performance กับ Target ปีนี้", "should_trigger": true},
+
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false},
+  {"query": "ยอดขายบริษัทเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย POS เดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false},
+  {"query": "member ที่ซื้อซ้ำมีกี่คน", "should_trigger": false},
+  {"query": "สินค้ารายตัวรหัสนี้ขายได้เท่าไหร่", "should_trigger": false}
+]

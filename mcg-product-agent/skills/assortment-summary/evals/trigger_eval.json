@@ -1,0 +1,20 @@
+[
+  {"query": "มีกี่ SKU", "should_trigger": true},
+  {"query": "จำนวน SKU ทั้งหมด", "should_trigger": true},
+  {"query": "มีกี่รุ่น", "should_trigger": true},
+  {"query": "จำนวนรุ่น", "should_trigger": true},
+  {"query": "กี่รุ่น-สี", "should_trigger": true},
+  {"query": "assortment ของเราเป็นยังไง", "should_trigger": true},
+  {"query": "product mix แยกแบรนด์", "should_trigger": true},
+  {"query": "จำนวนสินค้าแยก brand", "should_trigger": true},
+  {"query": "สัดส่วนสินค้าแยกหมวดหมู่", "should_trigger": true},
+  {"query": "จำนวน SKU แยก gender", "should_trigger": true},
+  {"query": "จำนวนรุ่น-สี แยก season", "should_trigger": true},
+  {"query": "นับ SKU แยก vendor", "should_trigger": true},
+
+  {"query": "มีสีอะไรบ้าง", "should_trigger": false},
+  {"query": "ราคาสินค้าเป็นยังไง", "should_trigger": false},
+  {"query": "ข้อมูลสินค้าในระบบล่าสุดเมื่อไหร่", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false}
+]

@@ -1,0 +1,20 @@
+[
+  {"query": "มีค่าอะไรบ้าง", "should_trigger": true},
+  {"query": "มีแบรนด์อะไรบ้าง", "should_trigger": true},
+  {"query": "มีสีอะไรบ้าง", "should_trigger": true},
+  {"query": "season ไหนบ้าง", "should_trigger": true},
+  {"query": "มีไซส์อะไรบ้าง", "should_trigger": true},
+  {"query": "มี category อะไรบ้าง", "should_trigger": true},
+  {"query": "list แบรนด์ทั้งหมด", "should_trigger": true},
+  {"query": "ขอรายการสินค้าทั้งหมด", "should_trigger": true},
+  {"query": "หาสินค้าที่มีสีน้ำเงิน", "should_trigger": true},
+  {"query": "SKU ตัวไหนเป็นสินค้าใหม่", "should_trigger": true},
+  {"query": "อยากดู SKU รายตัว", "should_trigger": true},
+  {"query": "ช่วย list รายการสินค้าแยกตามแบรนด์", "should_trigger": true},
+
+  {"query": "มีกี่ SKU", "should_trigger": false},
+  {"query": "ช่วงราคาสินค้าแยกหมวด", "should_trigger": false},
+  {"query": "สินค้าแยกตาม gender", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]

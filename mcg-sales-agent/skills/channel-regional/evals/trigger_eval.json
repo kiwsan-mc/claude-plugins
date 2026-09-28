@@ -1,0 +1,18 @@
+[
+  {"query": "ยอดขายแยกภาคเหนือ ใต้ อีสาน", "should_trigger": true},
+  {"query": "สัดส่วนยอดขายตาม region", "should_trigger": true},
+  {"query": "regional ratio ปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "heatmap ยอดขาย region กับ channel", "should_trigger": true},
+  {"query": "ภาคไหนทำยอดได้ดีที่สุด", "should_trigger": true},
+  {"query": "ยอดขายแยก Main Channel OFFLINE กับ ONLINE", "should_trigger": true},
+  {"query": "top 10 จังหวัดที่ขายดี", "should_trigger": true},
+  {"query": "ยอดขายภูมิภาคเทียบปีก่อน", "should_trigger": true},
+  {"query": "ภาคไหนเติบโตมากสุด", "should_trigger": true},
+  {"query": "ยอดขายแยกภูมิภาคกับช่องทาง", "should_trigger": true},
+
+  {"query": "ยอดขายระดับอำเภอ", "should_trigger": false},
+  {"query": "Sales per SQM ของสาขาไหนดีสุด", "should_trigger": false},
+  {"query": "สาขาเปิดใหม่ปีนี้กี่สาขา", "should_trigger": false},
+  {"query": "ยอดขาย Shopee เป็นเท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยกภาค", "should_trigger": false}
+]

@@ -1,0 +1,19 @@
+[
+  {"query": "ข้อมูลเป้าล่าสุดอัปเดตวันไหน", "should_trigger": true},
+  {"query": "ข้อมูลยอดขายล่าสุดถึงวันที่เท่าไหร่", "should_trigger": true},
+  {"query": "ช่วยดูเรื่องเป้าให้หน่อย", "should_trigger": true},
+  {"query": "ขอข้อมูลเป้าหน่อย", "should_trigger": true},
+  {"query": "เดือนนี้ขายได้กี่", "should_trigger": true},
+  {"query": "มีสาขาไหนมีเป้าบ้าง", "should_trigger": true},
+  {"query": "เป้าขายรายวันแยกสาขาให้หน่อย", "should_trigger": true},
+  {"query": "โปรโมชันเดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "โปรฯ ไหนขายดีที่สุด", "should_trigger": true},
+  {"query": "เป้าปีนี้ตั้งไว้เท่าไหร่", "should_trigger": true},
+
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false},
+  {"query": "สาขาไหนไม่ถึงเป้า", "should_trigger": false},
+  {"query": "ยอดขายบริษัทเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "GP เดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย + เป้า สรุปให้หน่อย", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false}
+]

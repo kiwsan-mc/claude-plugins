@@ -1,0 +1,20 @@
+[
+  {"query": "ข้อมูลสมาชิกเป็นยังไงบ้าง", "should_trigger": true},
+  {"query": "member ซื้อเท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขายจากสมาชิกเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ลูกค้า M2603-013482 มียอดซื้อเท่าไหร่", "should_trigger": true},
+  {"query": "ATV ของสมาชิกเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ticket ของสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "จำนวนสมาชิกมีเท่าไหร่", "should_trigger": true},
+  {"query": "ข้อมูลสมาชิกล่าสุดเมื่อไหร่", "should_trigger": true},
+  {"query": "สมาชิกซื้อช่องทางไหนมากสุด", "should_trigger": true},
+  {"query": "ยอดซื้อของสมาชิกแยกช่องทาง", "should_trigger": true},
+  {"query": "UPT ของสมาชิกเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ภาพรวม member และ CRM เป็นยังไง", "should_trigger": true},
+
+  {"query": "ใครคือลูกค้าของเรา", "should_trigger": false},
+  {"query": "ส่วนลดสมาชิกเป็นยังไง", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]

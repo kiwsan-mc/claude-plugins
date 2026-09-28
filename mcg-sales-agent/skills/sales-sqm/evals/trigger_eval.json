@@ -1,0 +1,18 @@
+[
+  {"query": "Sales per SQM ของสาขาเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "สาขาไหนใช้พื้นที่คุ้มที่สุด", "should_trigger": true},
+  {"query": "ยอดขายต่อตารางเมตร Top 5", "should_trigger": true},
+  {"query": "space efficiency ของสาขาเป็นยังไง", "should_trigger": true},
+  {"query": "runrate ยอดขายปีนี้เท่าไหร่", "should_trigger": true},
+  {"query": "projection ยอดขายสิ้นปีเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "สาขาเล็กกับสาขาใหญ่ขายต่างกันแค่ไหน", "should_trigger": true},
+  {"query": "สาขาที่ขายต่อ sqm แย่ที่สุด", "should_trigger": true},
+  {"query": "ขนาดพื้นที่สาขาสัมพันธ์กับยอดขายไหม", "should_trigger": true},
+  {"query": "Sales per Sqm แยกจังหวัด", "should_trigger": true},
+
+  {"query": "ยอดขายรวมของสาขา", "should_trigger": false},
+  {"query": "สาขาเปิดใหม่ปีนี้มีกี่สาขา", "should_trigger": false},
+  {"query": "ยอดขายแยกภาค", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยกสาขา", "should_trigger": false},
+  {"query": "salesman คนไหนขายดีสุด", "should_trigger": false}
+]

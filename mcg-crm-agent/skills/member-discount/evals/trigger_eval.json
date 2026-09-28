@@ -1,0 +1,20 @@
+[
+  {"query": "ส่วนลดสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "CRM discount เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "สิทธิประโยชน์สมาชิกมีอะไรบ้าง", "should_trigger": true},
+  {"query": "member discount ใช้ไปเท่าไหร่", "should_trigger": true},
+  {"query": "คืนสินค้าเป็นยังไง", "should_trigger": true},
+  {"query": "return rate ของสินค้าเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "discount code ไหนถูกใช้มากสุด", "should_trigger": true},
+  {"query": "ลูกค้า M2603-013482 ได้ส่วนลดอะไร", "should_trigger": true},
+  {"query": "ส่วนลดสมาชิกแยกช่องทาง", "should_trigger": true},
+  {"query": "หมวดไหนคืนสินค้ามากสุด", "should_trigger": true},
+  {"query": "ยอดคืนสินค้าของสมาชิก", "should_trigger": true},
+  {"query": "ส่วนลดสมาชิกใช้กับช่องทางไหนมากสุด", "should_trigger": true},
+
+  {"query": "ใครคือลูกค้าของเรา", "should_trigger": false},
+  {"query": "ข้อมูลสมาชิกเป็นยังไงบ้าง", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]

@@ -1,0 +1,19 @@
+[
+  {"query": "สัดส่วน member กับ non-member เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขายจากสมาชิกเท่าไหร่", "should_trigger": true},
+  {"query": "member ratio แยกช่องทาง", "should_trigger": true},
+  {"query": "ATV ของ member เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "UPT ของสมาชิกเทียบคนทั่วไป", "should_trigger": true},
+  {"query": "ยอดขายสมาชิกแยก generation", "should_trigger": true},
+  {"query": "ลูกค้าใหม่กับลูกค้าเดิมสัดส่วนเท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขายจาก Loyalty member เป็นยังไง", "should_trigger": true},
+  {"query": "สมาชิกกลุ่มไหนสร้างยอดขายมากสุด", "should_trigger": true},
+  {"query": "ยอดขาย member เทียบปีก่อน", "should_trigger": true},
+
+  {"query": "สมาชิกคนไหนซื้อเยอะสุด", "should_trigger": false},
+  {"query": "RFM ของสมาชิกเป็นยังไง", "should_trigger": false},
+  {"query": "สมาชิก tier Platinum มีกี่คน", "should_trigger": false},
+  {"query": "ยอดขายรวมทุกช่องทาง", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเดือนนี้", "should_trigger": false}
+]

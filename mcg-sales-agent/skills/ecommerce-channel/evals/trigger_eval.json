@@ -1,0 +1,18 @@
+[
+  {"query": "ยอดขาย Shopee เดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "Lazada กับ TikTok อันไหนทำยอดได้ดีกว่า", "should_trigger": true},
+  {"query": "ยอดขายแยก marketplace platform", "should_trigger": true},
+  {"query": "ช่องทาง online เป็นยังไงบ้าง", "should_trigger": true},
+  {"query": "organic กับ Ads อันไหนได้ผลกว่า", "should_trigger": true},
+  {"query": "affiliate ทำยอดได้เท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขาย e-commerce แยกแพลตฟอร์ม", "should_trigger": true},
+  {"query": "Mcshop.com ขายได้เท่าไหร่", "should_trigger": true},
+  {"query": "campaign type ไหนได้ผลที่สุด", "should_trigger": true},
+  {"query": "สินค้าขายดีบน Shopee คือตัวไหน", "should_trigger": true},
+
+  {"query": "ยอดขายรวมทุกช่องทางเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย OFFLINE แยกภาค", "should_trigger": false},
+  {"query": "สินค้า ONE-PRICED ขายได้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "ช่วยร่างอีเมลสรุปยอดขาย", "should_trigger": false}
+]

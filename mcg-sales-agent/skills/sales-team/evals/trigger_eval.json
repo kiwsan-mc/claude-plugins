@@ -1,0 +1,18 @@
+[
+  {"query": "salesman คนไหนขายดีที่สุด", "should_trigger": true},
+  {"query": "จัดอันดับพนักงานขาย", "should_trigger": true},
+  {"query": "ผลงานทีมขายเดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "ผู้จัดการเขตไหนทีมทำยอดได้ดี", "should_trigger": true},
+  {"query": "Head Sales สรุปผลงานให้หน่อย", "should_trigger": true},
+  {"query": "KPI พนักงานขายเป็นยังไง", "should_trigger": true},
+  {"query": "ranking พนักงานขาย Top 10", "should_trigger": true},
+  {"query": "ยอดขายแยก salesman", "should_trigger": true},
+  {"query": "ทีมขายภาคเหนือทำยอดได้เท่าไหร่", "should_trigger": true},
+  {"query": "พนักงานขายคนไหนทำยอดต่ำสุด", "should_trigger": true},
+
+  {"query": "ยอดขายรายสาขาเป็นยังไง", "should_trigger": false},
+  {"query": "Sales per SQM สาขาไหนดีสุด", "should_trigger": false},
+  {"query": "เป้าขายของพนักงานขาย", "should_trigger": false},
+  {"query": "ยอดขายแยกภาค", "should_trigger": false},
+  {"query": "สต็อกคงเหลือสาขา", "should_trigger": false}
+]

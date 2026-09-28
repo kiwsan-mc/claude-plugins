@@ -1,0 +1,21 @@
+[
+  {"query": "ยอดขายรวมเดือนนี้เท่าไหร่", "should_trigger": true},
+  {"query": "Sales Out ปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขายเทียบปีก่อน", "should_trigger": true},
+  {"query": "ช่วยสรุปยอดขายเดือนนี้ให้หน่อย", "should_trigger": true},
+  {"query": "ช่วยร่างอีเมลรายงานยอดขายให้ทีม", "should_trigger": true},
+  {"query": "แปลรายงานยอดขายเป็นภาษาอังกฤษ", "should_trigger": true},
+  {"query": "ยอดขายสาขา E105 เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "แนวโน้มยอดขาย 6 เดือนที่ผ่านมา", "should_trigger": true},
+  {"query": "ช่องทางไหนทำยอดขายได้ดีสุด", "should_trigger": true},
+  {"query": "ขอคำแนะนำกลยุทธ์การขาย", "should_trigger": true},
+  {"query": "ยอดขายรายสาขาเป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขายไตรมาสนี้เท่าไหร่", "should_trigger": true},
+
+  {"query": "ขอภาพรวม KPI ทั้งหมด", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดจริง", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "Sales In เดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "มีกี่รุ่น-สีในระบบ", "should_trigger": false},
+  {"query": "Sales per SQM", "should_trigger": false}
+]

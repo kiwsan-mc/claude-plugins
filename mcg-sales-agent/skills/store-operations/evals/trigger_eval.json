@@ -1,0 +1,18 @@
+[
+  {"query": "สาขาเปิดใหม่ปีนี้มีกี่สาขา", "should_trigger": true},
+  {"query": "มีสาขาที่ปิดไปแล้วไหม", "should_trigger": true},
+  {"query": "store lifecycle ของสาขาเป็นยังไง", "should_trigger": true},
+  {"query": "สาขา Active กับ Inactive มีเท่าไหร่", "should_trigger": true},
+  {"query": "สาขานี้เปิดเมื่อไหร่", "should_trigger": true},
+  {"query": "เทียบสาขาแต่ละ cluster", "should_trigger": true},
+  {"query": "ขนาดสาขาแยกตามพื้นที่เป็นยังไง", "should_trigger": true},
+  {"query": "สาขาใหม่ ramp-up เป็นยังไง", "should_trigger": true},
+  {"query": "สาขาไหนเปิดใหม่แล้วขายดี", "should_trigger": true},
+  {"query": "สรุปสถานะสาขาทั้งหมด", "should_trigger": true},
+
+  {"query": "Sales per SQM ของสาขา", "should_trigger": false},
+  {"query": "ยอดขายรายสาขา", "should_trigger": false},
+  {"query": "ยอดขายแยกภาค", "should_trigger": false},
+  {"query": "ยอดขายระดับอำเภอ", "should_trigger": false},
+  {"query": "สต็อกคงเหลือสาขา", "should_trigger": false}
+]

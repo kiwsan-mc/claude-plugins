@@ -1,0 +1,21 @@
+[
+  {"query": "ใครคือลูกค้าของเรา", "should_trigger": true},
+  {"query": "segment ของสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "RFM ของสมาชิก", "should_trigger": true},
+  {"query": "top member มีใครบ้าง", "should_trigger": true},
+  {"query": "สมาชิกซื้อบ่อยแค่ไหน", "should_trigger": true},
+  {"query": "one-time buyer มีเท่าไหร่", "should_trigger": true},
+  {"query": "loyalty ของสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "generation ของสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "tier ของสมาชิก", "should_trigger": true},
+  {"query": "gender ของสมาชิกเป็นยังไง", "should_trigger": true},
+  {"query": "member by channel เป็นยังไง", "should_trigger": true},
+  {"query": "สมาชิกซื้อสินค้าประเภทไหนมากสุด", "should_trigger": true},
+  {"query": "ลูกค้า M2603-013482 ซื้อบ่อยไหม", "should_trigger": true},
+
+  {"query": "ส่วนลดสมาชิกเป็นยังไง", "should_trigger": false},
+  {"query": "ATV ของสมาชิกเป็นเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]

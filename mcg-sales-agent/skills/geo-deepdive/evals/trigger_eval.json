@@ -1,0 +1,18 @@
+[
+  {"query": "ยอดขายระดับอำเภอ", "should_trigger": true},
+  {"query": "อำเภอไหนขายดีที่สุด", "should_trigger": true},
+  {"query": "ขอรายละเอียดยอดขายระดับตำบล", "should_trigger": true},
+  {"query": "ยอดขายแยกย่อยตามพื้นที่", "should_trigger": true},
+  {"query": "catchment area ของสาขาเป็นยังไง", "should_trigger": true},
+  {"query": "วิเคราะห์พื้นที่รอบสาขาให้หน่อย", "should_trigger": true},
+  {"query": "ยอดขายแยกอำเภอในกรุงเทพ", "should_trigger": true},
+  {"query": "district-level detail ขอดูหน่อย", "should_trigger": true},
+  {"query": "พื้นที่ไหนขายดีแต่ยังมีสาขาน้อย", "should_trigger": true},
+  {"query": "ยอดขายตามรหัสไปรษณีย์", "should_trigger": true},
+
+  {"query": "ยอดขายแยกภาคเหนือ ใต้", "should_trigger": false},
+  {"query": "Sales per SQM สาขาไหนดีสุด", "should_trigger": false},
+  {"query": "สาขาเปิดใหม่ปีนี้มีกี่สาขา", "should_trigger": false},
+  {"query": "ยอดขายแยก salesman", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยกพื้นที่", "should_trigger": false}
+]

@@ -1,0 +1,18 @@
+[
+  {"query": "ราคาเฉลี่ยต่อชิ้นเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "markdown depth ของแต่ละหมวด", "should_trigger": true},
+  {"query": "ยอดขาย ONE-PRICED เท่าไหร่", "should_trigger": true},
+  {"query": "CLEARANCE ขายได้เท่าไหร่", "should_trigger": true},
+  {"query": "promotion effectiveness ปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "ส่วนลดลึกแค่ไหนในแต่ละหมวด", "should_trigger": true},
+  {"query": "ราคาตั้งเทียบราคาขายจริงต่างกันเท่าไหร่", "should_trigger": true},
+  {"query": "sales type ไหนทำยอดได้ดีที่สุด", "should_trigger": true},
+  {"query": "list price กับราคาขายเฉลี่ยต่างกันเท่าไหร่", "should_trigger": true},
+  {"query": "price elasticity ของหมวด Denim", "should_trigger": true},
+
+  {"query": "margin ของหมวดนี้เป็นเท่าไหร่", "should_trigger": false},
+  {"query": "หมวดไหน discount สูงเกินไป", "should_trigger": false},
+  {"query": "สินค้า CLEARANCE ค้างสต็อกเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย Shopee", "should_trigger": false},
+  {"query": "ต้นทุนแยก vendor", "should_trigger": false}
+]

@@ -1,0 +1,18 @@
+[
+  {"query": "ขอดู MCL hierarchy หน่อย", "should_trigger": true},
+  {"query": "หมวดหมู่สินค้า Level 1 ถึง Level 4 มีอะไรบ้าง", "should_trigger": true},
+  {"query": "ยอดขายแยกตาม product group", "should_trigger": true},
+  {"query": "สัดส่วนหมวดสินค้า Denim เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "assortment mix ของแต่ละหมวดเป็นยังไง", "should_trigger": true},
+  {"query": "sub brand ไหนทำยอดได้ดี", "should_trigger": true},
+  {"query": "category ratio ปีนี้เทียบปีก่อน", "should_trigger": true},
+  {"query": "drill down หมวดสินค้า Fashion", "should_trigger": true},
+  {"query": "โครงสร้างหมวดหมู่สินค้าของบริษัทเป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขายแยก merchandise category", "should_trigger": true},
+
+  {"query": "สินค้ากลุ่ม A B C มีอะไรบ้าง", "should_trigger": false},
+  {"query": "ยอดขายแยกจังหวัด", "should_trigger": false},
+  {"query": "ไซส์ไหนขายดีสุด", "should_trigger": false},
+  {"query": "สต็อกแยกหมวดสินค้า", "should_trigger": false},
+  {"query": "ในระบบมีกี่ SKU", "should_trigger": false}
+]

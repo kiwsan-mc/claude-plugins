@@ -1,0 +1,21 @@
+[
+  {"query": "ราคาสินค้าเป็นยังไง", "should_trigger": true},
+  {"query": "price band ของสินค้า", "should_trigger": true},
+  {"query": "ช่วงราคาสินค้าแยกหมวด", "should_trigger": true},
+  {"query": "โครงสร้างราคาสินค้า", "should_trigger": true},
+  {"query": "margin แยกช่วงราคา", "should_trigger": true},
+  {"query": "tag price กับ selling price ต่างกันแค่ไหน", "should_trigger": true},
+  {"query": "ราคาป้ายเฉลี่ย", "should_trigger": true},
+  {"query": "ราคาขายเฉลี่ย", "should_trigger": true},
+  {"query": "สินค้าราคาสูงมีอะไรบ้าง", "should_trigger": true},
+  {"query": "สินค้าราคาต่ำมีอะไรบ้าง", "should_trigger": true},
+  {"query": "margin ของสินค้าแยกหมวดหมู่", "should_trigger": true},
+  {"query": "สินค้าที่จะวางขายเดือนตุลาคม ราคาเป็นยังไง", "should_trigger": true},
+  {"query": "Mark Up กับ Margin ต่างกันเท่าไหร่", "should_trigger": true},
+
+  {"query": "มีกี่รุ่น", "should_trigger": false},
+  {"query": "มีค่าอะไรบ้าง", "should_trigger": false},
+  {"query": "ข้อมูลสินค้าในระบบล่าสุดเมื่อไหร่", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false}
+]

@@ -1,0 +1,18 @@
+[
+  {"query": "vendor ไหนทำยอดได้ดีที่สุด", "should_trigger": true},
+  {"query": "จัดอันดับ supplier ตามยอดขาย", "should_trigger": true},
+  {"query": "ต้นทุนสินค้าแยก vendor", "should_trigger": true},
+  {"query": "โครงสร้างต้นทุนของแต่ละ vendor", "should_trigger": true},
+  {"query": "ผลงานของ supplier เป็นยังไง", "should_trigger": true},
+  {"query": "vendor ไหน margin ดีที่สุด", "should_trigger": true},
+  {"query": "ยอดขายแยก vendor", "should_trigger": true},
+  {"query": "Top 10 vendor ตามยอดขาย", "should_trigger": true},
+  {"query": "ต้นทุนขายแยก vendor", "should_trigger": true},
+  {"query": "vendor ไหนควรเพิ่มคำสั่งซื้อ", "should_trigger": true},
+
+  {"query": "รับของเข้าเท่าไหร่", "should_trigger": false},
+  {"query": "GR เดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "PO ค้างส่งเท่าไหร่", "should_trigger": false},
+  {"query": "margin รวมของบริษัท", "should_trigger": false},
+  {"query": "ยอดขายแยกหมวดสินค้า", "should_trigger": false}
+]

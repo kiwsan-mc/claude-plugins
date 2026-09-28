@@ -1,0 +1,22 @@
+[
+  {"query": "อยากรู้ข้อมูลสินค้าในระบบ", "should_trigger": true},
+  {"query": "ดูข้อมูลสินค้าในระบบหน่อย", "should_trigger": true},
+  {"query": "มีสินค้าอะไรในระบบบ้าง", "should_trigger": true},
+  {"query": "ดูภาพรวมสินค้าทั้งหมด", "should_trigger": true},
+  {"query": "สินค้าของเรามีกี่แบบ", "should_trigger": true},
+  {"query": "ช่วยดูข้อมูลสินค้าให้หน่อย", "should_trigger": true},
+  {"query": "สินค้าเรามีรายละเอียดอะไรบ้าง", "should_trigger": true},
+  {"query": "สินค้าแยกตาม gender", "should_trigger": true},
+  {"query": "สินค้าแยกตาม season", "should_trigger": true},
+  {"query": "สินค้าตาม aging zone", "should_trigger": true},
+  {"query": "สินค้าตาม sales type", "should_trigger": true},
+  {"query": "สินค้าแยกตามไซส์", "should_trigger": true},
+  {"query": "สินค้าตาม design และ theme", "should_trigger": true},
+  {"query": "ข้อมูลสินค้าในระบบล่าสุดเมื่อไหร่", "should_trigger": true},
+
+  {"query": "มีกี่ SKU", "should_trigger": false},
+  {"query": "มีสีอะไรบ้าง", "should_trigger": false},
+  {"query": "ราคาสินค้าเป็นยังไง", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false}
+]

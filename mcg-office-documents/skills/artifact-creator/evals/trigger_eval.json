@@ -1,0 +1,20 @@
+[
+  {"query": "สร้าง dashboard ยอดขายให้หน่อย", "should_trigger": true},
+  {"query": "ทำ dashboard สรุปยอดขายเป็น artifact", "should_trigger": true},
+  {"query": "สร้าง dashboard ติดตามยอดขายแยกภูมิภาค", "should_trigger": true},
+  {"query": "อยากได้ dashboard ที่กด refresh ข้อมูลเองได้", "should_trigger": true},
+  {"query": "สร้าง interactive dashboard ใน Cowork", "should_trigger": true},
+  {"query": "ทำ dashboard margin แยกหมวดหมู่", "should_trigger": true},
+  {"query": "สร้าง monitor ติดตามยอดขายรายวัน", "should_trigger": true},
+  {"query": "ทำ dashboard ที่มีกราฟและตารางสรุป", "should_trigger": true},
+  {"query": "สร้าง artifact สำหรับติดตาม KPI สาขา", "should_trigger": true},
+  {"query": "ทำ dashboard ที่ไม่ต้องขอ permission ซ้ำตอนเปิด", "should_trigger": true},
+  {"query": "สร้าง dashboard สรุปภาพรวมให้เปิดดูใน sidebar", "should_trigger": true},
+  {"query": "ช่วยทำ monitor ดูยอดขายแยกช่องทาง", "should_trigger": true},
+
+  {"query": "ส่งอีเมลสรุปยอดขายให้ทีม", "should_trigger": false},
+  {"query": "สรุปอีเมลที่ยังไม่ได้อ่านในกล่องขาเข้า", "should_trigger": false},
+  {"query": "ทำไฟล์ Excel สรุปสต็อก", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false}
+]

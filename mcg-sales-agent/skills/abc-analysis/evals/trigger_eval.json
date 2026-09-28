@@ -1,0 +1,21 @@
+[
+  {"query": "สินค้ากลุ่ม A มีอะไรบ้าง", "should_trigger": true},
+  {"query": "ABC classification ปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "hero product ของเราคือตัวไหน", "should_trigger": true},
+  {"query": "ตัวไหนควร discontinue บ้าง", "should_trigger": true},
+  {"query": "จัดกลุ่มสินค้า A B C ตามยอดขาย", "should_trigger": true},
+  {"query": "Top 10 products ขายดีสุด", "should_trigger": true},
+  {"query": "Bottom 10 ขายแย่สุดคือตัวไหน", "should_trigger": true},
+  {"query": "สินค้า slow-moving มีอะไรบ้าง", "should_trigger": true},
+  {"query": "สินค้าที่ทำยอดขาย 80% คือกลุ่มไหน", "should_trigger": true},
+  {"query": "วิเคราะห์ product performance ของสินค้าทั้งหมด", "should_trigger": true},
+  {"query": "margin ของสินค้ากลุ่ม A เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ช่วยจัดอันดับ top sellers ของบริษัท", "should_trigger": true},
+
+  {"query": "MCL level 3 หมวดไหนขายดีสุด", "should_trigger": false},
+  {"query": "ยอดขายแยกตาม aging zone", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "ยอดขาย member เทียบ non-member", "should_trigger": false},
+  {"query": "เป้าขายเดือนนี้เทียบยอดจริง", "should_trigger": false},
+  {"query": "ยอดขายแยกภาค", "should_trigger": false}
+]

@@ -1,0 +1,21 @@
+[
+  {"query": "ยอดขายบริษัทเดือนนี้เท่าไหร่", "should_trigger": true},
+  {"query": "Company sales แยกช่องทาง", "should_trigger": true},
+  {"query": "ขอดูยอดขายระดับบัญชีลูกค้า", "should_trigger": true},
+  {"query": "GP เดือนนี้เท่าไหร่", "should_trigger": true},
+  {"query": "กำไรขั้นต้นแยกแบรนด์", "should_trigger": true},
+  {"query": "gross profit ของ invoice เป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขายระดับใบกำกับแยกหมวดหมู่", "should_trigger": true},
+  {"query": "ขอดู moving cost ของเดือนนี้", "should_trigger": true},
+  {"query": "ยอดขายบริษัทเทียบปีก่อน", "should_trigger": true},
+  {"query": "ยอดขายตามบัญชีลูกค้าแยกภูมิภาค", "should_trigger": true},
+  {"query": "Sales Account แยกพนักงานขายเป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขายแยก vendor เท่าไหร่", "should_trigger": true},
+
+  {"query": "ทำเป้าได้กี่เปอร์เซ็นต์", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false},
+  {"query": "เป้าปีนี้ตั้งไว้เท่าไหร่", "should_trigger": false},
+  {"query": "โปรโมชันเดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "ยอดขาย POS รายวันเท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false}
+]

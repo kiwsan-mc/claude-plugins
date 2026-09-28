@@ -1,0 +1,18 @@
+[
+  {"query": "ไซส์ไหนขายดีที่สุด", "should_trigger": true},
+  {"query": "size mix ของหมวดเสื้อเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "สีไหนขายดี", "should_trigger": true},
+  {"query": "สีไหนขายไม่ออก", "should_trigger": true},
+  {"query": "trend สีปีนี้เป็นยังไง", "should_trigger": true},
+  {"query": "ยอดขายแยก size", "should_trigger": true},
+  {"query": "ยอดขายแยกสี", "should_trigger": true},
+  {"query": "design กับ shape ไหนขายดี", "should_trigger": true},
+  {"query": "โทนสีที่ลูกค้าชอบคืออะไร", "should_trigger": true},
+  {"query": "สัดส่วนการขายแต่ละไซส์", "should_trigger": true},
+
+  {"query": "มีกี่รุ่น-สีในระบบ", "should_trigger": false},
+  {"query": "ยอดขายแยกหมวดสินค้า", "should_trigger": false},
+  {"query": "สินค้ากลุ่ม A B C", "should_trigger": false},
+  {"query": "สต็อกแยกสี", "should_trigger": false},
+  {"query": "ยอดขายสมาชิกแยก generation", "should_trigger": false}
+]

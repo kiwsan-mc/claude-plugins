@@ -1,0 +1,18 @@
+[
+  {"query": "ขอภาพรวมยอดขายทั้งหมด", "should_trigger": true},
+  {"query": "Dashboard ยอดขายเดือนนี้", "should_trigger": true},
+  {"query": "สรุป KPI ทั้งหมดให้หน่อย", "should_trigger": true},
+  {"query": "executive summary ยอดขาย", "should_trigger": true},
+  {"query": "ภาพรวมผลการดำเนินงานขายเป็นยังไง", "should_trigger": true},
+  {"query": "KPI สำคัญของบริษัทมีอะไรบ้าง", "should_trigger": true},
+  {"query": "ขอ overview performance ภาพรวม", "should_trigger": true},
+  {"query": "ภาพรวมยอดขายแยก OFFLINE กับ ONLINE", "should_trigger": true},
+  {"query": "สรุป 3 ประเด็นสำคัญจากยอดขาย", "should_trigger": true},
+  {"query": "ภาพรวมยอดขายทั้งบริษัท", "should_trigger": true},
+
+  {"query": "เป้าขายเดือนนี้เทียบยอดจริง", "should_trigger": false},
+  {"query": "ภาพรวมธุรกิจครบทุกด้านรวมสต็อกและเป้า", "should_trigger": false},
+  {"query": "ช่วยร่างอีเมลรายงานยอดขาย", "should_trigger": false},
+  {"query": "ยอดขายแยกภาค", "should_trigger": false},
+  {"query": "ของค้างในสต็อก", "should_trigger": false}
+]

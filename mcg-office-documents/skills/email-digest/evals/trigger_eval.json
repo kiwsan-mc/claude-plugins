@@ -1,0 +1,20 @@
+[
+  {"query": "สรุปอีเมลที่ยังไม่ได้อ่านในกล่องขาเข้า", "should_trigger": true},
+  {"query": "email summary ให้หน่อย", "should_trigger": true},
+  {"query": "ช่วยเช็คอีเมลให้หน่อย", "should_trigger": true},
+  {"query": "inbox digest วันนี้", "should_trigger": true},
+  {"query": "ช่วย triage อีเมลให้หน่อย", "should_trigger": true},
+  {"query": "มีอีเมลอะไรต้องด่วนบ้าง", "should_trigger": true},
+  {"query": "สรุปอีเมลที่ต้องตอบวันนี้", "should_trigger": true},
+  {"query": "อีเมลไหนต้องจัดการก่อน", "should_trigger": true},
+  {"query": "จัดลำดับความสำคัญอีเมลในกล่องขาเข้า", "should_trigger": true},
+  {"query": "ขอดูอีเมลที่ยังไม่เปิดอ่าน", "should_trigger": true},
+  {"query": "กล่องขาเข้ามีอะไรใหม่บ้าง", "should_trigger": true},
+  {"query": "อีเมลไหนที่ต้องให้ความสนใจเป็นพิเศษ", "should_trigger": true},
+
+  {"query": "ส่งอีเมลสรุปยอดขายให้ทีม", "should_trigger": false},
+  {"query": "ทำไฟล์ Excel สรุปสต็อก", "should_trigger": false},
+  {"query": "สร้าง dashboard ยอดขายให้หน่อย", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false}
+]

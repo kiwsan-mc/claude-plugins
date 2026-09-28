@@ -1,0 +1,21 @@
+[
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": true},
+  {"query": "ทำเป้าได้กี่เปอร์เซ็นต์", "should_trigger": true},
+  {"query": "ถึงเป้าไหมเดือนนี้", "should_trigger": true},
+  {"query": "achievement เดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "เป้ากับยอดจริงต่างกันเท่าไหร่", "should_trigger": true},
+  {"query": "สาขาไหนไม่ถึงเป้า", "should_trigger": true},
+  {"query": "ทำเป้าเกินเป้าหรือต่ำกว่าเป้า", "should_trigger": true},
+  {"query": "เป้าแยกช่องทางเป็นยังไง", "should_trigger": true},
+  {"query": "เป้าเทียบยอดจริงแยก cluster ให้หน่อย", "should_trigger": true},
+  {"query": "ทำได้กี่ % ของเป้า", "should_trigger": true},
+  {"query": "เป้าเทียบยอดขายบริษัทเป็นยังไง", "should_trigger": true},
+  {"query": "ขอตารางเป้าเทียบยอดขายแยก sub-channel", "should_trigger": true},
+
+  {"query": "ยอดขายบริษัทเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "GP เดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "โปรโมชันเดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "ข้อมูลเป้าล่าสุดอัปเดตวันไหน", "should_trigger": false},
+  {"query": "ยอดขาย + เป้า สรุปให้หน่อย", "should_trigger": false},
+  {"query": "สต็อกคงเหลือแยก aging", "should_trigger": false}
+]

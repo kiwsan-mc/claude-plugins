@@ -1,0 +1,62 @@
+[
+  {
+    "query": "ยอดขายแยก aging zone เป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขาย GREEN YELLOW RED PURPLE เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "สัดส่วนยอดขายของสินค้า RED เป็นเท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายแยกตาม aging ของสินค้า",
+    "should_trigger": true
+  },
+  {
+    "query": "fashion grade ขายเป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายสินค้าแยก fashion grade และ aging",
+    "should_trigger": true
+  },
+  {
+    "query": "สินค้าอายุมากขายได้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายแยกช่วงอายุสินค้า",
+    "should_trigger": true
+  },
+  {
+    "query": "หมวดไหนมียอดขายจากสินค้า aging สูง",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายสินค้าใหม่เทียบของค้าง",
+    "should_trigger": true
+  },
+  {
+    "query": "สต็อกคงเหลือแยก aging",
+    "should_trigger": false
+  },
+  {
+    "query": "สต็อก RED PURPLE มีเท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "ของค้างเกิน 6 เดือนมีไหม",
+    "should_trigger": false
+  },
+  {
+    "query": "เงินจมในสต็อกเท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "ราคาเฉลี่ยต่อชิ้นเป็นเท่าไหร่",
+    "should_trigger": false
+  }
+]

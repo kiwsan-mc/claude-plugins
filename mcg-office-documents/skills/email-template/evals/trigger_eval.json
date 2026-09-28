@@ -1,0 +1,20 @@
+[
+  {"query": "ส่งอีเมลสรุปยอดขายให้ทีม", "should_trigger": true},
+  {"query": "email report ให้ผู้จัดการ", "should_trigger": true},
+  {"query": "ส่งรายงานทางอีเมล", "should_trigger": true},
+  {"query": "ส่งอีเมลรายงานยอดขายไปที่ทีมขาย", "should_trigger": true},
+  {"query": "ช่วยส่งอีเมลแจ้งผลการขายรายสัปดาห์", "should_trigger": true},
+  {"query": "ส่งอีเมลแจ้งเตือนสินค้าใกล้หมด", "should_trigger": true},
+  {"query": "ส่งอีเมลสรุปให้ผู้บริหาร", "should_trigger": true},
+  {"query": "ทำอีเมลรายงานรูปแบบ MC Group ส่งให้หัวหน้า", "should_trigger": true},
+  {"query": "ส่งรายงานออกทาง Outlook", "should_trigger": true},
+  {"query": "ส่งอีเมลรายงานประจำวัน", "should_trigger": true},
+  {"query": "ช่วยร่างอีเมลรายงานยอดขายแล้วส่งให้ทีม", "should_trigger": true},
+  {"query": "ส่งอีเมลแจ้งผลประกอบการให้ทีม", "should_trigger": true},
+
+  {"query": "สรุปอีเมลที่ยังไม่ได้อ่านในกล่องขาเข้า", "should_trigger": false},
+  {"query": "ทำไฟล์ Excel สรุปสต็อก", "should_trigger": false},
+  {"query": "สร้าง dashboard ยอดขายให้หน่อย", "should_trigger": false},
+  {"query": "ยอดขายเดือนนี้เท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false}
+]
