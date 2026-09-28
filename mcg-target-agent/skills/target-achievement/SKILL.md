@@ -6,6 +6,7 @@ description: >
   วิเคราะห์เป้าขายเทียบยอดจริง + achievement% แยก channel/สาขา/cluster/category/เดือน
 tools:
   - mcp__plugin_mcg-target-agent_synapse-target__sales_target_vs_actual_synapse
+  - mcp__plugin_mcg-target-agent_synapse-target__sales_target_vs_company_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__sales_query_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__company_sales_schema_cheatsheet_synapse
   - mcp__plugin_mcg-target-agent_synapse-target__describe_table_sales_synapse
@@ -44,6 +45,22 @@ tools:
 ---
 
 # Task: Target vs Actual Analysis
+
+## Step 0.5 — เทียบเป้ากับยอดขาย "2 ฐาน" (2026-09-28)
+
+ธุรกิจต้องการเห็นเป้าเทียบกับยอดขาย **สองฐาน** — เลือกให้ตรงคำถาม และ **กำกับฐานทุกครั้ง**
+
+| ฐาน | ความหมาย | ทำได้ที่ไหน |
+|---|---|---|
+| **Target vs Sales Company** | ยอดขาย **invoice-level** (`fact_daily_sales_account` · Net_Sales_BGP) | ✅ ที่นี่ — `sales_target_vs_company_synapse(start_date, end_date)` (เดือนเดียวทั้งบริษัท · จำกัดเฉพาะสาขา×วันที่มีเป้า ให้สองฝั่ง population เดียวกัน) |
+| **Target vs Sales Out** | ยอดขาย **Sales Out** (`mcg_aiplatform_sales` · Postgres) | ⚠️ **คนละ platform กับตารางเป้า ⇒ join ใน SQL เดียวไม่ได้** → ฝั่ง Sales Out ต้องดึงผ่าน `sales_out_vs_target_base(start_date, end_date)` ของ **mcg-sales-agent** แล้วนำมาเทียบกับเป้าที่ดึงจากที่นี่ (บอกผู้ใช้ว่าเป็นการเทียบข้ามแหล่ง) |
+
+🔴 **กฎ VAT (บังคับ):** เป้าเป็นยอด **รวม VAT** แต่ทั้ง Sales Company (BGP) และ Sales Out (total_exc_vat_price) เป็นยอด **ไม่รวม VAT** ⇒ ต้องแปลงเป็นฐานเทียบด้วย **× 1.07** ก่อนคำนวณ %achievement **และต้องเขียนกำกับว่าแปลงด้วย 1.07** (ทั้ง 2 tool คืนคอลัมน์เทียบให้แล้ว: `company_comparable_incl_vat` / `sales_out_comparable_incl_vat`) 🚫 ห้ามเอายอด excl VAT ไปหารเป้าโดยตรง (จะได้ %ต่ำกว่าจริง ~7%)
+
+- 📌 ระดับที่ธุรกิจขอ = **เดือนเดียวทั้งบริษัท** (ตัวเลขเดียว: เป้า · ยอดจริง · ต่าง · %) — ไม่ต้องแยกรายสาขา
+- 📌 Sales Out แบบ **ทุกช่องทาง** รวมแพลตฟอร์มออนไลน์ที่ไม่มีเป้า ⇒ ถ้าเทียบกับเป้าร้านค้า ให้ใช้คู่ **OFFLINE** (`offline_comparable_incl_vat`) และกำกับ
+- 📌 ตอบ **ส่วนต่างเป็นบาท** ด้วย ไม่ใช่แค่ %
+- 🚫 ห้ามบวก/เฉลี่ยสองฐานเข้าด้วยกัน และห้ามใช้ตัวเลขฐานหนึ่งแทนอีกฐานโดยไม่บอก
 
 ## Step 1 — เลือก dimension + ช่วงเวลา
 

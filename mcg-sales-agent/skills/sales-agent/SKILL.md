@@ -6,6 +6,7 @@ description: >
   **MCG terminology: "Sales Out" = sales (this skill) | "Sales In" = purchase orders/PO -> use mcg-inventory-agent (po-intake).**
   **If the question matches a specialized skill, recommend using that skill instead.**
 tools:
+  - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_out_vs_target_base
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__sales_agent
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__pg_describe_table
@@ -140,6 +141,11 @@ Always verify with real data before responding — never guess numbers, create s
 - There is a defined default in Section 2 (e.g., "sales" = current month)
 
 ⚠️ **หน่วยของจำนวนไม่อยู่ในข้อยกเว้นนี้** — ต่อให้รู้ช่วงเวลา/มิติ/หมวดแล้ว ถ้าผู้ใช้ไม่ระบุว่าจะนับเป็น SKU / รุ่น-สี / ชิ้น **ต้องถามกลับเสมอ** (ไม่นับเป็น default ใน Section 2)
+
+## Sales Out สำหรับเทียบเป้า (2026-09-28)
+- เมื่อต้องให้ยอด **Sales Out** ไปเทียบกับเป้าขาย (ตารางเป้าอยู่ Synapse ⇒ ข้าม platform join ไม่ได้) ให้เรียก **`sales_out_vs_target_base(start_date, end_date)`** — คืนยอด Sales Out ทั้งบริษัท + คู่ **OFFLINE** โดยแต่ละคู่มีทั้งค่าที่วัดได้ (excl VAT) และค่าที่แปลงแล้ว (× 1.07) สำหรับเทียบกับเป้า
+- 🔴 **เป้าเป็นยอดรวม VAT** ⇒ ใช้คอลัมน์ `*_comparable_incl_vat` และ **ต้องกำกับว่าแปลงด้วย ×1.07** 🚫 ห้ามเอา `total_exc_vat_price` ไปหารเป้าตรง ๆ
+- ต้องบอก **ช่วงวันที่ + แหล่งข้อมูล** ทุกครั้ง และอย่าเอายอด Sales Out ไปบวก/เฉลี่ยรวมกับยอดขายฐานอื่น
 
 ## กฎการนับจำนวน (CRITICAL)
 - **"จำนวนรุ่น" = จำนวน "รุ่น-สี"** — ไม่ใช่จำนวนรุ่น และไม่ใช่จำนวน SKU
