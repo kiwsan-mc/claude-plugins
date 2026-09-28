@@ -96,6 +96,12 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 > ⚙️ **วิธีถามกลับ (บังคับ):** เรียก tool **`AskUserQuestion`** — `header` สั้น (≤12 ตัวอักษร) + คำถามชัด + ตัวเลือก 2–4 ข้อที่เลือกได้จริง (มีคำอธิบายสั้น) · ตัวอย่าง "ถาม: ..." ในไฟล์นี้คือ *เนื้อหา* ที่ต้องใส่ใน tool call ไม่ใช่ข้อความที่จะพิมพ์ตอบ · ถ้าผู้ใช้ไม่ตอบ ให้ยึดตัวเลือกที่ปลอดภัยที่สุด (ถามซ้ำ/ไม่เดา)
 คำถามกำกวม (ช่วงเวลา? มิติ? channel? **หน่วยของจำนวน (SKU / รุ่น-สี / ชิ้น)?**) → ถาม clarifying question ก่อนดึงข้อมูล
 
+## กฎคอลัมน์ส่วนลด (Discount) — บังคับ
+- **"ส่วนลด" ในตาราง `poc_fact_sales_with_crm` ให้ใช้ `Discount_Exclude_VAT`** (ส่วนลดรวมทั้งบิล) — 🚫 ห้ามใช้ `Discount_CRM_Exclude_VAT` แทนเมื่อผู้ใช้ถาม "ส่วนลด" ทั่วไป
+- `Discount_CRM_Exclude_VAT` = **ส่วนลดเฉพาะสมาชิก (CRM)** เท่านั้น — โชว์ได้ แต่ต้องกำกับว่าเป็นส่วนลดฝั่ง CRM ไม่ใช่ส่วนลดรวม
+- ⚠️ ขนาดต่างกันมากจนตัวเลขผิดคนละเรื่อง — ตรวจ 2026-08-26 เป็นต้นมา (30 วัน): ส่วนลดรวมจาก `Discount_Exclude_VAT` = **฿72,782,318.86** (164,252 แถวมีส่วนลด) ขณะที่ `Discount_CRM_Exclude_VAT` = **฿141,838.72** (2,584 แถว) ⇒ ต่างกัน ~513 เท่า
+- Discount% = `Discount_Exclude_VAT` ÷ `Gross` × 100 (ตรวจช่วงเดียวกัน: 39.59%)
+
 ## กฎการนับจำนวน (CRITICAL)
 - **"จำนวนรุ่น" = จำนวน "รุ่น-สี"** — ไม่ใช่จำนวนรุ่น และไม่ใช่จำนวน SKU
   (ตรวจ 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 ⇒ ตีความผิดหน่วย = ตัวเลขคลาดจริง ~32%)
@@ -230,8 +236,9 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | Members | `COUNT(DISTINCT Member_Code)` |
 | ATV | `SUM(CAST(Net_Sales AS float)) / NULLIF(COUNT(DISTINCT Invoice_Code), 0)` |
 | UPT | `SUM(CAST(Quantity AS float)) / NULLIF(COUNT(DISTINCT Invoice_Code), 0)` |
-| CRM Discount | `SUM(CAST(Discount_CRM_Exclude_VAT AS float))` |
-| Discount% | `SUM(CAST(Discount_Exclude_VAT AS float)) / NULLIF(SUM(CAST(Gross AS float)), 0) * 100` |
+| **ส่วนลด (ยอดรวม)** | **`SUM(CAST(Discount_Exclude_VAT AS float))`** — 🔴 ใช้คอลัมน์นี้เมื่อพูดถึง "ส่วนลด" |
+| ส่วนลดเฉพาะสมาชิก (CRM) | `SUM(CAST(Discount_CRM_Exclude_VAT AS float))` — **คนละตัวกับส่วนลดรวม** ใช้เมื่อถามเจาะว่า CRM ให้ส่วนลดเท่าไหร่ |
+| Discount% | `SUM(CAST(Discount_Exclude_VAT AS float)) / NULLIF(SUM(CAST(Gross AS float)), 0) * 100` — ตัวตั้งคือ **ส่วนลดรวม** |
 | SKU (จำนวน SKU) | `COUNT(DISTINCT f.Article_Key)` |
 | รุ่น-สี (จำนวนรุ่น) | `COUNT(DISTINCT a.Article_Model_Color)` — ⚠️ ต้อง join `ai.dim_article a ON f.Article_Key = a.Article_Key` ก่อน เพราะ `Article_Model_Color` ไม่ได้อยู่บน fact row · "รุ่น" ในคำถามธุรกิจ = **"รุ่น-สี"** เท่านั้น 🚫 ไม่ใช่ `Article_Model` และไม่ใช่ `Article_Key` — ตรวจ 2026-09-26 (90 วัน): SKU 8,837 · รุ่น-สี 2,840 |
 
