@@ -6,7 +6,8 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v2.1.16** — เทียบเป้ากับยอดขายบริษัท (VAT ×1.07)
+**v2.1.17** — ตารางรายงานธุรกิจ Target vs Net Sales by Sub_Channel
+- **v2.1.17**: เพิ่ม `sales_vs_target_by_subchannel_synapse` reproduce รายงานบริษัท (Target · Net Sales BGP · Ach% · LY · YoY ตาม Sub_Channel) ตรงกับรายงานจริงทุกหลัก · **แก้กฎ VAT ให้ตรงรายงาน: Ach% = Net ÷ Target โดยไม่แปลง VAT** (คอลัมน์ ×1.07 เก็บไว้เป็นข้อมูลเสริม) · เพิ่ม Step 0.6 อธิบายนิยามคอลัมน์ + สูตร ASP/ATV/UPT
 - **v2.1.16**: เพิ่ม `sales_target_vs_company_synapse` — เป้า vs ยอดขายบริษัท (invoice · Net_Sales_BGP) ระดับเดือนทั้งบริษัท จำกัดเฉพาะสาขา×วันที่มีเป้า · คืนค่าที่แปลง ×1.07 ให้เทียบกับเป้าได้ตรง + %achievement · skill `target-achievement` เพิ่ม Step 0.5 อธิบาย 2 ฐาน (Company / Sales Out) + กฎ VAT
 - **v2.1.15**: เติมเกณฑ์คอลัมน์ (ยอดขาย = `Net_Sales_BGP` · COGS = `COGS`) ลงใน frontmatter description + Headline ของ `company-account-sales` ให้ agent เห็นก่อนอ่านเนื้อไฟล์
 - **v2.1.14**: 🔴 **แก้ bug สำคัญ** — ตาราง `ai.dim_target_main_lines` มีคอลัมน์จริง 5 ตัว (`Target_Year` · `Target_Month` · `Branch_Code` · `Target_Date` · **`Target_exc_vat`**) แต่ tool/skill อ้าง `Target_Value` · `Target_Weight` · `Date_Key` ที่ **ไม่มีจริง** ⇒ tool เป้า error ทุกครั้ง · แก้ tool 2 ตัว (`sales_target_vs_actual_synapse`, `target_sales_mix_synapse`) ให้ใช้ `Target_exc_vat` + join ฝั่งเป้าด้วย `Target_Date` และตัดคอลัมน์ target weight ออก (verified: ก.ย. 2026 เป้ารวม ฿390.97M · 586 สาขา)
