@@ -76,17 +76,18 @@ SELECT
        WHEN regional_text IS NULL AND main_channel = 'OFFLINE' THEN 'Other'
        ELSE RTRIM(regional_text) END AS regional,
   main_channel,
-  SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
-  SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+  SUM(CASE WHEN sold_date BETWEEN '{{fy_curr_start}}' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_curr,
+  SUM(CASE WHEN sold_date BETWEEN '{{fy_prev_start}}' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_prev
 FROM mcg_aiplatform_sales
-WHERE sold_date BETWEEN '2025-07-01' AND '<max_date>'
+WHERE sold_date BETWEEN '{{fy_prev_start}}' AND '<max_date>'
 GROUP BY
   CASE WHEN regional_text IS NULL AND main_channel = 'ONLINE' THEN 'Online'
        WHEN regional_text IS NULL AND main_channel = 'OFFLINE' THEN 'Other'
        ELSE RTRIM(regional_text) END,
   main_channel
-ORDER BY ns_fy28 DESC
+ORDER BY ns_curr DESC
 ```
+> ⚠️ **ห้าม hardcode ปีในเงื่อนไข** — ต้องดึง `fy_curr_start` / `fy_prev_start` / `same_day_prev` จาก `max_sold_date` ทุกครั้ง (กฎเดียวกับ sales-agent) ไม่งั้นพอขึ้นปีใหม่คำตอบจะเงียบ ๆ ผิด
 
 Calculate: Net Sales (฿), Sales Ratio%, Tickets (ใบเสร็จ), Margin%, Qty (ชิ้น)
 

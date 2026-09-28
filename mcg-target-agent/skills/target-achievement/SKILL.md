@@ -120,7 +120,7 @@ tools:
 - วัดจริง: ไม่ใส่ช่วง = 79.8 วิ → 1 เดือน = 6.1 วิ
 - **บอก user ด้วยว่าใช้ช่วงวันที่ไหน** (เช่น "1–23 ก.ย. 2026") — อย่าปล่อยให้เข้าใจว่าเป็นยอดเต็มเดือน
 
-ผลลัพธ์ให้: dimension_value, target_value (บาท), target_weight, actual_qty (**จำนวนชิ้น** — ไม่ใช่จำนวน SKU/รุ่น), actual_sales (บาท), achievement_pct
+ผลลัพธ์ให้: dimension_value, target_value (บาท), actual_qty (**จำนวนชิ้น** — ไม่ใช่จำนวน SKU/รุ่น), actual_sales (บาท), achievement_pct
 
 ## Step 3 — Response
 

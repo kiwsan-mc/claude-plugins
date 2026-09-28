@@ -6,7 +6,8 @@ MC Group Sales Target Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
-**v2.1.17** — ตารางรายงานธุรกิจ Target vs Net Sales by Sub_Channel
+**v2.1.18** — แก้สิ่งที่ skill สัญญาแต่ tool ไม่มี
+- **v2.1.18**: ตามผลรีวิว: `target-achievement` เลิกอ้างคอลัมน์ `target_weight` ที่ tool ไม่คืน · `target-agent` แก้ 3 จุด — rebate (ตารางนี้ rebate เป็น 0 ⇒ ไม่มีตัวเลข rebate) · sales mix (ตารางเป้ามีแค่สาขา×วัน ⇒ ไม่มี category/LY) · Step 1 เลิกเขียน SQL หา anchor เอง ให้เรียก `max_invoice_date_synapse`
 - **v2.1.17**: เพิ่ม `sales_vs_target_by_subchannel_synapse` reproduce รายงานบริษัท (Target · Net Sales BGP · Ach% · LY · YoY ตาม Sub_Channel) ตรงกับรายงานจริงทุกหลัก · **แก้กฎ VAT ให้ตรงรายงาน: Ach% = Net ÷ Target โดยไม่แปลง VAT** (คอลัมน์ ×1.07 เก็บไว้เป็นข้อมูลเสริม) · เพิ่ม Step 0.6 อธิบายนิยามคอลัมน์ + สูตร ASP/ATV/UPT
 - **v2.1.16**: เพิ่ม `sales_target_vs_company_synapse` — เป้า vs ยอดขายบริษัท (invoice · Net_Sales_BGP) ระดับเดือนทั้งบริษัท จำกัดเฉพาะสาขา×วันที่มีเป้า · คืนค่าที่แปลง ×1.07 ให้เทียบกับเป้าได้ตรง + %achievement · skill `target-achievement` เพิ่ม Step 0.5 อธิบาย 2 ฐาน (Company / Sales Out) + กฎ VAT
 - **v2.1.15**: เติมเกณฑ์คอลัมน์ (ยอดขาย = `Net_Sales_BGP` · COGS = `COGS`) ลงใน frontmatter description + Headline ของ `company-account-sales` ให้ agent เห็นก่อนอ่านเนื้อไฟล์

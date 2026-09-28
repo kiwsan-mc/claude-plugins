@@ -174,7 +174,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 1. **เป้า vs ยอดจริง + achievement%** → `sales_target_vs_actual_synapse`
 2. **ยอดขายระดับ invoice (company/account, GP%)** → `sales_company_summary_synapse`
-3. **โปรโมชัน** → `promotion_sales_synapse` | **rebate** → `rebate_analysis_synapse` | **sales mix แยก category** → `target_sales_mix_synapse`
+3. **โปรโมชัน** → `promotion_sales_synapse` | **ส่วนลด/GP ของ invoice** → `rebate_analysis_synapse` (⚠️ ไม่มีตัวเลข rebate) | **เป้ารายสาขา×วัน** → `target_sales_mix_synapse`
 4. **canned ไม่ครอบคลุม** → `sales_query_synapse` (raw T-SQL)
 5. **ไม่แน่ใจชื่อคอลัมน์** → `describe_table_sales_synapse` / `search_columns_sales_synapse`
 
@@ -220,8 +220,8 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | `describe_table_sales_synapse` | ดู schema |
 | `search_columns_sales_synapse` | ค้นหาคอลัมน์ด้วย pattern |
 | `promotion_sales_synapse` | โปรโมชัน — net sales/qty (ชิ้น)/gross profit/invoice count แยก promotion (ต้องมี date range) |
-| `rebate_analysis_synapse` | Rebate — net sales, rebate, net after rebate, rebate% แยก dimension (ต้องมี date range) |
-| `target_sales_mix_synapse` | Sales mix แยก category — sales mix%, ASP LY, qty LY (ชิ้น), total sales LY (filter year/month ได้) |
+| `rebate_analysis_synapse` | ยอดขาย + ส่วนลด + GP% แยก dimension — ⚠️ **ไม่มีตัวเลข rebate** (คอลัมน์ rebate เป็น 0 ทั้งตาราง · net after rebate = net sales) (ต้องมี date range) |
+| `target_sales_mix_synapse` | **เป้ารายสาขา × วัน** (`target_value`) — ⚠️ **ไม่มี sales mix / LY / category แล้ว** (ตารางเป้ามีแค่สาขา×วัน) (filter year/month ได้) |
 
 ---
 
@@ -283,11 +283,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 **วิธีที่ 2 (fallback) — raw query** ถ้าต้องการ measure/dimension นอกเหนือ canned: ใช้ `sales_query_synapse` ด้วย **conditional SUM ในครั้งเดียว (ห้ามใช้ CTE 2 ชุด JOIN กัน)** อิงจำนวนวันเท่ากันตาม MAX(invoice date):
 
-**Step 1 — หา anchor date ก่อน:**
-```sql
-SELECT MAX(Tax_Invoice_Date) AS max_date FROM ai.fact_daily_sales_account
-```
-จาก max_date คำนวณ: fy_curr_start, fy_prev_start, same_day_prev (max_date - 1 ปี)
+**Step 1 — หา anchor date ก่อน:** เรียก **`max_invoice_date_synapse`** (ตาม Step 0) — คืน `max_date` · `same_day_prev` · `fy_curr_start` · `fy_prev_start` ครบในครั้งเดียว 🚫 **ห้ามเขียน SQL หา anchor เอง** (จะได้แค่ max_date แล้วต้องคำนวณ FY เอง ซึ่งเป็นจุดที่เคยพลาด off-by-one)
 
 **Step 2 — conditional SUM curr vs prev (จำนวนวันเท่ากัน):**
 ```sql
