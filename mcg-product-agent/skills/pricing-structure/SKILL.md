@@ -6,6 +6,7 @@ description: >
   วิเคราะห์โครงสร้างราคาและ margin ตาม price band / category
 tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_dimension_summary_synapse
+  - mcp__plugin_mcg-product-agent_synapse-product__product_launch_plan_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_schema_cheatsheet_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__describe_table_product_synapse
@@ -45,9 +46,17 @@ tools:
 
 # Task: Pricing Structure Analysis
 
+## Step 0 — ถ้าถาม "สินค้าที่จะวางขายเดือน XX" (แผนวางขาย)
+
+ใช้ **`product_launch_plan_synapse(season_month='<1-12>', brand='%')`** — คืนต่อ 1 รุ่น-สี: จำนวน SKU · ราคาป้าย/ราคาขายเฉลี่ย · ต้นทุนเฉลี่ย · **Mark Up%** · **Margin%** · **ช่วงราคา (price band)** · **Price Rank ในหมวด**
+- 🗓️ "วางขายเดือน XX" = `Season_Text` แบบ `ขายหน้าร้านเดือน <N>` (N = 1-12 · มี `No season`) — ส่ง `season_month` เป็นเลขเดือน
+- 🔴 **Mark Up% ≠ Margin%** — โชว์ **คู่กันเสมอ** พร้อมกำกับสูตร (Mark Up = กำไร ÷ ต้นทุน · Margin = กำไร ÷ ราคาขาย) · ตรวจ 2026-09-28 เดือน 10 แบรนด์ MC: 296.7% vs 74.8%
+- 📊 ช่วงราคา 6 ช่วง: `1: <500` · `2: 500-999` · `3: 1000-1499` · `4: 1500-1999` · `5: 2000-2999` · `6: 3000+` · **Price Rank = อันดับในหมวด (Level3)** ไม่ใช่อันดับข้ามแบรนด์
+- ✅ "ราคาขายเฉลี่ย" ให้ระบุว่าเป็น **ราคาตั้งใน master** (แผน) และถ้าผู้ใช้ต้องการราคาขายจริง ให้ชี้ไปที่ ASP จากยอดขาย (mcg-sales-agent) — คนละความหมาย
+
 ## Step 1 — เลือกมุมมอง
 
-- ตาม **ช่วงราคา** → `product_dimension_summary_synapse(group_by='price_band')`
+- ตาม **ช่วงราคา** → `product_dimension_summary_synapse(group_by='price_band')` (✅ ใช้ได้แล้ว — คำนวณจากราคาขาย)
 - ตาม **หมวดหมู่** → `group_by='category'` (หรือ level3)
 - ตาม **แบรนด์** → `group_by='brand'`
 

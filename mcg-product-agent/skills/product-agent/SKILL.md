@@ -9,6 +9,7 @@ tools:
   - mcp__plugin_mcg-product-agent_synapse-product__product_dimension_summary_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_attribute_values_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_list_synapse
+  - mcp__plugin_mcg-product-agent_synapse-product__product_launch_plan_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_query_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__product_schema_cheatsheet_synapse
   - mcp__plugin_mcg-product-agent_synapse-product__describe_table_product_synapse
@@ -142,6 +143,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 # Data Freshness (ข้อมูลล่าสุด)
 
+🗓️ **"วางขายเดือน XX" = `Season_Text` / `New_Season_Text`** — เก็บเป็นข้อความ `ขายหน้าร้านเดือน <N>` (N = 1..12) และมีค่า `No season` ⇒ กรองเดือนด้วยค่านี้ (2026-09-28: 13 ค่า) และ `Season_Year` / `New_Season_Year` เก็บปีของ season
 ⚠️ **Product master ไม่มีมิติเวลา** — `dim_article` เป็น snapshot ปัจจุบันของ master สินค้า ไม่มี "วันที่อัปเดตล่าสุด" ให้ query
 - ถ้า user ถาม "ข้อมูลสินค้าล่าสุดเมื่อไหร่" → ตอบ: "ข้อมูลสินค้าเป็น master snapshot ปัจจุบัน ไม่มีมิติเวลา — สะท้อนโครงสร้างสินค้า ณ ปัจจุบัน"
 - ถ้า user ต้องการความสดของข้อมูลที่มี time-series (ยอดขาย/สต็อก) → ส่งไป mcg-sales-agent (`max_sold_date`) หรือ mcg-inventory-agent (`max_stock_date`)
@@ -167,6 +169,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | `product_dimension_summary_synapse` | จำนวน SKU / รุ่น / รุ่น-สี + avg tag/selling price + margin% แยก dimension (ต้องระบุหน่วยของจำนวนทุกครั้ง) |
 | `product_attribute_values_synapse` | list ค่า distinct ของ 1 attribute (มี SKU count) — ใช้ก่อน filter |
 | `product_list_synapse` | list SKU รายตัว + attributes — filter 1 dimension ได้ |
+| `product_launch_plan_synapse` | **แผนวางขายรายเดือน** — Model Col ที่วางขายเดือน XX: ราคาเฉลี่ย (ป้าย/ขาย) · ต้นทุน · **Mark Up% + Margin%** · ช่วงราคา · **Price Rank ในหมวด** (`season_month` = 1-12, `brand`) |
 | `product_query_synapse` | Raw T-SQL (SELECT/WITH) เมื่อ canned ไม่พอ |
 | `product_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงของ dim_article ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_product_synapse` | ดู schema |
@@ -201,6 +204,11 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 - Tag Price (ราคาป้าย) = `Tag_Price` | Selling Price (ราคาขาย) = `Selling_Price` | Moving Cost = `Moving_Cost`
 - Margin% = `(AVG(CAST(Selling_Price AS float)) - AVG(CAST(Moving_Cost AS float))) / NULLIF(AVG(CAST(Selling_Price AS float)), 0) * 100`
+- 🔴 **Mark Up% ≠ Margin% — ต้องโชว์คู่และกำกับสูตรทุกครั้ง** (ผู้ใช้วันที่ 2026-09-28 เลือกให้แสดงทั้งสองแบบ)
+  · **Mark Up% = (ราคาขาย − ต้นทุน) / ต้นทุน × 100** · **Margin% = (ราคาขาย − ต้นทุน) / ราคาขาย × 100**
+  · ทั้งคู่คิดจาก **ค่าเฉลี่ยของกลุ่ม** (ไม่ใช่เฉลี่ยอัตราส่วนราย SKU) — ตรวจ 2026-09-28 เดือน 10 แบรนด์ MC: Mark Up **296.7%** vs Margin **74.8%** ⇒ เลขต่างกันมาก ห้ามใช้แทนกัน
+- **ช่วงราคา (price band) 6 ช่วง** ตามราคาขายเฉลี่ย: `1: <500` · `2: 500-999` · `3: 1000-1499` · `4: 1500-1999` · `5: 2000-2999` · `6: 3000+` (⚠️ ไม่มีคอลัมน์ช่วงราคาใน master — คำนวณจากราคาขาย)
+- **Price Rank** = อันดับราคา **ภายในหมวดสินค้า (Level3)** เรียงตามราคาขายเฉลี่ย (1 = แพงสุดในหมวดนั้น) — ไม่ใช่อันดับข้ามแบรนด์
 - ⚠️ tag vs selling อย่าสลับ | margin NULL = ไม่มีข้อมูลราคา อย่ารายงานเป็น 0
 
 ## 5.3 ไม่มี Apple-to-Apple / YoY ในโดเมนนี้ (CRITICAL)
