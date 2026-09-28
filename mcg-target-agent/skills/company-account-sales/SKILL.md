@@ -70,7 +70,13 @@ tools:
 
 เรียก `sales_company_summary_synapse(start_date=..., end_date=..., group_by=<dimension>)`
 
-ผลลัพธ์ให้: net sales (excl VAT), qty (จำนวนชิ้น), gross profit + GP%, moving cost, discount
+ผลลัพธ์ให้: **ยอดขาย = `Net_Sales_BGP`**, qty (จำนวนชิ้น), **`COGS`**, **gross profit (= ยอดขาย − COGS)**, **GP%**, invoice count
+
+> 🔴 **เกณฑ์ที่ธุรกิจสั่ง (2026-09-28) — บังคับ:**
+> · **"ยอดขาย" ใช้ `Net_Sales_BGP`** (ไม่ใช่ `Net_Sales_Exclude_VAT` — คนละตัว จริง 1-24 ก.ย. 2026: BGP 266.9M vs excl VAT 261.5M)
+> · **"COGS" และ "GP%" ใช้ `COGS`** — GP = ยอดขาย BGP − COGS · GP% = GP ÷ ยอดขาย BGP × 100
+> · 🚫 ห้ามใช้ `Moving_Cost_Amount` แทน COGS ในรายงานนี้ (จริง 1-20 ก.ย.: GP จาก COGS 153.4M / 66.30% vs จาก moving 149.3M / 65.89%)
+> · ถ้าจะเทียบกับตัวเลขที่เคยรายงานด้วยเกณฑ์อื่น **ต้องบอกว่าใช้เกณฑ์ไหน** ไม่งั้นจะดูเหมือนยอดขาย/GP หายไป
 
 > 🚫 **คนละแหล่งกับยอดเป้า/POS** — ตารางนี้มาจาก `silver.sap_zsdr006` (invoice) ส่วนยอดจริงที่ใช้คิด achievement มาจาก `gold.script_daily_sales_snapshot` (POS) ⇒ **คนละ population และขอบข้อมูลอาจไม่ตรงวันกัน** · ตรวจ 2026-09-24 ตรงกันที่ 2026-09-23 แต่ก่อนวางสองยอดในตารางเดียว **ต้องเทียบ `max_date` ของทั้งสองฝั่งก่อนทุกครั้ง** แล้วกำกับช่วงวันที่ให้ชัด
 
@@ -81,7 +87,7 @@ tools:
 **Headline** — ยอดขายรวม + GP% เฉลี่ย (ถ้าคำถามเป็นเชิงปริมาณ เช่น "กี่ชิ้น" / "รับของเข้าเท่าไหร่" → นำ **จำนวนชิ้น** ขึ้นเป็นตัวเลขหลัก 🚫 ไม่ยกมูลค่า/PO value ขึ้นนำ เว้นแต่ user ถามเรื่องมูลค่าเอง)
 
 **ตาราง: Company Sales by [dimension]**
-| Dimension | Net Sales | Qty (ชิ้น) | Gross Profit | GP% | Discount |
+| Dimension | ยอดขาย (BGP) | Qty (ชิ้น) | COGS | Gross Profit | GP% |
 
 - `Qty (ชิ้น)` = จำนวนชิ้นที่ขายได้ — 🚫 ไม่ใช่จำนวน SKU และไม่ใช่จำนวนรุ่น-สี
 
@@ -96,7 +102,7 @@ tools:
 # Output Rules
 - ต้องมี date range เสมอ (invoice date) และ **ระบุช่วงวันที่ในคำตอบทุกครั้ง**
 - 🚫 **ห้ามวางยอดขายจากที่นี่รวมกับยอดขาย POS / ยอดเป้า ในตารางหรือบรรทัดเดียวกัน** — คนละ population (invoice vs POS) และคนละขอบข้อมูล ⇒ ต้องเทียบ `max_date` ของทั้งสองฝั่งก่อน แล้วแยกส่วนพร้อมกำกับแหล่ง
-- GP% = gross profit / net sales * 100 — ใช้ threshold สี
+- GP% = (ยอดขาย `Net_Sales_BGP` − `COGS`) / ยอดขาย `Net_Sales_BGP` × 100 — ใช้ threshold สี (≥60% 🟢 | 50-<60% 🟡 | <50% 🔴) และกำกับเกณฑ์ทุกครั้ง
 - นี่คือยอดขาย invoice-level — ต่างจาก POS รายวันของ mcg-sales-agent **และต่างจากยอดจริงที่ใช้คิด achievement ของ target-achievement**
 - ⚠️ แหล่งข้อมูลนี้**ไม่รวม** billing type ฝั่ง Sales-In (Z250/Z260/Z860/ZC26/ZC83/ZC84) — ยอดจึงไม่เท่ากับตาราง invoice เดิม และไม่ควรมาเทียบข้ามแหล่งโดยไม่ flag
 - ⚠️ คอลัมน์ rebate ทั้งหมดในตารางนี้เป็น 0 และ `Supplier_Name` ว่าง — ถ้า user ถาม rebate ให้ใช้ `rebate_analysis_synapse` (ซึ่งรายงาน discount/GP แทน) อย่าดึง rebate จาก raw query

@@ -156,7 +156,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ห้ามพูดถึง SQL, Database, MCP, Query, Tool, ชื่อ Column, ชื่อ Table (fact_daily_sales_account, dim_target_main_lines), Synapse — สื่อสารเหมือนนักวิเคราะห์
 
 **ห้ามเด็ดขาด:**
-- ❌ "คอลัมน์ Net_Sales_Exclude_VAT" → ✅ "ยอดขายสุทธิ"
+- ❌ "คอลัมน์ Net_Sales_BGP" → ✅ "ยอดขายสุทธิ"
 - ❌ "query จาก dim_target_main_lines" → ✅ "ตรวจสอบข้อมูลเป้าในระบบ"
 
 ⚠️ **กฎนี้ครอบคลุม "Insight" / กล่องหมายเหตุ / Data Footer ด้วย — ไม่ใช่แค่เนื้อคำตอบหลัก**
@@ -212,9 +212,9 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | Tool | ใช้เมื่อ |
 |------|---------|
 | `sales_target_vs_actual_synapse` | เป้า/day, target & actual qty (ชิ้น), actual sales, achievement% — filter year/month ได้ และกรองช่วงวันที่ได้ด้วย start_date/end_date (ใส่ `'all'` = ไม่กรอง) |
-| `sales_company_summary_synapse` | ยอดขาย invoice-level (current): net sales (excl VAT), qty (ชิ้น), gross profit + GP%, moving cost — ต้องมี date range |
+| `sales_company_summary_synapse` | ยอดขาย invoice-level (current): ยอดขาย (`Net_Sales_BGP`), qty (ชิ้น), `COGS`, gross profit (BGP − COGS) + GP% — ต้องมี date range |
 | `max_invoice_date_synapse` | **anchor** — MAX invoice date + A2A ranges (เรียกก่อนทำ YoY) |
-| `sales_company_summary_yoy_synapse` | **YoY** — company sales curr vs prev (Apple-to-Apple) net sales + GP + qty (ชิ้น) |
+| `sales_company_summary_yoy_synapse` | **YoY** — company sales curr vs prev (Apple-to-Apple): ยอดขาย (BGP) + COGS + GP (BGP − COGS) + qty (ชิ้น) |
 | `sales_query_synapse` | Raw T-SQL (SELECT/WITH) เมื่อ canned ไม่พอ |
 | `company_sales_schema_cheatsheet_synapse` | **schema anchor** — คอลัมน์จริงทุกตาราง ครั้งแรกก่อน raw query ครั้งแรกของ conversation |
 | `describe_table_sales_synapse` | ดู schema |
@@ -256,9 +256,9 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ## 5.2 Measure Detail (มาตรฐานเดียวกับ mcg-sales-agent)
 
 **Company/Account (ai.fact_daily_sales_account):**
-- Net Sales (ext VAT) = `Net_Sales_Exclude_VAT` — ⚠️ ยอดขายมาตรฐานคือ **excl VAT** เสมอ (ไม่ใช่ inc VAT)
-- Gross Profit = `Gross_Profit` | Moving Cost = `Moving_Cost_Amount` | Qty = `Quantity` (จำนวนชิ้น)
-- GP% = `SUM(CAST(Gross_Profit AS float)) / NULLIF(SUM(CAST(Net_Sales_Exclude_VAT AS float)), 0) * 100`
+- **ยอดขาย (Net Sales) = `Net_Sales_BGP`** — 🔴 เกณฑ์ที่ธุรกิจสั่ง 2026-09-28 (เดิมใช้ `Net_Sales_Exclude_VAT`; จริง 1-24 ก.ย. 2026: BGP 266.9M vs excl VAT 261.5M) 🚫 ห้ามสลับกันโดยไม่บอกเกณฑ์
+- **Gross Profit = ยอดขาย (`Net_Sales_BGP`) − `COGS`** | **COGS = `COGS`** (เกณฑ์ที่ธุรกิจสั่ง 2026-09-28) | Qty = `Quantity` (จำนวนชิ้น) · ℹ️ `Moving_Cost_Amount` ยังมีในตารางแต่ **ไม่ใช่ค่า COGS ที่ต้องรายงาน**
+- GP% = `(SUM(CAST(Net_Sales_BGP AS float)) - SUM(CAST(COGS AS float))) / NULLIF(SUM(CAST(Net_Sales_BGP AS float)), 0) * 100`
 - ⚠️ ตารางนี้**ไม่รวม** billing type ฝั่ง Sales-In (Z250/Z260/Z860/ZC26/ZC83/ZC84) ที่ตารางเดิมมี — ยอดรวมจึงไม่เท่าของเดิม อย่าเทียบข้ามแหล่ง
 
 **Target (ai.dim_target_main_lines) + Actual (ai.fact_sales_and_stock_daily):**
@@ -294,9 +294,9 @@ SELECT MAX(Tax_Invoice_Date) AS max_date FROM ai.fact_daily_sales_account
 SELECT
   Main_Channel_Text AS dimension_value,
   SUM(CASE WHEN Tax_Invoice_Date BETWEEN '<curr_start>' AND '<max_date>'
-      THEN CAST(Net_Sales_Exclude_VAT AS float) ELSE 0 END) AS ns_curr,
+      THEN CAST(Net_Sales_BGP AS float) ELSE 0 END) AS ns_curr,   -- ยอดขาย BGP (เกณฑ์ 2026-09-28)
   SUM(CASE WHEN Tax_Invoice_Date BETWEEN '<prev_start>' AND '<same_day_prev>'
-      THEN CAST(Net_Sales_Exclude_VAT AS float) ELSE 0 END) AS ns_prev
+      THEN CAST(Net_Sales_BGP AS float) ELSE 0 END) AS ns_prev
 FROM ai.fact_daily_sales_account
 WHERE Tax_Invoice_Date BETWEEN '<prev_start>' AND '<max_date>'
 GROUP BY Main_Channel_Text
@@ -312,8 +312,8 @@ YoY% = `(ns_curr - ns_prev) / NULLIF(ns_prev, 0) * 100`
 ⚠️ สามตัวนี้มาจาก 2 ตาราง คนละ population — ใส่ตารางเดียวกันได้ แต่ต้องยึด 3 กฎนี้ทุกครั้ง
 
 **กฎ 1 — หนึ่งตัวเลข ยึดแหล่งเดียว (GP มีได้หลายค่า)**
-- GP ต้องมาจาก `Gross_Profit` หรือ `Net_Sales_Exclude_VAT` − `Moving_Cost_Amount` เท่านั้น
-- 🚫 **ห้ามใช้ `COGS` แทน `Moving_Cost_Amount`** — คนละคอลัมน์ ค่าไม่เท่ากัน (ของจริง 1–20 ก.ย. 2026: `Moving_Cost_Amount` 77,511,159.25 → GP **150,004,217.89** · `COGS` 78,147,269.03 → GP **149,368,108.03** ต่างกัน 636K)
+- **GP ต้องมาจากยอดขาย `Net_Sales_BGP` − `COGS` เท่านั้น** (🔴 เกณฑ์ที่ธุรกิจสั่ง 2026-09-28 — กลับจากกฎเดิมที่ให้ใช้ `Moving_Cost_Amount`)
+- ℹ️ เกณฑ์เดิม (excl VAT − Moving_Cost) ให้ค่าต่างกันจริง — 1-20 ก.ย. 2026: ใหม่ **153.38M / GP% 66.30%** · เก่า 149.34M / 65.89% ⇒ ถ้าอ้างตัวเลขเดิมต้องบอกว่าเปลี่ยนเกณฑ์แล้ว
 - 🚫 ห้ามหยิบ GP จาก platform อื่น (Postgres `cogs` → GP 152,192,992.97) มาใส่รายงานนี้
 - ถ้ามีตัวเลขให้เทียบ ต้องระบุว่ายึดเกณฑ์ไหน
 
@@ -330,7 +330,7 @@ YoY% = `(ns_curr - ns_prev) / NULLIF(ns_prev, 0) * 100`
 - tool join เป้ากับยอดจริงด้วย `Date_Key` + `Branch_Code` ที่ชุดสาขา×วันเดียวกันแล้ว — apples-to-apples ให้เสร็จ อย่าไปสร้างตัวตั้งเอง
 
 **กฎ 3 — GP กับ achievement คนละ population ต้อง flag ทุกครั้ง**
-- GP มาจาก `fact_daily_sales_account` (Tax_Invoice_Date · **ทุกสาขา** · **excl VAT**)
+- GP มาจาก `fact_daily_sales_account` (Tax_Invoice_Date · **ทุกสาขา** · **ยอดขาย BGP − COGS**)
 - achievement มาจาก `fact_sales_and_stock_daily` (**586 สาขาที่มีเป้า** · **incl VAT**)
 - → วางตารางเดียวกันได้ แต่ต้องเขียนกำกับว่าเป็นคนละนิยาม/population **ห้ามบวก / เฉลี่ย / เทียบกันตรง ๆ** (rule 1.5)
 

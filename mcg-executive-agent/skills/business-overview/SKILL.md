@@ -255,14 +255,14 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ### 5.4.1 GP + Target + %Achievement อยู่รายงานเดียวกัน — 3 กฎบังคับ (CRITICAL)
 
 **กฎ 1 — หนึ่งตัวเลข ยึดแหล่งเดียว (GP มีได้หลายค่า)**
-- GP ของ Sales Out = `Net Sales − COGS` (แหล่ง POS) · GP ของ Target/Company = `Gross_Profit` (แหล่ง invoice) — **สองตัวนี้ไม่ใช่ตัวเลขเดียวกัน ห้ามปนกันในชุดเดียวโดยไม่ flag**
-- 🚫 ห้ามใช้ `Gross` (ราคาป้าย) เป็น GP · ห้ามสลับ `COGS` กับ `Moving_Cost_Amount` — ของจริง 1–20 ก.ย. 2026 ต่างกันถึง 2.46M:
+- GP ของ Sales Out = `Net Sales − COGS` (แหล่ง POS) · **GP ของ Target/Company = ยอดขาย `Net_Sales_BGP` − `COGS` (แหล่ง invoice) — 🔴 เกณฑ์ที่ธุรกิจสั่ง 2026-09-28** — **สองตัวนี้ไม่ใช่ตัวเลขเดียวกัน ห้ามปนกันในชุดเดียวโดยไม่ flag**
+- 🚫 ห้ามใช้ `Gross` (ราคาป้าย) เป็น GP · 🚫 ห้ามใช้ `Moving_Cost_Amount` แทน `COGS` ในรายงานนี้ — ของจริง 1–20 ก.ย. 2026 ต่างกัน 4.04M:
 
 | เกณฑ์ | GP | GP% |
 |---|---|---|
-| POS `Total_COGS` | 151,829,174.55 | 66.04% |
-| invoice `Moving_Cost_Amount` (= `Gross_Profit`) | 150,004,217.89 | 65.93% |
-| invoice `COGS` | 149,368,108.03 | 65.65% |
+| invoice `Net_Sales_BGP` − `COGS` ✅ **ใช้เกณฑ์นี้** | 153,384,047.02 | 66.30% |
+| invoice `Net_Sales_Exclude_VAT` − `Moving_Cost_Amount` (เกณฑ์เดิม) | 149,337,580.22 | 65.89% |
+| POS `Total_COGS` (คนละแหล่ง) | 151,829,174.55 | 66.04% |
 
 - ระบุในคำตอบว่ายึดเกณฑ์ไหน
 
@@ -271,7 +271,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - ของจริง 1–20 ก.ย. 2026: ตัวที่ถูก = 242,176,567.91 → **86.83%** · เอา Company Net Sales excl VAT (227.5M) → 81.6% ❌ · เอา POS excl VAT (229.9M) → 82.4% ❌
 
 **กฎ 3 — GP กับ achievement คนละ population ต้อง flag ทุกครั้ง**
-- GP (invoice) = **ทุกสาขา** · excl VAT · `Tax_Invoice_Date`
+- GP (invoice) = **ทุกสาขา** · **ยอดขาย `Net_Sales_BGP` − `COGS`** · `Tax_Invoice_Date`
 - achievement actual = **586 สาขาที่มีเป้า** · incl VAT · `Date_Key`
 - → วางตารางเดียวกันได้ แต่ต้องกำกับว่าเป็นคนละนิยาม/population **ห้ามบวก / เฉลี่ย / เทียบตรง ๆ** (§1.5)
 
