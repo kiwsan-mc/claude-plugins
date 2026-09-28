@@ -227,7 +227,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 
 # 4. Main Data Sources
 
-- `ai.dim_target_main_lines` — เป้าขายรายวัน **ระดับสาขา × วัน เท่านั้น** (Target_Year, Target_Month, Branch_Code, Target_Date, Date_Key, Target_Value, Target_Weight) → ⚠️ **ไม่มี column category / channel / cluster / LY** — ดู §5.2
+- `ai.dim_target_main_lines` — เป้าขายรายวัน **ระดับสาขา × วัน เท่านั้น** — คอลัมน์จริงมี **5 ตัว: `Target_Year` · `Target_Month` · `Branch_Code` · `Target_Date` · `Target_exc_vat`** (ค่าของเป้าอยู่ที่ `Target_exc_vat` เท่านั้น) → ⚠️ **ไม่มี** column category / channel / cluster / LY และ **ไม่มี** `Target_Value` / `Target_Weight` / `Date_Key` — ดู §5.2
 - `ai.fact_daily_sales_account` — ยอดขายระดับ invoice (Company/Account) → **ต้อง filter `Tax_Invoice_Date` เสมอ (ตารางใหญ่)**
 - join: `ai.dim_article` on `Article_Key`, `ai.dim_branch` on `Branch_Code_Key`
 - ⚠️ `dim_target_main_lines` เก็บเป้าระดับสาขาและรวมทุก category ไว้แล้ว — **ห้าม SUM ซ้ำด้วยการ join ตารางอื่น**
@@ -262,10 +262,10 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - ⚠️ ตารางนี้**ไม่รวม** billing type ฝั่ง Sales-In (Z250/Z260/Z860/ZC26/ZC83/ZC84) ที่ตารางเดิมมี — ยอดรวมจึงไม่เท่าของเดิม อย่าเทียบข้ามแหล่ง
 
 **Target (ai.dim_target_main_lines) + Actual (ai.fact_sales_and_stock_daily):**
-- Target = `Target_Value` | Target Weight = `Target_Weight` — เป้าอยู่ **ระดับสาขา × วัน** เท่านั้น
+- **Target = `Target_exc_vat`** — 🔴 **คอลัมน์เดียวที่เก็บค่าเป้าในตารางนี้** (ตรวจกับ DB 2026-09-28: ตารางมี 5 คอลัมน์ `Target_Year` · `Target_Month` · `Branch_Code` · `Target_Date` · `Target_exc_vat` ⇒ ⚠️ **ไม่มี** `Target_Value` / `Target_Weight` / `Date_Key` — ของเดิมที่เขียนไว้ผิดและทำให้ tool error) · เป้าอยู่ **ระดับสาขา × วัน** เท่านั้น
 - Actual Sales = `Total_Price_After_Discount` (จาก `fact_sales_and_stock_daily`) | Actual Qty = `Total_Quantity` (**จำนวนชิ้น**)
-- Achievement% = `SUM(actual_sales) / NULLIF(SUM(Target_Value), 0) * 100`
-- join เป้ากับยอดจริงด้วย `Date_Key` + `Branch_Code` = `Branch_Code_Key`
+- Achievement% = `SUM(actual_sales) / NULLIF(SUM(Target_exc_vat), 0) * 100`
+- join เป้ากับยอดจริง: ฝั่งเป้าใช้ **`Target_Date`** + `Branch_Code` · ฝั่งยอดจริงใช้ **`Date_Key`** + `Branch_Code_Key` (คนละชื่อคอลัมน์ — join ด้วย `f.Date_Key = t.Target_Date`)
 
 > ⚠️ **เป้าแยก category ทำไม่ได้แล้ว** — ตารางเป้าใหม่มีเฉพาะสาขา×วัน ไม่มี column category/channel/cluster
 > ถ้า user ขอเป้าแยก category → แจ้งตรง ๆ ว่าเป้าอยู่ระดับสาขา/วัน แล้วเสนอทางเลือก: แยกตาม **ช่องทาง / สาขา / cluster / เดือน** แทน (เป้าเทียบ achievement ยังได้ครบ)
