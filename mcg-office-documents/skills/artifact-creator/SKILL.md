@@ -234,8 +234,8 @@ CRITICAL - large queries cause silent timeout in sandbox (~20-25s)
 "SELECT ... SUM(CASE WHEN fy27 THEN ... WHEN fy26 THEN ...) FROM ... WHERE sold_date BETWEEN '2025-07-01' AND '2026-08-05'"
  
 // RIGHT: 2 small queries, each scanning ~1 month, merge in JS
-"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '2026-07-01' AND '2026-08-05'"  // FY27
-"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '2025-07-01' AND '2025-08-05'"  // FY26
+"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '<fy_curr_start>' AND '<max_date>'"  // FY27
+"SELECT ... SUM(...) FROM ... WHERE sold_date BETWEEN '<fy_prev_start>' AND '<same_day_prev>'"  // FY26
  
 // Then merge in JavaScript:
 var fy26Map = {};

@@ -387,7 +387,7 @@ WHERE fy_year = '2027'
 
 Date range filter (Apple-to-Apple):
 ```sql
-WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27'
+WHERE sold_date BETWEEN '<fy_curr_start>' AND '<max_date>'
 ```
 
 ## 5.2 Aggregation
@@ -412,8 +412,8 @@ v2: `COALESCE(product, 'Unknown')`, `COALESCE(category, 'Unknown')` in GROUP BY
 ### Example — Correct:
 ```
 Call 1: SELECT MAX(sold_date) AS last_data FROM mcg_aiplatform_sales
-Call 2: SELECT SUM(total_exc_vat_price)::float AS ns, SUM(ticket_count) AS tkt FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27'
-Call 3: SELECT main_channel, SUM(total_exc_vat_price)::float AS ns FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '2026-07-01' AND '2026-07-27' GROUP BY main_channel
+Call 2: SELECT SUM(total_exc_vat_price)::float AS ns, SUM(ticket_count) AS tkt FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '<fy_curr_start>' AND '<max_date>'
+Call 3: SELECT main_channel, SUM(total_exc_vat_price)::float AS ns FROM mcg_aiplatform_sales WHERE sold_date BETWEEN '<fy_curr_start>' AND '<max_date>' GROUP BY main_channel
 ```
 
 ### Example — Wrong:
@@ -435,8 +435,8 @@ FROM ... WHERE ... GROUP BY ...
 ```sql
 SELECT
   <dimension_columns>,
-  SUM(CASE WHEN sold_date BETWEEN '2026-07-01' AND '2026-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
-  SUM(CASE WHEN sold_date BETWEEN '2025-07-01' AND '2025-07-27' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
+  SUM(CASE WHEN sold_date BETWEEN '<fy_curr_start>' AND '<max_date>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy28,
+  SUM(CASE WHEN sold_date BETWEEN '<fy_prev_start>' AND '<same_day_prev>' THEN total_exc_vat_price ELSE 0 END) AS ns_fy27
 FROM mcg_aiplatform_sales
 WHERE sold_date BETWEEN '<earliest_start>' AND '<latest_end>'
 GROUP BY <dimension_columns>
@@ -463,7 +463,7 @@ SELECT ... FROM fy28 JOIN fy27 ...
 ```sql
 SELECT DISTINCT region_analysis
 FROM mcg_aiplatform_sales
-WHERE sold_date >= '2026-07-01'
+WHERE sold_date >= '<fy_curr_start>'
 ORDER BY region_analysis
 ```
 
