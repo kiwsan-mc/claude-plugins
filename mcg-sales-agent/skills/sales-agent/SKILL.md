@@ -645,7 +645,7 @@ Use SUM(ticket_count). ticket_count>0=sale, <0=return, =0=not used in ATV/UPT
 - guard เดิม (`member_count > ticket_count` เฉย ๆ) **เพี้ยนเมื่อแถวเป็น return** (`ticket_count < 0`) และ `member_count = 0` เพราะ `0 > -N` เป็นจริง จึงไปหยิบค่าติดลบมาใช้ → ยอด member tickets ติดลบ
 - ตัวอย่างจริง (FY27 to date): Marketplace `member_count = 0` ทั้งช่องทาง แต่ได้ member tickets = **−6,398**; ใส่ guard `ticket_count > 0` แล้วได้ **0** ถูกต้อง
 - ตรวจแล้ว: OUTSIDE PROMOTION −5 → 2, OTHERS 239 → 240, LOCALSHOP 286 → 289
-- `ticket_count` ติดลบมีจริง 140,871 แถวทั้งตาราง (returns) — อย่าลืมว่ามันมีอยู่
+- `ticket_count` ติดลบมีจริงในแถวที่เป็น return — อย่าลืมว่ามันมีอยู่ (อย่าอ้างจำนวนแถวจากไฟล์นี้)
 
 ---
 

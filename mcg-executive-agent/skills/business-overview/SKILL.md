@@ -123,7 +123,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - ❌ `★ Insight: dashboard_kpi_overall_synapse ดึงจาก ai.fact_sales_and_stock_daily…`
   → ✅ "ตัวเลขนี้มาจากยอดขาย POS รายวัน" (หรือไม่ต้องมี block นี้เลยก็ได้ — ผู้อ่านต้องการคำตอบ ไม่ใช่กลไกเบื้องหลัง)
 - ❌ ใส่ชื่อ table / tool ลงใน Data Footer → ✅ ใช้ footer ตามรูปแบบที่ §0 กำหนด (`📊 Source: Synapse | <domain>`) เท่านั้น
-- ❌ ชื่อ measure/column ที่ tool คืนมา เป็น**ป้ายภายใน** → ✅ แปลเป็นภาษาไทย **พร้อมหน่วยกำกับของจำนวนเสมอ** ("ยอดขายสุทธิ", "สินค้า 31,418 รุ่น-สี")
+- ❌ ชื่อ measure/column ที่ tool คืนมา เป็น**ป้ายภายใน** → ✅ แปลเป็นภาษาไทย **พร้อมหน่วยกำกับของจำนวนเสมอ** ("ยอดขายสุทธิ", "สินค้า 12,345 รุ่น-สี")
 - เกณฑ์: ถ้าประโยคนั้นบอก user ว่าเรา**ดึงข้อมูลยังไง** (ชื่อ tool / table / column / วิธี query) → ตัดออกหรือเขียนใหม่เป็นภาษาธุรกิจ
 
 ## 1.3 ครอบคลุม domain ที่ user ถาม (CRITICAL)
@@ -143,7 +143,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 ถ้าตัวเลขจาก domain ต่างกันไม่ตรงกัน (เช่น Net Sales จาก Sales Out vs Actual จาก Target) → ระบุให้ชัดว่าเป็นคนละแหล่ง/นิยาม ห้ามนำเสนอเป็นตัวเลขเดียวกันโดยไม่ flag
 - ⚠️ ยอดขาย POS รายวัน (Sales Out) กับยอดขาย invoice-level (Company/Target) เป็น **คนละ population** — ห้ามบวกกันหรือเทียบกันตรง ๆ
 - 🚫 **ต้นทุน (COGS) ก็ห้ามข้ามตารางด้วย (CRITICAL)** — GP ของ Sales Out ต้องใช้ต้นทุนจาก POS fact เท่านั้น **ห้ามหยิบ Moving Cost ของตาราง invoice มาหักกับยอดขาย POS** แม้ตัวเลขจะดูใกล้กันจนน่าใช้ (ของจริง 1–20 ก.ย. 2026: POS COGS 78.1M vs invoice moving cost 77.5M → GP ต่างกัน ~0.4M; ปีก่อนต่างกันถึง 2.6M → GP% เพี้ยน 1.3pp)
-- 🚫 **ห้ามรายงาน "จำนวนบิล" / ticket / ATV / UPT ในภาพรวมนี้เด็ดขาด** — platform นี้ไม่มี invoice/ticket key ในตาราง POS และ `Total_Ticket` **ไม่ใช่จำนวนบิล** (ผลรวมทั้งเดือนได้ 419,065 ซึ่งไม่ใช่ความจริง) ถ้า user ขอ: ทั้งบริษัท → ส่งต่อ **mcg-sales-agent** (Postgres, มี ticket_count จริง); เฉพาะ member/CRM subset → `member_ticket_atv_synapse` (mcg-crm-agent)
+- 🚫 **ห้ามรายงาน "จำนวนบิล" / ticket / ATV / UPT ในภาพรวมนี้เด็ดขาด** — platform นี้ไม่มี invoice/ticket key ในตาราง POS และ `Total_Ticket` **ไม่ใช่จำนวนบิล** (ผลรวมทั้งเดือนใกล้เคียงกับจำนวนชิ้น ซึ่งไม่ใช่ความจริง) ถ้า user ขอ: ทั้งบริษัท → ส่งต่อ **mcg-sales-agent** (Postgres, มี ticket_count จริง); เฉพาะ member/CRM subset → `member_ticket_atv_synapse` (mcg-crm-agent)
   - ⚠️ **ห้ามดึง ticket จาก platform อื่น (Postgres) มาใส่ตาราง Sales Out ของที่นี่** — ทั้งตารางจะกลายเป็นตัวเลขข้าม platform โดย source ไม่ตรงกัน (ผิด §0 กฎ 2) ให้แยกเป็นตาราง/บรรทัดต่างหากพร้อมระบุ source
 - ⚠️ **as-of ของแต่ละ domain ไม่เท่ากัน — ห้ามใช้ค่าเดียวกันทั้งรายงาน** — Sales Out / Company / สต็อก = 20 ก.ย. แต่ Member/CRM = 16 ก.ย. → หัวตารางของ Member ต้องเขียนช่วงที่เป็นจริง (1–16) และ footer ต้องแยก as-of ตาม domain ไม่ใช่ใส่ 20 ก.ย. ทั้งหมด
 
