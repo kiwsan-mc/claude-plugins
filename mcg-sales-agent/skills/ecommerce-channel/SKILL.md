@@ -86,7 +86,7 @@ WHERE sold_date BETWEEN '{{fy_curr_start}}' AND '{{max_date}}'
 **กับดัก 4 ข้อ — ห้ามพลาด:**
 1. 🚫 **ห้ามใช้ `sub_channel` กับ Mcshop.com** — แถว `Mcshop.com Offline` ก็มี `sub_channel = 'MCSHOP.COM'` เหมือนกัน จึงดูด offline เข้ามาทั้งก้อน
 2. 🚫 **`main_channel = 'ONLINE'` ไม่ช่วยตัด offline** — สาขา E002 (`Mcshop.com Offline`) ถูก flag เป็น ONLINE
-3. 🚫 **ห้ามกรองด้วย `branch_code` หรือชื่อสาขา** — `E002` "MC Social Commerce" มีแถวอยู่ **ทั้งสองฝั่ง** (offline 1,907,297.74 · online 65,255.69) และ `LIKE '%cshop%'` จะลาก `Pc Mcshop` มาด้วย
+3. 🚫 **ห้ามกรองด้วย `branch_code` หรือชื่อสาขา** — `E002` "MC Social Commerce" มีแถวอยู่ **ทั้งสองฝั่ง** (มีแถวทั้งฝั่ง offline และ online — งวด 1–20 ก.ย. 2026) และ `LIKE '%cshop%'` จะลาก `Pc Mcshop` มาด้วย
 4. ถ้าต้องการเขียนแบบ defensive ใช้ `channel_store <> 'Mcshop.com Offline'` หรือ `channel_store_sub <> 'Pc Mcshop'` — ให้ผลเท่ากัน
 
 > 📌 ถ้า user เทียบกับ dashboard **Online Daily Performance** แล้วเลขไม่ตรง ให้สงสัยข้อนี้ก่อน — dashboard กรองด้วย `channel_store` แบบ exact match
@@ -184,5 +184,5 @@ LIMIT 10
 - sold_date filter always
 - จำนวนทุกตัวในคำตอบต้องมี **หน่วย** กำกับ (กี่ SKU / กี่รุ่น-สี / กี่ชิ้น) พร้อมบอกขอบเขตที่กรอง (platform · ช่วงวันที่) — ถ้า user ถาม "กี่รุ่น" / "มีกี่ตัว" / "จำนวนเท่าไหร่" ลอย ๆ **ถามกลับก่อน** ห้ามเดาแล้วตอบตัวเลขเดียว
 - **"จำนวนรุ่น" = รุ่น-สี (`model_color`)** เท่านั้น — ไม่ใช่รุ่น (`model`) และไม่ใช่ SKU (`item_code`)
-  - อ้างอิง ณ 2026-09-26 (ทั้งบริษัท): SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 — นับผิดหน่วยตัวเลขผิดจริง (รุ่น vs รุ่น-สี ต่างกัน ~32%)
+  - (ทั้งบริษัท): SKU ≠ รุ่น ≠ รุ่น-สี — นับผิดหน่วย = ตัวเลขผิดจริง
 - **"รับของเข้า" / "Sales In" / ปริมาณรับเข้า (GR)** → **จำนวนชิ้น** เป็นตัวเลขหลัก (ต้องแยก สั่ง PO · รับเข้าแล้ว GR · ค้างส่ง พร้อม as-of) ห้ามยกมูลค่า (บาท / PO value) ขึ้นนำ — ข้อมูลนี้ไม่มีในตารางชุดนี้ → ส่งต่อ **mcg-inventory-agent**

@@ -83,7 +83,7 @@ You are a CRM & Sales Strategy Analyst specializing in member behavior and value
 - **member_count > ticket_count**: Anomalous data → Use CASE WHEN member_count > ticket_count **AND ticket_count > 0** THEN ticket_count ELSE member_count END to prevent Member% > 100%
   - ⚠️ `AND ticket_count > 0` จำเป็น: ถ้าไม่มี แถว return (`ticket_count < 0`) ที่ `member_count = 0` จะถูกนับเป็นค่าติดลบ (ค่าติดลบจะกลายเป็น 0 เมื่อใส่ guard)
 - **product/category IS NULL**: Use COALESCE(product, 'Unknown') in GROUP BY
-- **นับจำนวนสินค้า**: `"จำนวนรุ่น"` = `COUNT(DISTINCT Article_Model_Color)` เท่านั้น — รุ่น = `Article_Model`, SKU = `Article_Key` (as-of 2026-09-26: SKU 128,121 · รุ่น 23,815 · รุ่น-สี 31,418 — สามตัวเลขไม่เท่ากัน ห้ามใช้แทนกัน) · ถ้าผู้ใช้ไม่ระบุหน่วย ให้ถามกลับก่อนว่าจะนับเป็น SKU / รุ่น / รุ่น-สี
+- **นับจำนวนสินค้า**: `"จำนวนรุ่น"` = `COUNT(DISTINCT Article_Model_Color)` เท่านั้น — รุ่น = `Article_Model`, SKU = `Article_Key` (SKU ≠ รุ่น ≠ รุ่น-สี — สามตัวนี้ไม่เท่ากัน ห้ามใช้แทนกัน) · ถ้าผู้ใช้ไม่ระบุหน่วย ให้ถามกลับก่อนว่าจะนับเป็น SKU / รุ่น / รุ่น-สี
 - **Marketplace**: Include in overall Member% calculation
 
 ## Step 3 — Member Group & Generation
