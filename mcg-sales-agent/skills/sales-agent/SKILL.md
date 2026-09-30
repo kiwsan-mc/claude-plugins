@@ -165,72 +165,16 @@ Then follow this flow:
 
 ---
 
-# 1.5 Semantic Query Layer (CRITICAL — do this before generating SQL)
+# 1.5 Semantic Query Layer — ❌ ไม่มีในระบบนี้ (ตรวจ 2026-09-30)
 
-⚠️ **MANDATORY** — always look up patterns before writing SQL
+🚫 **ห้ามยิง query หาตาราง semantic layer** (`query_patterns` / `business_context`) — **ตารางเหล่านี้ไม่มีในฐานข้อมูลจริง** ตรวจเมื่อ 2026-09-30: query ได้ `relation ... does not exist` ⇒ ยิงไปก็เสียรอบเปล่าและทำให้คำตอบช้า
 
-### Step 0A: Search SQL Template
+✅ **ทำแทนด้วย:**
+1. **canned tool ก่อนเสมอ** (ดู §Tool Strategy) — tool ที่จัดกลุ่มให้แล้วลดทั้งเวลาและความผิดพลาด
+2. เขียน SQL เองตาม **§5 SQL Rules** + กฎในไฟล์นี้
+3. จับคู่ชื่อ/ค่าเองจากตารางอ้างอิงในไฟล์นี้ (**§13 Key Columns** · **§13.1 Branch Code** · **§13.2 Article/Model Code** · §9 Channels)
+4. ชื่อสินค้า/หมวดที่ user ใช้ไม่ตรงค่าในระบบ → ค้นด้วย `ILIKE` ที่คอลัมน์จริงก่อนสรุปว่าไม่มี (ดู Fallback ด้านล่าง) 🚫 ห้ามเดาค่า mapping
 
-Use `sales_agent` to search from table `query_patterns` with keyword matching:
-
-```sql
-SELECT pattern_name, skill, sql_skeleton, required_params
-FROM query_patterns
-WHERE is_active = true
-  AND (
-    keywords && ARRAY['<keyword1>', '<keyword2>']
-    OR pattern_name ILIKE '%<keyword>%'
-    OR EXISTS (SELECT 1 FROM unnest(question_examples) ex WHERE ex ILIKE '%<keyword>%')
-  )
-LIMIT 3
-```
-
-**How to choose keywords:** Extract key words from user's question, e.g.:
-- "discount by category" → keywords: `['discount', 'category']`
-- "member compared to last year" → keywords: `['member', 'yoy']`
-- "sales by region" → keywords: `['regional', 'region']`
-- "มีกี่รุ่น" / "จำนวนรุ่น" → keywords: `['model_color', 'count']` → **ต้องได้ pattern ที่นับ `model_color` (รุ่น-สี) เท่านั้น** ไม่ใช่ `model` หรือ `item_code` และคำตอบต้องระบุหน่วย · ถ้าไม่มี pattern ที่นับรุ่น-สี ให้เขียน SQL เองด้วย `COUNT(DISTINCT model_color)` (ดู § กฎการนับจำนวน)
-
-If pattern found:
-→ Use `sql_skeleton` as template and replace `{{placeholders}}` with actual values
-
-If no pattern found:
-→ Write SQL manually following rules in Section 5
-
-### Step 0B: Search Business Rules + Column Mapping
-
-Use `sales_agent` to search from table `business_context`:
-
-```sql
--- Search KPI formula
-SELECT name, description_th, metadata
-FROM business_context
-WHERE is_active = true
-  AND context_type = 'kpi'
-  AND (name ILIKE '%<keyword>%' OR description_th ILIKE '%<keyword>%')
-LIMIT 3
-
--- Search business rules
-SELECT name, description_th, metadata
-FROM business_context
-WHERE is_active = true
-  AND context_type = 'rule'
-  AND description_th ILIKE '%<keyword>%'
-LIMIT 5
-
--- Search value mapping (Thai → DB value)
-SELECT name, metadata
-FROM business_context
-WHERE is_active = true
-  AND context_type = 'value_map'
-  AND metadata::text ILIKE '%<thai_word>%'
-LIMIT 3
-```
-
-Results provide:
-- **kpi**: Correct formulas (e.g., ATV formula)
-- **rule**: Business rules to follow (e.g., no CTE)
-- **value_map**: Map Thai words → DB values (e.g., "jeans" → product = 'JEANS')
 
 ### Fallback — ชื่อสินค้า/หมวดไม่ตรง value_map
 
@@ -251,19 +195,12 @@ LIMIT 20
 ```
 User: "Average discount by category compared to last year"
 
-Step 0A: keyword search query_patterns
-  → keywords: ['discount', 'category']
-  → match: "discount_margin_by_category"
-  → sql_skeleton: SELECT COALESCE(category...) ... conditional SUM ...
+Step 0: anchor — max_sold_date → {{max_date}} และ {{fy_curr_start}} (ดึงจริงเสมอ ห้ามพิมพ์เอง)
 
-Step 0B: keyword search business_context
-  → match: kpi "discount_pct" → formula: SUM(total_discount_amount)::float / NULLIF(SUM(price_sign)::float, 0) * 100
-  → match: rule "no_cte" → CTEs not allowed
+Step 1: เลือก canned tool ที่ตรงที่สุด — ที่นี่ใช้ discount_margin_by_category_synapse/discount_margin_by_category
+  → ได้ตาราง category + discount% + margin% ครบทั้งปีนี้และปีก่อนในครั้งเดียว
 
-Step 1: replace placeholders
-  → {{max_date}} = MAX(sold_date) = 2026-07-27
-  → {{fy_curr_start}} = 2026-07-01
-  → execute SQL
+Step 2: ถ้า canned tool ไม่มีมิติที่ต้องใช้ ค่อยเขียน SQL ตาม §5 (≤15 บรรทัด, มี WHERE sold_date เสมอ)
 ```
 
 ## 1.4 Skill Routing (v2 NEW)
@@ -338,7 +275,7 @@ When the user asks a question matching a specialized skill below, recommend it b
 ---
 
 # 3. Data Tools
-- **sales_agent**: (1) Search patterns/rules from query_patterns + business_context (2) Execute SQL query (max 3 calls total)
+- **sales_agent**: (1) Execute SQL query โดยตรง (semantic layer ไม่มีในระบบนี้ — ดู §1.5) (2) จำกัดรวม **ไม่เกิน 3 ครั้งต่อคำถาม**
 - **pg_describe_table**: When column name errors occur
 - **pg_list_tables**: When user asks what data is available
 
