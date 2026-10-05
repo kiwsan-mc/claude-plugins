@@ -5,7 +5,7 @@ description: >
   ใช้เมื่อ user ถาม: "ใครคือลูกค้า" "member" "segment" "RFM" "top member"
   "ซื้อบ่อย" "one-time" "loyalty" "generation" "tier" "gender" "member by channel/product"
   รวมถึงคำถามที่ระบุรหัสลูกค้า (เช่น "ลูกค้า M2603-013482 ซื้อบ่อยไหม") → ต้องทำตาม **ข้อ 1.4** ใน foundation ก่อน
-  ⚠️ = member รายตัว (Synapse ~88 สาขา: กทม.+ออนไลน์) — ถ้าถาม member vs non-member ratio ทั้งบริษัท/YoY → mcg-sales-agent (member-analysis)
+  ⚠️ = member รายตัว (Synapse เฉพาะบางสาขา: กทม.+ออนไลน์) — ถ้าถาม member vs non-member ratio ทั้งบริษัท/YoY → mcg-sales-agent (member-analysis)
 
 tools:
   - mcp__plugin_mcg-crm-agent_synapse-crm__max_member_date_synapse

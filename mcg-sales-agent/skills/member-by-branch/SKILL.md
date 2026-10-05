@@ -35,7 +35,7 @@ You are a Data Analyst specializing in store-level member penetration and ticket
 > ถ้า user ต้องการ **member vs non-member ระดับทั้งบริษัท / แยกช่องทาง / แยก generation** → ใช้ **`member-analysis`**
 > ถ้า user ต้องการ **member รายตัว / RFM / top member / tier / CRM discount / return** → ใช้ **`mcg-crm-agent`** (คนละ platform — 🚫 ห้ามนำตัวเลขมาเทียบกัน)
 > ถ้า user ต้องการ **ยอดขายอย่างเดียว ไม่แยก member** → ใช้ **`sales-dashboard`**
-> ⚠️ **ห้ามนำตัวเลขข้าม platform มาเทียบ/บวกกัน** — member penetration ของสองแหล่งต่างกันมาก (ระดับบริษัท ~55% vs ระดับใบเสร็จที่มีรหัสสมาชิก ~16%) เพราะ **ขอบเขตสาขา + นิยาม member ต่างกัน** → ต้องระบุว่าใช้แหล่งไหนเสมอ
+> ⚠️ **ห้ามนำตัวเลขข้าม platform มาเทียบ/บวกกัน** — member penetration ของสองแหล่งต่างกันมาก (แหล่งหนึ่งครอบคลุมทุกสาขา อีกแหล่งเฉพาะบางสาขา และนิยาม "สมาชิก" คนละแบบ) เพราะ **ขอบเขตสาขา + นิยาม member ต่างกัน** → ต้องระบุว่าใช้แหล่งไหนเสมอ
 
 ---
 

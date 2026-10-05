@@ -102,7 +102,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 2. **ห้าม mix ข้าม platform** — ห้ามบวก/เทียบ/คิด % ระหว่างตัวเลขคนละ platform ในคำตอบเดียว ถ้าจำเป็นต้องอ้าง ให้ flag ว่า "คนละแหล่ง/คนละนิยาม"
 3. **อะไรตรง/ไม่ตรง** (ยืนยันจากข้อมูลจริง):
    - ✅ **ตรงกัน** Postgres ↔ Synapse sales: **Net Sales, Qty** (เทียบแล้วตรงกัน — ค่าชั่วขณะ ให้ตรวจใหม่ทุกครั้ง)
-   - ⚠️ **ไม่ตรง**: Discount, Gross (นิยามต่าง) · **Member** (Postgres = ทุกสาขา / CRM = 88 สาขา)
+   - ⚠️ **ไม่ตรง**: Discount, Gross (นิยามต่าง) · **Member** (Postgres = ทุกสาขา / CRM = เฉพาะบางสาขา)
    - ⚠️ **Tickets/ATV**: Postgres **มี** (`ticket_count`) — Synapse sales **ไม่มี**
 4. **Anchor ต้องมาจาก platform เดียวกับ tool** — อย่าใช้ anchor ของ Postgres ป้อน tool ของ Synapse (max_date อาจต่างกัน 1 วัน)
 5. **คำถามข้าม platform** → ตอบแยกส่วน ระบุ source ของแต่ละส่วน อย่ารวมเป็นตัวเลขเดียว

@@ -77,7 +77,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | Sales Out (POS รายวัน) | mcg-sales-agent | **Postgres** (ทุกสาขา) |
 | สต็อก / PO / STO | mcg-inventory-agent | Synapse |
 | Product master | mcg-product-agent | Synapse |
-| Member / CRM (รายตัว) | mcg-crm-agent | Synapse (88 สาขา) |
+| Member / CRM (รายตัว) | mcg-crm-agent | Synapse (เฉพาะบางสาขา) |
 | เป้าขาย / Company sales | mcg-target-agent | Synapse |
 | ภาพรวมข้าม domain | **mcg-executive-agent** | **Synapse (5 servers)** ← ที่นี่ |
 
@@ -86,11 +86,11 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 2. **ห้าม mix ข้าม platform** — ที่นี่เป็น Synapse ล้วน ถ้าผู้ใช้เทียบกับตัวเลขจาก sales-agent (Postgres) ต้อง flag ว่า **คนละ platform**
 3. **อะไรตรง/ไม่ตรง** (ยืนยันจากข้อมูลจริง):
    - ✅ **ตรงกัน** Postgres ↔ Synapse sales: **Net Sales, Qty** (เทียบแล้วตรงกัน — ค่าชั่วขณะ ให้ตรวจใหม่ทุกครั้ง)
-   - ⚠️ **ไม่ตรง**: Discount, Gross · **Member** (Postgres ~55% ทุกสาขา vs CRM ~16% / 88 สาขา) · **Tickets/ATV** (Postgres มี, Synapse sales ไม่มี)
+   - ⚠️ **ไม่ตรง**: Discount, Gross · **Member** (Postgres ทุกสาขา vs CRM เฉพาะบางสาขา — นิยามต่างกัน 🚫 ห้ามเทียบ) · **Tickets/ATV** (Postgres มี, Synapse sales ไม่มี)
 4. **Anchor ต้องมาจาก platform เดียวกับ tool** — ที่นี่ใช้ 4 anchor ของ Synapse เท่านั้น (ดู §2)
 5. **คำถามข้าม platform** → ตอบแยกส่วน ระบุ source ของแต่ละส่วน
 6. **🚫 ห้ามนำยอดขาย invoice (Company/Account) กับยอดขาย POS มาเทียบ / บวก / เฉลี่ยกัน** — คนละระบบต้นทาง (ยอดขาย **invoice-level** vs ยอดขาย **POS**) และคนละ population ⇒ ตัวเลขไม่ตรงกัน**โดยธรรมชาติ ไม่ใช่ข้อมูลผิด**
-7. **🚫 ห้ามนำยอด Member/CRM (subset ~88 สาขา) มาเทียบกับยอดรวมทั้งบริษัท** — ต้องระบุว่าเป็น subset เสมอ
+7. **🚫 ห้ามนำยอด Member/CRM (subset ของบางสาขา) มาเทียบกับยอดรวมทั้งบริษัท** — ต้องระบุว่าเป็น subset เสมอ
 8. ℹ️ ตารางรายวันเคยหยุดชะงัก (ถึง 2026-08-13) และ **ถูกเติมกลับครบแล้ว — ปัจจุบันข้อมูลเดินหน้า** ⇒ ถ้าเจอตัวเลข 0/ว่าง ให้สงสัยข้อมูลล่าช้าแล้วเทียบ `max_date` ก่อนสรุป
 8.1 **เทียบ `max_date` ของแต่ละแหล่งก่อนวางตัวเลขไว้ตาราง/ประโยคเดียวกัน** — ตารางคนละ job เคยหยุดไม่พร้อมกันจริง (สต็อก: `fact_sales_and_stock_daily` หยุด 2026-08-13 ขณะที่ `fact_MB52` อยู่ 2026-09-22) ⇒ ขอบไม่ตรงวัน = ต้องแยกแสดงและกำกับวันที่
 9. **ทุกตัวเลขต้องมี 2 ป้ายกำกับ: แหล่ง + ช่วงวันที่** — ✅ "ยอดขายบริษัท (invoice) 1–23 ก.ย. 2026" · ❌ "ยอดขาย ฿X"
@@ -103,7 +103,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 | **ยอดขาย invoice (Company/Account)** | `fact_daily_sales_account` | `ai` (invoice) | ใบกำกับ · population **แคบกว่า** | 🚫 เทียบกับ POS ไม่ได้ |
 | เป้าขาย | `dim_target_main_lines` | `ai` | สาขา × วัน · **ไม่มี category** | ใช้กับ POS |
 | สต็อก | `fact_MB52` | `ai` | **snapshot วันเดียว** | ใช้กับยอดขายไม่ได้ (คนละช่วง) |
-| Member / CRM | `poc_fact_sales_with_crm` | `ai` | **~88 สาขา** เท่านั้น | 🚫 ใช้แทนยอดทั้งบริษัทไม่ได้ |
+| Member / CRM | `poc_fact_sales_with_crm` | `ai` | **เฉพาะบางสาขา** เท่านั้น | 🚫 ใช้แทนยอดทั้งบริษัทไม่ได้ |
 
 > 📌 ยอดเป้าและยอด POS ที่ใช้คิด achievement **ต้องเป็นช่วงวันที่เดียวกัน** เสมอ — ดูรายละเอียดกลไกที่ `mcg-target-agent` (target-achievement Step 2): เป้าเต็มเดือน ÷ ยอดจริงบางส่วน ให้ achievement ต่ำเกินจริง (วัดจริง 2026-09-24: 64.35% vs 85.61%)
 
@@ -137,7 +137,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - ⚠️ **Member/CRM มี 2 แหล่ง — ต้องเลือกให้ถูก และห้ามนำมาเทียบกัน**:
   - **member ratio ทั้งบริษัท + YoY** → **mcg-sales-agent** (skill `member-analysis`, Postgres) — ครอบคลุมทุกสาขา
   - **member รายตัว / RFM / tier / CRM discount / return** → **mcg-crm-agent** (Synapse)
-  - KPI top-line ในภาพรวมนี้ใช้ `member_kpi_overview_synapse` ได้ แต่ **⚠️ เป็น subset แค่ ~88 สาขา (กทม.+ออนไลน์) ไม่ใช่ทั้งบริษัท** — ต้อง flag ทุกครั้งที่รายงาน
+  - KPI top-line ในภาพรวมนี้ใช้ `member_kpi_overview_synapse` ได้ แต่ **⚠️ เป็น subset เฉพาะบางสาขา (กทม.+ออนไลน์) ไม่ใช่ทั้งบริษัท** — ต้อง flag ทุกครั้งที่รายงาน
 
 ## 1.5 ตัวเลขข้าม domain ต้องสอดคล้องกัน (CRITICAL)
 ถ้าตัวเลขจาก domain ต่างกันไม่ตรงกัน (เช่น Net Sales จาก Sales Out vs Actual จาก Target) → ระบุให้ชัดว่าเป็นคนละแหล่ง/นิยาม ห้ามนำเสนอเป็นตัวเลขเดียวกันโดยไม่ flag
@@ -283,7 +283,7 @@ MC Group มี **2 platform** — คำถามธุรกิจเดีย
 - `member_kpi_overview_synapse(start_date, end_date)` → net sales, members, ATV, CRM discount
 - `member_by_channel_synapse(group_by="channel", start_date, end_date)` → member แยก channel
 - ⚠️ **อย่าลงลึก** (RFM / tier / top members / return / frequency) — นั่นเป็นงานของ **mcg-crm-agent**
-- ⚠️ ตัวเลข member จากชุดนี้เป็น **subset (~88 สาขา: กทม.+ออนไลน์)** — ห้ามนำไปเทียบหรือบวกกับ sales ทั้งบริษัท (ซึ่งครอบคลุมทุกสาขา)
+- ⚠️ ตัวเลข member จากชุดนี้เป็น **subset (เฉพาะบางสาขา: กทม.+ออนไลน์)** — ห้ามนำไปเทียบหรือบวกกับ sales ทั้งบริษัท (ซึ่งครอบคลุมทุกสาขา)
 
 ---
 

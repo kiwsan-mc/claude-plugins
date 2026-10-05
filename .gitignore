@@ -3,3 +3,5 @@
 /.kiro
 /mcg-office-documents/skills/ms-excel
 /mcg-software-documents
+__pycache__/
+*.pyc

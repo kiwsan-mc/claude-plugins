@@ -14,7 +14,7 @@
       },
       "category": "productivity",
       "source": "./claude-code-setup",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/claude-code-setup"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/claude-code-setup"
     },
     {
       "name": "claude-md-management",
@@ -25,7 +25,7 @@
       },
       "category": "productivity",
       "source": "./claude-md-management",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/claude-md-management"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/claude-md-management"
     },
     {
       "name": "example-plugin",
@@ -36,7 +36,7 @@
       },
       "category": "development",
       "source": "./example-plugin",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/example-plugin"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/example-plugin"
     },
     {
       "name": "explanatory-output-style",
@@ -47,7 +47,7 @@
       },
       "category": "learning",
       "source": "./explanatory-output-style",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/explanatory-output-style"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/explanatory-output-style"
     },
     {
       "name": "frontend-design",
@@ -58,7 +58,7 @@
       },
       "category": "design",
       "source": "./frontend-design",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/frontend-design"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/frontend-design"
     },
     {
       "name": "learning-output-style",
@@ -69,7 +69,7 @@
       },
       "category": "learning",
       "source": "./learning-output-style",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/learning-output-style"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/learning-output-style"
     },
     {
       "name": "math-olympiad",
@@ -80,7 +80,7 @@
       },
       "category": "math",
       "source": "./math-olympiad",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/math-olympiad"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/math-olympiad"
     },
     {
       "name": "playground",
@@ -91,7 +91,7 @@
       },
       "category": "development",
       "source": "./playground",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/playground"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/playground"
     },
     {
       "name": "project-artifact",
@@ -102,7 +102,7 @@
       },
       "category": "productivity",
       "source": "./project-artifact",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/project-artifact"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/project-artifact"
     },
     {
       "name": "ralph-loop",
@@ -113,7 +113,7 @@
       },
       "category": "development",
       "source": "./ralph-loop",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/ralph-loop"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/ralph-loop"
     },
     {
       "name": "receipts",
@@ -124,7 +124,7 @@
       },
       "category": "productivity",
       "source": "./receipts",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/receipts"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/receipts"
     },
     {
       "name": "session-report",
@@ -135,7 +135,7 @@
       },
       "category": "productivity",
       "source": "./session-report",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/session-report"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/session-report"
     },
     {
       "name": "skill-creator",
@@ -146,7 +146,7 @@
       },
       "category": "development",
       "source": "./skill-creator",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/skill-creator"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/skill-creator"
     },
     {
       "name": "mcg-sales-agent",
@@ -157,7 +157,7 @@
       },
       "category": "productivity",
       "source": "./mcg-sales-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-sales-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-sales-agent"
     },
     {
       "name": "consolidate-memory",
@@ -168,7 +168,7 @@
       },
       "category": "productivity",
       "source": "./consolidate-memory",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/consolidate-memory"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/consolidate-memory"
     },
     {
       "name": "docx",
@@ -179,7 +179,7 @@
       },
       "category": "productivity",
       "source": "./docx",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/docx"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/docx"
     },
     {
       "name": "explain-usage",
@@ -190,7 +190,7 @@
       },
       "category": "productivity",
       "source": "./explain-usage",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/explain-usage"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/explain-usage"
     },
     {
       "name": "pdf",
@@ -201,7 +201,7 @@
       },
       "category": "productivity",
       "source": "./pdf",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pdf"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/pdf"
     },
 
     {
@@ -213,7 +213,7 @@
       },
       "category": "productivity",
       "source": "./pptx",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/pptx"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/pptx"
     },
     {
       "name": "xlsx",
@@ -224,7 +224,7 @@
       },
       "category": "productivity",
       "source": "./xlsx",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/xlsx"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/xlsx"
     },
     {
       "name": "schedule",
@@ -235,7 +235,7 @@
       },
       "category": "productivity",
       "source": "./schedule",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/schedule"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/schedule"
     },
     {
       "name": "setup-cowork",
@@ -246,7 +246,7 @@
       },
       "category": "productivity",
       "source": "./setup-cowork",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/setup-cowork"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/setup-cowork"
     },
     {
       "name": "mcg-inventory-agent",
@@ -257,7 +257,7 @@
       },
       "category": "productivity",
       "source": "./mcg-inventory-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-inventory-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-inventory-agent"
     },
     {
       "name": "mcg-target-agent",
@@ -268,7 +268,7 @@
       },
       "category": "productivity",
       "source": "./mcg-target-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-target-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-target-agent"
     },
     {
       "name": "mcg-product-agent",
@@ -279,7 +279,7 @@
       },
       "category": "productivity",
       "source": "./mcg-product-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-product-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-product-agent"
     },
     {
       "name": "mcg-executive-agent",
@@ -290,7 +290,7 @@
       },
       "category": "productivity",
       "source": "./mcg-executive-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-executive-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-executive-agent"
     },
     {
       "name": "mcg-crm-agent",
@@ -301,7 +301,7 @@
       },
       "category": "productivity",
       "source": "./mcg-crm-agent",
-      "homepage": "https://github.com/kiwsan-mc/plugins/tree/main/mcg-crm-agent"
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-crm-agent"
     }
   ]
 }
