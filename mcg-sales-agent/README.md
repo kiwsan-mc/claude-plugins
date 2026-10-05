@@ -8,6 +8,10 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
+**v5.22.1** — ถอดค่าที่ปักไว้ + lint กันไม่ให้กลับมา
+- **v5.22.1**: กวาดค่าที่ปักไว้ในกฎออกจาก `member-analysis` · `member-by-branch` · `sales-agent` (2026-10-05): จำนวนสาขา `~88` และข้ออ้าง "~55% vs ~16%" ⇒ เปลี่ยนเป็นข้อความที่ไม่ผูกตัวเลข พร้อมเคสจริงที่ไม่เหลือตัวเลขให้ลอก — ข้ออ้างนั้น **พิสูจน์แล้วว่า stale** เพราะตั้งแต่ 2026-08-01 คอลัมน์ member ของฝั่ง Sales Out เป็น 0
+- **v5.22.1**: เพิ่ม `tools/check-pinned-values.py` + เทสต์ 15 เคส ที่ระดับ repo — กฎข้อนี้มีอยู่แล้วเป็นตัวอักษรและยังสะสมได้ 18 จุด จึงย้ายมาเป็นเครื่องมือตรวจ · ตั้งใจให้ **แคบ** (ไม่ยิงใส่แถว threshold อย่าง `≥80%=🟢`) และ **advisory เป็นค่าเริ่มต้น** เพราะยังยิงเกินใน 2 รูปที่กฎอนุญาต (ตารางหลักฐาน และ ratio ที่บรรยายรูป bug) ซึ่งเขียนเป็นเทสต์ยืนยันไว้ ไม่ใช่กลบ
+
 **v5.22.0** — เปิดใช้ Answer Term Guard เป็น Stop hook (ยืนยันแล้วว่า Cowork รัน hook ได้)
 - **v5.22.0**: ปิดคำถามค้างจาก v5.21.0 ว่า "Cowork รัน plugin hook หรือไม่" — **รันได้** หลักฐาน: สเปกปลั๊กอินของ Cowork (`cowork-plugin-management/0.2.2` → `references/component-schemas.md`) ระบุ `hooks/hooks.json` · event `Stop` = "When Claude finishes a response" · command hook คืน `{"decision":"block","reason":"..."}` ⇒ payload ที่เขียนไว้ตั้งแต่ v5.21.0 ถูกต้องอยู่แล้ว · และในเครื่องนี้มีหลักฐาน hook **ยิงจริง** — ปลั๊กอิน CockroachDB ใต้ `rpm\plugin_01J1ZUJcofzWJxiajSBsZ8US` มี `hookEvent: PostToolUse` พร้อม `blockingError` ใน transcript
 - **v5.22.0**: ⚠️ **ข้อจำกัดที่พบทีหลังและสำคัญกว่า**: hook โหลดเฉพาะปลั๊กอินที่มาทาง **marketplace/plugin route** — ในเครื่องนี้ `rpm\plugin_*` มี 20+ ปลั๊กอิน (CockroachDB, Figma, Zoom, Box …) แต่ **ไม่มีปลั๊กอิน mcg ตัวใดเลย** และ manifest ของเส้นทาง Skills panel ก็ไม่มี mcg ⇒ ถ้า skill ไปถึง Desktop ทาง Skills panel อย่างเดียว hook จะไม่โหลด ⇒ **ยังไม่ยืนยันว่า hook นี้ยิงจริงใน Cowork ของเรา** ต้องพิสูจน์ด้วยการนับ `hookEvent` ใน transcript (คำสั่งอยู่ใน README หัวข้อ Answer Term Guard) · อีกกับดัก: transcript เคยบันทึก hook ที่ล้มเพราะพาธเพี้ยนเป็น `C:\c\Users\...`
