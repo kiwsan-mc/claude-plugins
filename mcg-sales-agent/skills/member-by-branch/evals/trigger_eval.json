@@ -1,0 +1,23 @@
+[
+  {"query": "member แยกสาขา", "should_trigger": true},
+  {"query": "สาขาไหนมีสัดส่วนสมาชิกเยอะสุด", "should_trigger": true},
+  {"query": "member% ตามสาขาเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ยอดขายสมาชิกรายสาขา", "should_trigger": true},
+  {"query": "ขอตารางรายสาขาที่มีใบเสร็จสมาชิก", "should_trigger": true},
+  {"query": "ใบเสร็จต่อสาขาเป็นเท่าไหร่", "should_trigger": true},
+  {"query": "ลูกค้าใหม่รายสาขา", "should_trigger": true},
+  {"query": "Customer Overview", "should_trigger": true},
+  {"query": "ATV รายสาขา", "should_trigger": true},
+  {"query": "สาขาไหนสัดส่วนสมาชิกต่ำสุด", "should_trigger": true},
+
+  {"query": "สัดส่วน member กับ non-member เป็นเท่าไหร่", "should_trigger": false},
+  {"query": "member ratio แยกช่องทาง", "should_trigger": false},
+  {"query": "ยอดขายสมาชิกแยก generation", "should_trigger": false},
+  {"query": "member ratio ระดับบริษัทเทียบปีก่อน", "should_trigger": false},
+  {"query": "สมาชิกคนไหนซื้อเยอะสุด", "should_trigger": false},
+  {"query": "RFM ของสมาชิกเป็นยังไง", "should_trigger": false},
+  {"query": "ยอดขายรวมทุกช่องทาง", "should_trigger": false},
+  {"query": "cluster ร้านไหนขายดีต่อตร.ม.", "should_trigger": false},
+  {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
+  {"query": "เป้าขายเดือนนี้", "should_trigger": false}
+]
