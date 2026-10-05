@@ -147,6 +147,7 @@ GROUP BY CASE WHEN Item_Category = '7' THEN 'STO' ELSE 'PO' END
 ---
 
 # Vendor_Type (คำนวณจาก Vendor_Code)
+📌 หลักฐาน ณ 2026-09-24 (ค่าชั่วขณะ — ห้ามนำไปตอบ)
 
 🚫 **ห้ามใช้คอลัมน์ `Vendor_Type` ในตาราง** — ตรวจ 2026-09-24 แล้วมีค่าเป็น `'Not-Dummy'` **100% ทุกแถว** (ใช้ประโยชน์ไม่ได้)
 ✅ ให้คำนวณจาก `Vendor_Code` ด้วย CASE นี้เสมอ:

@@ -37,7 +37,7 @@ CANDIDATES: list[tuple[str, re.Pattern[str]]] = [
     ("approximate scale", re.compile(r"~\s?\d[\d,]*\s?(?:สาขา|แถว|ล้าน|SKU|รุ่น|ชิ้น|คน|ใบ)")),
 ]
 
-DATE = re.compile(r"\b20\d\d-\d\d-\d\d\b")
+DATE = re.compile(r"\b20\d\d-\d\d-\d\d\b|[ก-๙]{1,3}\.\s*20\d\d")
 GUARD = re.compile(r"ห้ามนำไปตอบ|ค่าชั่วขณะ|ห้ามนำไปใช้ตอบ|อ่านค่าจริง|ตัวเลขสมมติ")
 # A threshold row states a policy. A rank label ("Top 10 %") is not a share.
 # A "Numbers:" line is the rulebook's own formatting example.
@@ -72,16 +72,40 @@ class Finding:
 
 
 def scan(markdown: str) -> list[Finding]:
-    findings: list[Finding] = []
-    in_fence = False
+    """Flag figures that are not covered by their block's caption.
 
-    for lineno, line in enumerate(markdown.splitlines(), start=1):
-        if line.lstrip().startswith("```"):
+    The rule is about blocks, not lines: a figure is allowed when the block it
+    sits in is captioned with a date AND a guard. So a section (delimited by a
+    heading) is exempt when its heading, or the first non-empty line under it,
+    carries both. This is why a table of snapshot values under a dated caption
+    passes while the same numbers loose in a rule sentence do not.
+    """
+    findings: list[Finding] = []
+    lines = markdown.splitlines()
+    in_fence = False
+    caption_ok = False
+
+    for lineno, line in enumerate(lines, start=1):
+        stripped = line.strip()
+
+        if stripped.startswith("```"):
             in_fence = not in_fence
             continue
         if in_fence:
             continue
-        if DATE.search(line) or GUARD.search(line):
+
+        if re.match(r"^#{1,6}\s", stripped):
+            caption_ok = False
+            continue
+
+        # A caption governs the lines under it until the next heading, and it has
+        # to carry a date AND a guard. That is why a table of snapshot values
+        # under a dated caption passes while the same numbers loose in a rule do
+        # not. Dates are recognised in ISO or Thai form (`1-20 ก.ย. 2026`).
+        if DATE.search(line) and GUARD.search(line):
+            caption_ok = True
+
+        if caption_ok or DATE.search(line) or GUARD.search(line):
             continue
         if THRESHOLD_ROW.search(line) or RANK_LABEL.search(line) or FORMAT_EXAMPLE.search(line):
             continue
@@ -106,6 +130,11 @@ def scan(markdown: str) -> list[Finding]:
             findings.append(Finding(lineno, kind, token, line))
 
     return findings
+
+
+def _captioned(text: str) -> bool:
+    """A caption qualifies when it carries a date and a guard."""
+    return bool(DATE.search(text) and GUARD.search(text))
 
 
 def skill_files(root: Path) -> list[Path]:

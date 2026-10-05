@@ -60,6 +60,7 @@ tools:
 ผลลัพธ์ให้: **ยอดขาย = `Net_Sales_BGP`**, qty (จำนวนชิ้น), **`COGS`**, **gross profit (= ยอดขาย − COGS)**, **GP%**, invoice count
 
 > 🔴 **เกณฑ์ที่ธุรกิจสั่ง (2026-09-28) — บังคับ:**
+> 📌 หลักฐาน ณ 2026-09-28 · ค่าชั่วขณะ (ห้ามนำไปตอบ)
 > · **"ยอดขาย" ใช้ `Net_Sales_BGP`** (ไม่ใช่ `Net_Sales_Exclude_VAT` — คนละตัว จริง 1-24 ก.ย. 2026: BGP 266.9M vs excl VAT 261.5M)
 > · **"COGS" และ "GP%" ใช้ `COGS`** — GP = ยอดขาย BGP − COGS · GP% = GP ÷ ยอดขาย BGP × 100
 > · 🚫 ห้ามใช้ `Moving_Cost_Amount` แทน COGS ในรายงานนี้ (จริง 1-20 ก.ย.: GP จาก COGS 153.4M / 66.30% vs จาก moving 149.3M / 65.89%)

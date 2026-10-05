@@ -14,11 +14,15 @@ python tools/check-pinned-values.py --strict   # exit 1 on any hit
 python -m unittest discover -s tools/tests -v  # 15 cases
 ```
 
-**Advisory by default, on purpose.** Measured against the 34-file corpus it still over-fires on two legitimate shapes, and both are pinned in `tests/` as known false positives so nobody loosens the lint to silence them:
+**Advisory by default, on purpose.** Measured against the corpus on 2026-10-05 it still over-fires on two legitimate shapes, and both are pinned in `tests/` as known false positives so nobody loosens the lint to silence them:
 
-- An evidence table of snapshot values, e.g. `| GREEN | 3,944,606 | ฿875.0M | ฿904.6M |`
+- An evidence table of snapshot values whose caption carries no date or no guard
 - A bug-shape ratio the rule explicitly allows, e.g. `PO จะพอง ~42%`
 
 Treat every hit as a question, not a verdict. It is also deliberately narrow: bare policy numbers in threshold rows (`≥80%=🟢`) are left alone, because a lint that fires on those gets switched off. It trades recall for precision, so a clean run is not proof the corpus is clean.
+
+**What it cannot see.** The four patterns match baht amounts, approximate shares, decimal shares and `~N` scale claims. They do **not** match a bare count, so a live figure like `1,070 สาขา`, `643 สาขา` or `18,935 SKU` in a rule sentence passes unflagged. Counts of branches, stores and SKUs drift exactly like shares do, so a clean run still needs a manual read for them. Measured 2026-10-05: a sweep that reported 3 remaining hits still had live counts of that shape in the same files.
+
+**The lint is block-aware, not line-aware.** The rule allows a figure inside a block whose caption carries a date *and* a guard, so a caption covers every line under it until the next heading. A caption counts when it carries both, and a date counts in ISO (`2026-09-28`) or Thai form (`1-20 ก.ย. 2026`). A table of snapshot values under a dated caption therefore passes, while the same numbers loose in a rule sentence do not.
 
 On Windows set `PYTHONIOENCODING=utf-8`; the skill files are Thai and a `cp874` console crashes on the first odd glyph.

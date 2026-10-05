@@ -111,6 +111,46 @@ class TestAllowsRuleShapes(unittest.TestCase):
         self.assertEqual(scan("```\nSUM(x) / 100 * 100\n฿1,000,000.00\n```"), [])
 
 
+class TestBlockCaptions(unittest.TestCase):
+    """The rule is about blocks: a dated+guarded caption covers what is under it."""
+
+    def test_table_under_a_thai_dated_caption_is_exempt(self):
+        block = (
+            "### 5.4.1 GP\n"
+            "- 🚫 ห้ามใช้ Moving_Cost แทน COGS — ของจริง 1-20 ก.ย. 2026 ต่างกัน 4.04M "
+            "(ค่าชั่วขณะ — ห้ามนำตัวเลขไปตอบ)\n"
+            "\n"
+            "| เกณฑ์ | GP | GP% |\n"
+            "|---|---|---|\n"
+            "| BGP - COGS | 153,384,047.02 | 66.30% |\n"
+            "| excl VAT | 149,337,580.22 | 65.89% |\n"
+        )
+        self.assertEqual(scan(block), [])
+
+    def test_same_table_without_the_caption_is_flagged(self):
+        block = (
+            "### 5.4.1 GP\n"
+            "\n"
+            "| เกณฑ์ | GP | GP% |\n"
+            "|---|---|---|\n"
+            "| BGP - COGS | 153,384,047.02 | 66.30% |\n"
+        )
+        self.assertIn("66.30%", {f.token for f in scan(block)})
+
+    def test_caption_does_not_leak_past_the_next_heading(self):
+        block = (
+            "### เกณฑ์\n"
+            "📌 หลักฐาน ณ 2026-09-28 (ค่าชั่วขณะ — ห้ามนำไปตอบ)\n"
+            "| GP | 66.30% |\n"
+            "\n"
+            "### กฎอื่น\n"
+            "สัดส่วนอื่น ~1.8% ที่ไม่มีบริบท\n"
+        )
+        caught = {f.token for f in scan(block)}
+        self.assertNotIn("66.30%", caught)
+        self.assertIn("~1.8%", caught)
+
+
 class TestKnownFalsePositives(unittest.TestCase):
     """Asserted, not excused. If one of these stops firing, update the README."""
 
