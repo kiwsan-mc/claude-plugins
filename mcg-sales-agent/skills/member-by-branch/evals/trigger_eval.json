@@ -9,6 +9,10 @@
   {"query": "Customer Overview", "should_trigger": true},
   {"query": "ATV รายสาขา", "should_trigger": true},
   {"query": "สาขาไหนสัดส่วนสมาชิกต่ำสุด", "should_trigger": true},
+  {"query": "Top 10 % Member Sales Contribution", "should_trigger": true},
+  {"query": "จัดอันดับสาขาตามสัดส่วนสมาชิก", "should_trigger": true},
+  {"query": "10 อันดับสาขาที่สัดส่วนสมาชิกสูงสุด", "should_trigger": true},
+  {"query": "สาขาไหนสมาชิกซื้อเยอะสุด เรียงอันดับ", "should_trigger": true},
 
   {"query": "สัดส่วน member กับ non-member เป็นเท่าไหร่", "should_trigger": false},
   {"query": "member ratio แยกช่องทาง", "should_trigger": false},
@@ -17,6 +21,8 @@
   {"query": "สมาชิกคนไหนซื้อเยอะสุด", "should_trigger": false},
   {"query": "RFM ของสมาชิกเป็นยังไง", "should_trigger": false},
   {"query": "ยอดขายรวมทุกช่องทาง", "should_trigger": false},
+  {"query": "Top 10 สาขาที่ขายดีสุด", "should_trigger": false},
+  {"query": "10 อันดับสินค้าขายดี", "should_trigger": false},
   {"query": "cluster ร้านไหนขายดีต่อตร.ม.", "should_trigger": false},
   {"query": "สต็อกคงเหลือเท่าไหร่", "should_trigger": false},
   {"query": "เป้าขายเดือนนี้", "should_trigger": false}

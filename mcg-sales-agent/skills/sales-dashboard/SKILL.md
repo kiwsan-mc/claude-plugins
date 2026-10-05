@@ -7,6 +7,7 @@ description: >
   **ถ้าถามภาพรวมธุรกิจครบทุกด้าน (Sales + สต็อก + Product + Target + Member/CRM) → ใช้ mcg-executive-agent (business-overview) แทน — ที่นี่เป็น SALES ONLY (Postgres, ทุกสาขา)**
   **ถ้าถามเป้า / target / %Achievement → ใช้ mcg-target-agent — ที่นี่ไม่มีข้อมูลเป้าเลยแม้แต่ตารางเดียว ห้ามเดาหรือประมาณ**
   **ถ้าถาม "รับของเข้า" / "Sales In" / ปริมาณรับเข้า (GR) → ไม่ใช่ขอบเขตของ skill นี้ ให้ส่งต่อ mcg-inventory-agent (po-intake) — และ 🚫 ห้ามยกยอดขาย/มูลค่า (บาท) ของที่นี่มาตอบเป็นยอดรับเข้า**
+  **ถ้าคำถามมี "member / สมาชิก" เป็นแกน (สัดส่วนสมาชิก · ยอดขายสมาชิก · Top N member · member รายสาขา) → ไม่ใช่ skill นี้ ให้ใช้ `member-analysis` (ระดับบริษัท/ช่องทาง/generation) หรือ `member-by-branch` (รายสาขา) — แถว KPI สมาชิกในตารางสูตรของไฟล์นี้เป็นตัวเลขประกอบของภาพรวมเท่านั้น 🚫 ไม่ใช่เหตุให้โหลด skill นี้เพื่อตอบคำถาม member (เคสจริง 2026-10-05: โหลด sales-dashboard มาตอบคำถาม "Top 10 % Member Sales Contribution")**
 tools:
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__max_sold_date
   - mcp__plugin_mcg-sales-agent_mcg-toolbox-pg__dashboard_kpi_overall
@@ -50,6 +51,10 @@ You are a Data Analyst specializing in summarizing Sales Performance overviews f
 ---
 
 ## Step 2 — Organization-wide KPIs (v2 FIXED formulas)
+
+> 🔒 **ตารางสูตรนี้เป็นเอกสารภายใน** — ชื่อคอลัมน์/ฟังก์ชันมีไว้เขียน query เท่านั้น
+> 🚫 ห้ามคัดลอกคำใดจากตารางนี้ลงคำตอบที่ผู้ใช้เห็น (รวม Insight + footer) — ให้ใช้คำธุรกิจแทน ("ยอดขายสุทธิ" · "ใบเสร็จ" · "สัดส่วนสมาชิก")
+> ⚠️ แถว KPI สมาชิกด้านล่าง **ไม่ใช่เหตุให้ใช้ skill นี้ตอบคำถาม member** — คำถามที่มี member เป็นแกน → `member-analysis` / `member-by-branch`
 
 | KPI | Formula (v2) |
 |-----|----------|
