@@ -8,6 +8,19 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
+**v5.22.0** — เปิดใช้ Answer Term Guard เป็น Stop hook (ยืนยันแล้วว่า Cowork รัน hook ได้)
+- **v5.22.0**: ปิดคำถามค้างจาก v5.21.0 ว่า "Cowork รัน plugin hook หรือไม่" — **รันได้** หลักฐาน: สเปกปลั๊กอินของ Cowork (`cowork-plugin-management/0.2.2` → `references/component-schemas.md`) ระบุ `hooks/hooks.json` · event `Stop` = "When Claude finishes a response" · command hook คืน `{"decision":"block","reason":"..."}` ⇒ payload ที่เขียนไว้ตั้งแต่ v5.21.0 ถูกต้องอยู่แล้ว · และในเครื่องนี้มีหลักฐาน hook **ยิงจริง** — ปลั๊กอิน CockroachDB ใต้ `rpm\plugin_01J1ZUJcofzWJxiajSBsZ8US` มี `hookEvent: PostToolUse` พร้อม `blockingError` ใน transcript
+- **v5.22.0**: ⚠️ **ข้อจำกัดที่พบทีหลังและสำคัญกว่า**: hook โหลดเฉพาะปลั๊กอินที่มาทาง **marketplace/plugin route** — ในเครื่องนี้ `rpm\plugin_*` มี 20+ ปลั๊กอิน (CockroachDB, Figma, Zoom, Box …) แต่ **ไม่มีปลั๊กอิน mcg ตัวใดเลย** และ manifest ของเส้นทาง Skills panel ก็ไม่มี mcg ⇒ ถ้า skill ไปถึง Desktop ทาง Skills panel อย่างเดียว hook จะไม่โหลด ⇒ **ยังไม่ยืนยันว่า hook นี้ยิงจริงใน Cowork ของเรา** ต้องพิสูจน์ด้วยการนับ `hookEvent` ใน transcript (คำสั่งอยู่ใน README หัวข้อ Answer Term Guard) · อีกกับดัก: transcript เคยบันทึก hook ที่ล้มเพราะพาธเพี้ยนเป็น `C:\c\Users\...`
+- **v5.22.0**: เพิ่ม `hooks/hooks.json` (event `Stop`, `timeout` 20s) + `hooks-handlers/run-check.sh` ที่เลือก interpreter เองตามลำดับ `ANSWER_GUARD_PYTHON` → `py -3` → `python3` → `python` — เลือก `py` ก่อนเพราะบน Windows `python`/`python3` มักเป็น alias ของ Microsoft Store ที่อาจค้าง (บนเครื่องนี้ทั้งคู่เป็น stub)
+- **v5.22.0**: **กัน loop** — handler ปล่อยผ่านทันทีถ้า payload มี `stop_hook_active` ⇒ false positive จะไม่วน block ซ้ำ · และ **fail open ทุกทาง** (transcript อ่านไม่ได้ · ไม่มี interpreter · ตัดสินไม่ทันใน timeout) ⇒ ไม่มีทางที่ hook ที่พังจะค้างคำตอบผู้ใช้
+- **v5.22.0**: ใช้ hooks.json **แบบ flat** (event ระดับบนสุด) ตามสเปก Cowork — ต่างจาก `explanatory-output-style` ของ Anthropic ในรีโปนี้ที่ห่อด้วย key `hooks` ⇒ ถ้าฝั่ง Claude Code ไม่ยิง hook ให้สลับไปแบบห่อ
+- **v5.22.0**: เทสต์ 18 เคส — เพิ่มเคส `stop_hook_active` ปล่อยผ่านแม้ข้อความสกปรก, transcript ไม่มี path, และยิง launcher จริง 3 ทาง (สกปรก → block · สะอาด → เงียบ · ไม่มี interpreter → exit 0)
+
+**v5.21.0** — Answer Term Guard: ตรวจคำต้องห้ามด้วยเครื่อง ไม่ใช่ให้โมเดลตรวจตัวเอง
+- **v5.21.0**: รอบที่ 2 ของเคสเดิม (2026-10-05) คำตอบยังหลุด — รอบนี้หลุด**หนักกว่าเดิม** โดยพิมพ์ `Branch_Code` · `dim_branch` · `Branch_Code_Key` · `Branch_Code_And_Text` · `Store_Name` · `Branch_Text` ใน**กล่อง Insight** และพิมพ์ `ai.poc_fact_sales_with_crm + ai.dim_branch` ใน **footer** ⇒ สรุปว่าการเพิ่มข้อความห้ามอย่างเดียวถึงเพดานแล้ว (สองรอบ สองครั้งที่หลุด) จึงเพิ่ม **ตัวตรวจที่รันได้จริง** แทนการพึ่ง self-check: `answer-guard/check_answer_terms.py` ใช้เกณฑ์จับคำ 6 ข้อเดียวกับ §1 (ขึ้นต้น `ai.` · ลงท้าย `_synapse`/`_count`/`_key`/`_model`/`_color`/`_quantity` · ฟังก์ชัน SQL · snake_case/Pascal_Snake · ชื่อ tool/MCP · ชื่อระบบ) · ยกเว้นบรรทัด 🔒 (ตารางสูตร) · CLI ใช้ได้ทั้งไฟล์และ stdin และคืน exit 1 เมื่อพบ
+- **v5.21.0**: เทสต์ 16 เคส (`answer-guard/tests/`) — ฝั่ง fail ใช้**ข้อความจริงที่หลุดถึงผู้ใช้ทั้งสองรอบ** (ไม่ใช่ตัวอย่างสมมติ) ยืนยันจับได้ครบ 11 token · ฝั่ง pass ใช้ข้อความธุรกิจที่มีตัวเลข/หน่วย/฿/ไทย เหมือนคำตอบจริง เพื่อกัน false positive · ครอบคลุม edge case: token ซ้ำนับครั้งเดียว · 🔒 ยกเว้น · transcript อ่านไม่ได้ = **fail open** · ตัดสินเฉพาะ assistant turn สุดท้าย (turn เก่าที่หลุดแล้วไม่ทำให้บล็อกซ้ำ และ turn เก่าที่สะอาดไม่กลบ turn สุดท้ายที่หลุด)
+- **v5.21.0**: แนบ Stop-hook handler `hooks-handlers/check_answer_terms_stop.py` **แต่ยังไม่เปิดใช้** — ต้องยืนยันก่อนว่า Cowork/Claude Desktop รัน plugin hook (เคสที่หลุดเกิดบน Desktop) และต้องแก้ชื่อ interpreter ให้ตรงเครื่อง (บน Windows `python` อาจเป็น alias ของ Microsoft Store ที่ค้าง) ⇒ วิธีเปิดและข้อควรระวังอยู่ใน README หัวข้อ "Answer Term Guard"
+
 **v5.20.1** — แก้ 3 ต้นเหตุจากเคสจริง (Claude Desktop, 2026-10-05)
 - **v5.20.1**: เคส "Top 10 % Member Sales Contribution" ที่คำตอบออกมาเป็นยอดรวมก้อนเดียว 18.4% และพิมพ์ชื่อคอลัมน์ลงคำตอบ ⇒ แก้ที่ต้นเหตุ 3 จุด (1) **กฎการจัดอันดับ** — `member-by-branch` บังคับว่าคำถามที่มี "Top N / อันดับ / สาขาไหนมากสุด" ต้องได้**ตารางที่มี 1 แถวต่อ 1 รายการ + คอลัมน์อันดับ + ระบุมิติและตัวชี้วัดที่ใช้จัดอันดับ** · 🚫 ห้ามตอบด้วยยอดรวม · ไม่ระบุมิติ/ตัวชี้วัด → ถามกลับด้วย `AskUserQuestion` (2) **กฎนิยาม member** — "สมาชิก" มี 2 ฐาน (ฐานใบเสร็จ vs ฐานยอดขาย) ที่ให้ค่าไม่ตรงกัน ต้องระบุฐานทุกครั้ง ห้ามสลับกลางคำตอบ · ถ้าค่าที่ได้ขัดกับตัวเลขที่ธุรกิจเคยรายงาน **ให้บอกว่าขัด ไม่ใช่ปรับตัวเลขให้ดูเข้าท่า** · และต้องเทียบช่วงเวลา/ขอบเขตสาขา/ฐานให้เป็นเนื้อเดียวกันก่อนสรุป (เคสจริง: 178.17M ของเดือนเดียว vs 184.5M ของทั้งไตรมาส) (3) **🔒 ปิดตารางสูตรเป็นเอกสารภายใน** — เพิ่ม fence ห้ามคัดลอกชื่อคอลัมน์/ฟังก์ชันจากตารางสูตรลงคำตอบ ใน `member-by-branch` · `member-analysis` · `sales-dashboard` (ตามบทเรียน v1.1.11 ที่แก้เฉพาะประโยคกฎ แต่ตารางสูตรยังเป็นแหล่งที่โมเดลลอกคำไปพิมพ์)
 - **v5.20.1**: แก้ routing ที่ชนกัน — `sales-dashboard` มีแถว KPI สมาชิกอยู่ในตารางสูตรทั้งที่ description ประกาศว่า SALES ONLY ⇒ agent โหลด `sales-dashboard` มาถาม member · เพิ่มบรรทัดขอบเขตทั้งใน description และเหนือตารางสูตร: คำถามที่มี member เป็นแกน → `member-analysis` / `member-by-branch` และ `member-analysis` เพิ่มทางออกไป `member-by-branch` สำหรับคำถามรายสาขา/จัดอันดับ · เพิ่ม trigger eval ของ `member-by-branch` เป็น 26 เคส (positive 14) ตรวจแล้ว **178 วลีรวมทั้งปลั๊กอิน ไม่มีวลีใดชนกับ positive ของสกิลอื่น**
@@ -37,6 +50,32 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 - **v5.19.3**: แก้ตามผลตรวจ: ถามกลับแบบ 3 ตัวเลือก (SKU / รุ่น (รุ่น-สี) / ชิ้น) แทนการแยก «รุ่น» ออกมา · ติดหน่วย Tickets (ใบเสร็จ) และตาราง Member (฿/ใบ/ชิ้น) · `total_quantity` = จำนวนชิ้น · `pricing-promotion` ให้ถามกลับก่อนค่อยรัน SQL · `category-hierarchy` นับ SKU/รุ่น-สี เฉพาะช่วง FY ปัจจุบัน (FILTER) ให้ตรงหัวตาราง · ระบุกฎตอบ "รับของเข้า" เป็นจำนวนชิ้นในไฟล์แม่
 - **v5.19.2**: ย้ำกฎ **ห้ามเดาข้อมูลมาตอบ** (ใช้กับทุก runtime โดยเฉพาะ Claude Desktop / Cowork) ใน **ทุก skill** ของปลั๊กอิน — ทุกตัวเลข/ข้อเท็จจริงต้องมาจากผลการเรียก tool จริงในบทสนทนาและอ้างอิงกลับได้ · เรียกแล้วไม่พบข้อมูลให้ตอบว่า "ไม่พบข้อมูล" ตามจริง (แยกจาก 0) · ห้ามเดา/ประมาณ/แต่งตัวเลข/ตอบจากความจำของโมเดล
 - **v5.19.1**: กฎการนับจำนวน — "จำนวนรุ่น" = **รุ่น-สี** (ไม่ใช่รุ่น ไม่ใช่ SKU) · "จำนวน/กี่" ที่ไม่ระบุหน่วยต้อง **ถามกลับ** (SKU / รุ่น-สี / ชิ้น) · ทุกคำตอบที่เป็นจำนวนต้องระบุหน่วย — วางกฎที่ `sales-agent` (ไฟล์แม่) และปรับหน่วย/ตารางในสกิลลูก
+
+## Answer Term Guard
+
+ตัวตรวจคำต้องห้ามในคำตอบ — แทนการให้โมเดลตรวจตัวเอง (ซึ่งหลุดซ้ำ 2 ครั้งในวันที่ 2026-10-05)
+
+```bash
+python answer-guard/check_answer_terms.py draft.md   # หรือ cat draft.md | python answer-guard/check_answer_terms.py
+python -m unittest discover -s answer-guard/tests -v # 16 เคส
+```
+
+- ตรวจตาม**เกณฑ์จับคำ 6 ข้อ**เดียวกับบล็อกกฎ §1: ขึ้นต้น `ai.` · ลงท้าย `_synapse`/`_count`/`_key`/`_model`/`_color`/`_quantity` · ชื่อฟังก์ชัน SQL · snake_case/Pascal_Snake · ชื่อ tool/MCP · ชื่อระบบ
+- เคสทดสอบเป็น**ข้อความจริงที่หลุดถึงผู้ใช้** (ชื่อคอลัมน์ในกล่อง Insight, ชื่อตารางใน footer) + ข้อความธุรกิจที่ต้องผ่าน (ไทย · ฿ · หน่วย) ⇒ กันทั้งการพลาดและการจับผิด
+- บรรทัดที่ขึ้นต้นด้วย 🔒 (ตารางสูตร) ได้รับยกเว้น
+
+**ติดตั้งเป็น Stop hook แล้ว — แต่ยังไม่ยืนยันว่ายิงจริงใน Cowork ของเรา** — `hooks/hooks.json` เรียก `hooks-handlers/run-check.sh` ซึ่งเลือก interpreter เอง (`ANSWER_GUARD_PYTHON` → `py -3` → `python3` → `python`) แล้วส่งต่อให้ `hooks-handlers/check_answer_terms_stop.py`
+
+- ✅ สเปกปลั๊กอินของ Cowork ระบุ `hooks/hooks.json` · event `Stop` = "When Claude finishes a response" · command hook คืน `{"decision":"block","reason":"..."}` ตรงกับ payload ที่ handler ส่งอยู่แล้ว
+- 🚫 **hook โหลดเฉพาะปลั๊กอินที่มาทาง marketplace/plugin route** — ตรวจในเครื่องนี้ (2026-10-05): ปลั๊กอินที่ materialize ใต้ `rpm\plugin_*` (CockroachDB, Figma, Zoom …) มี hook ครบและเคยยิงจริง (`PostToolUse` ×7 · `UserPromptSubmit` ×2) แต่ **ไม่มีปลั๊กอิน mcg ตัวใดอยู่ใต้ `rpm\`** และ manifest ของเส้นทาง Skills panel (`skills-plugin\...\manifest.json`) ก็ไม่มี mcg ⇒ ถ้า skill ไปถึง Desktop ทาง Skills panel อย่างเดียว `hooks\hooks.json` จะ **ไม่ถูกโหลด**
+- 🔍 **วิธีพิสูจน์ (ground truth เร็วกว่าเอกสาร)** — เปิด session ที่ปลั๊กอินติดตั้งแล้ว ถามคำถามที่ล่อให้พิมพ์ชื่อคอลัมน์ แล้วนับ event ใน transcript: `grep -rho '"hookEvent":"[A-Za-z]*"' "$APPDATA/Claude/local-agent-mode-sessions" --include=*.jsonl | sort | uniq -c` · ไม่เห็น `Stop` = hook ไม่ยิง
+- ⚠️ **กับดัก path บน Windows** — transcript ในเครื่องนี้เคยบันทึก hook ที่ล้มเหลวเพราะพาธเพี้ยนเป็น `C:\c\Users\...` (`${CLAUDE_PLUGIN_ROOT}` ถูกแทนที่ถูก แต่พาธต่อท้ายเพี้ยน) ถ้าเจออาการนี้ ให้เลิกเรียกผ่าน `bash` แล้วเรียก interpreter ตรง ๆ ใน `command`
+- ⚠️ **Cowork ใช้ hooks.json แบบ flat** (event อยู่ระดับบนสุด) ต่างจากปลั๊กอินของ Anthropic ในรีโปนี้ (`explanatory-output-style`) ที่ห่อด้วย key `hooks` — ที่นี่ใช้แบบ flat ตามสเปก Cowork ถ้าฝั่ง Claude Code ไม่ยิง hook ให้สลับไปแบบห่อ
+- ✅ **กัน loop** — ถ้า payload มี `stop_hook_active` จะปล่อยผ่านทันที ⇒ false positive ไม่วน block ซ้ำ
+- ✅ **fail open ทุกทาง** — อ่าน transcript ไม่ได้ · ไม่มี interpreter · hook ไม่ทันใน 20 วินาที ⇒ ปล่อยคำตอบผ่าน ไม่ค้างงานผู้ใช้
+- ⚠️ เลือก `py -3` ก่อน `python` เพราะบน Windows `python`/`python3` มักเป็น alias ของ Microsoft Store (บนเครื่องนี้ทั้งคู่เป็น stub ที่อาจค้าง) · ตั้ง `ANSWER_GUARD_PYTHON` เพื่อล็อก interpreter เช่นตัวที่แถมมาใต้ `C:\ProgramData\McGroup\Claude\mcp\python3-standalone`
+- ⚠️ handler อ่าน transcript รูปแบบ `{"type":"assistant","message":{...}}` ต่อบรรทัด — ถ้าเปลี่ยนรูปแบบจะ fail open (ไม่บล็อก) ไม่ใช่บล็อกผิด
+- 🚫 ปิดได้โดยลบ `hooks/hooks.json`
 
 ### Changelog
 - **v3.0.0**: Migrated to PostgreSQL + pgvector. New tools: `sales_agent`, `pg_describe_table`, `pg_list_tables`. SQL syntax updated to PostgreSQL. Added `FY_Year` column support. SQM threshold ≥50.
