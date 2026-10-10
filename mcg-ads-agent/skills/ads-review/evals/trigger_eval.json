@@ -13,6 +13,9 @@
   {"query": "กลุ่มเป้าหมายโฆษณาใกล้หมดอายุหรือยัง", "should_trigger": true},
   {"query": "โฆษณาเพิ่มออเดอร์จนคลังรับไม่ไหวไหม", "should_trigger": true},
   {"query": "ยอดคงเหลือบัญชีโฆษณาเหลือเท่าไร", "should_trigger": true},
+  {"query": "ควรยิงแอดสินค้าตัวไหนต่อ", "should_trigger": true},
+  {"query": "คำค้นไหนน่ายิงบ้าง ราคาเสนอเท่าไร", "should_trigger": true},
+  {"query": "เมื่อวานนี้โฆษณาเผางบช่วงกี่โมง", "should_trigger": true},
 
   {"query": "ยอดขายรวมเดือนนี้เท่าไร", "should_trigger": false},
   {"query": "เป้ายอดขายเดือนนี้เทียบยอดจริง", "should_trigger": false},

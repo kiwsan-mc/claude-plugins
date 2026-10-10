@@ -12,8 +12,14 @@ tools:
   - mcp__e-commerce-mcp__shopee_ads_get_balance
   - mcp__e-commerce-mcp__shopee_ads_get_toggle
   - mcp__e-commerce-mcp__shopee_ads_get_daily_performance
+  - mcp__e-commerce-mcp__shopee_ads_get_hourly_performance
   - mcp__e-commerce-mcp__shopee_ads_list_campaigns
+  - mcp__e-commerce-mcp__shopee_ads_get_campaign_settings
   - mcp__e-commerce-mcp__shopee_ads_get_product_daily_performance
+  - mcp__e-commerce-mcp__shopee_ads_get_product_hourly_performance
+  - mcp__e-commerce-mcp__shopee_ads_get_recommended_items
+  - mcp__e-commerce-mcp__shopee_ads_get_recommended_keywords
+  - mcp__e-commerce-mcp__shopee_ads_get_recommended_roi
   - mcp__e-commerce-mcp__tiktok_ads_list_advertisers
   - mcp__e-commerce-mcp__tiktok_ads_get_advertiser
   - mcp__e-commerce-mcp__tiktok_ads_get_report
@@ -58,8 +64,10 @@ tools:
 | หน่วยที่ขายได้จากแอด | ❌ | ✅ `direct_item_sold` / `broad_item_sold` |
 | ค่าโฆษณาต่อออเดอร์ | ⚠️ metric ถูกปฏิเสธ | ✅ `cost_per_conversion` |
 | การแยก direct / broad | ❌ | ✅ ทุกตัวเลขมีสองมุม |
-| การแสดงผลรายชั่วโมง | ❌ มีแค่วัน | ⚠️ มี endpoint แต่ยังไม่เปิดเป็น tool |
-| โครงสร้างแคมเปญ/แอดกรุ๊ป/โฆษณา | ✅ ละเอียด (budget, bid, objective) | ⚠️ มีแค่รายการแคมเปญ |
+| การแสดงผลรายชั่วโมง | ❌ มีแค่วัน | ✅ ทั้งระดับร้านและระดับแคมเปญ |
+| ชื่อแคมเปญ | ✅ | ✅ (ผ่านการตั้งค่าแคมเปญ) |
+| สิ่งที่แพลตฟอร์มแนะนำให้ยิง | ❌ | ✅ สินค้า · คำค้น · เป้าผลตอบแทน · งบ |
+| โครงสร้างแคมเปญ/แอดกรุ๊ป/โฆษณา | ✅ ละเอียด (budget, bid, objective) | ⚠️ มีแค่รายการและค่าตั้งต้น |
 | การวัดผล (pixel, audience) | ✅ | ❌ ไม่มี endpoint |
 
 ▸ **เมื่อผู้ใช้ถาม "ยอดขายจากโฆษณา" หรือ "ROAS" ให้เริ่มที่ Shopee** เพราะเป็นช่องทางเดียวที่ตอบได้ด้วยตัวเลขจริง ส่วน TikTok ให้เริ่มที่ระดับบัญชีและบอกตรง ๆ ว่าต่ำกว่านั้นไม่มีข้อมูล
@@ -72,11 +80,24 @@ tools:
 
 ## Shopee Ads
 
+**สถานะบัญชี**
 1. `shopee_ads_get_balance` → เงินเหลือเท่าไร · **อ่านก่อนอย่างอื่น** เพราะ ROAS บนบัญชีที่ใกล้หมดไม่ actionable
 2. `shopee_ads_get_toggle` → เปิด auto top-up / campaign surge อยู่ไหม
-3. `shopee_ads_get_daily_performance` → ตัวเลขรายวัน (ดูข้อควรระวังด้านล่าง)
-4. `shopee_ads_list_campaigns` → รายการแคมเปญของร้าน
-5. `shopee_ads_get_product_daily_performance` → ผลรายแคมเปญ (ต้องมี campaign id จากข้อ 4 ก่อน)
+
+**ผลงาน**
+3. `shopee_ads_get_daily_performance` → ภาพรวมรายวัน
+4. `shopee_ads_get_hourly_performance` → **รายชั่วโมงของวันเดียว** — ใช้เมื่อต้องดูว่ากำลังเผางบอยู่หรือเปล่า
+5. `shopee_ads_get_product_daily_performance` → ต่อแคมเปญ รายวัน
+6. `shopee_ads_get_product_hourly_performance` → ต่อแคมเปญ รายชั่วโมง
+
+**แคมเปญ**
+7. `shopee_ads_list_campaigns` → รายการแคมเปญทั้งร้าน (ต้องมีก่อนใช้ข้อ 5, 6)
+8. `shopee_ads_get_campaign_settings` → **ชื่อแคมเปญ** และค่าตั้งต้น — ตัวเดียวที่ทำให้ id อ่านออก
+
+**การวางแผน** (ไม่ใช่ผลงานที่ผ่านมา อย่ารายงานรวมกับตัวเลขผลงาน)
+9. `shopee_ads_get_recommended_items` → สินค้าที่แพลตฟอร์มแนะนำให้ยิง พร้อม tag
+10. `shopee_ads_get_recommended_keywords` → คำค้น + ปริมาณการค้นหา + ราคาเสนอที่แนะนำ
+11. `shopee_ads_get_recommended_roi` → ช่วงเป้าผลตอบแทนของสินค้า ใช้ตั้งเกณฑ์ตัดแคมเปญ
 
 ## TikTok Ads
 
@@ -91,7 +112,10 @@ tools:
 **Shopee:**
 - วันที่รับเป็น `YYYY-MM-DD` แล้ว tool แปลงให้เอง — 🚫 อย่าส่งรูปแบบอื่น
 - ช่วงวันต้องจบไม่เกินวันนี้ และย้อนไม่เกิน **6 เดือน**
-- `get_product_daily_performance` **ต้องมี campaign id** — ตอบ "ทุกสินค้าเป็นยังไง" ไม่ได้
+- **รายชั่วโมงรับ "วันเดียว" ไม่ใช่ช่วง** — ส่งช่วงจะไม่ผ่าน
+- `get_product_daily/hourly_performance` **ต้องมี campaign id** — ตอบ "ทุกสินค้าเป็นยังไง" ไม่ได้
+- `get_campaign_settings` **ต้องส่งทั้ง campaign id และ `info_type_list`** — ขาดตัวใดตัวหนึ่งไม่ผ่าน
+- `get_recommended_roi` รับ **item id** ไม่ใช่ campaign id (ส่ง campaign id จะได้ server error)
 - รายการแคมเปญ **ไม่ผูกกับสินค้า** แม้ชื่อจะบอกอย่างนั้น — ส่งรหัสสินค้าไปก็ได้ผลเหมือนเดิม
 - ร้าน Mc Jeans มีแคมเปญหลายพันรายการ ส่วนใหญ่ไม่มีการใช้เงิน — **ต้องดู spend ก่อน**
 
@@ -148,6 +172,16 @@ tools:
 
 ---
 
+# Step 8 — การวางแผน (เมื่อถูกถามว่า "ควรยิงอะไรต่อ")
+
+`shopee_ads_get_recommended_items` → เลือกสินค้าที่น่าสนใจ → `shopee_ads_get_recommended_keywords` เอาคำค้นและราคาเสนอ → `shopee_ads_get_recommended_roi` เอาช่วงเป้าผลตอบแทนไปตั้งเกณฑ์ตัดแคมเปญ
+
+▸ **นี่คือคำแนะนำของแพลตฟอร์ม ไม่ใช่ผลงานที่ผ่านมา** — 🚫 ห้ามนำตัวเลขจากข้อนี้ไปรวมหรือเทียบกับงบที่ใช้ไปแล้ว และต้องบอกผู้ใช้ว่าเป็นข้อเสนอ ไม่ใช่ผลลัพธ์
+
+▸ ถ้าผู้ใช้ถาม "ผลงานเป็นยังไง" อย่าโหลดข้อนี้ — ข้อนี้สำหรับ "ควรทำอะไรต่อ"
+
+---
+
 # Response Structure
 
 **Headline** — ใช้เงินไปเท่าไร ช่วงไหน ผลตอบแทนเป็นอย่างไร และช่องทางไหน
@@ -187,6 +221,7 @@ tools:
 | โฆษณา Lazada | ❌ ยังไม่มีข้อมูล |
 | ที่เชื่อม ad ↔ SKU | ❌ ยังไม่มีทั้งสองช่องทาง |
 | ROAS รายแคมเปญบน TikTok | ⚠️ มักไม่มี — มีค่าเฉพาะบางแคมเปญ ต้องอ่านค่าจริง |
-| ข้อมูลรายชั่วโมงของ Shopee | ⚠️ มี endpoint แต่ยังไม่เปิดเป็น tool |
+| ผลรายแคมเปญของ Shopee | ⚠️ แคมเปญที่ดูมายังไม่พบที่มียอด — ถ้าทุกแถวเป็นศูนย์ ให้รายงานว่า "ยังไม่พบแคมเปญที่มียอด" ไม่ใช่ "ไม่มีผลงาน" |
+| แคมเปญแบบ GMS ของ Shopee | ❌ ถูกจำกัดการเรียกไว้ ยังอ่านไม่ได้ |
 | ความสดของข้อมูล | ⚠️ ฝั่งออเดอร์เป็น snapshot ที่ sync มา อาจตามหลังไม่กี่นาที |
 | เพดานช่วงวันของ Shopee | ⚠️ ย้อนได้ไม่เกิน 6 เดือน และห้ามเกินวันนี้ |
