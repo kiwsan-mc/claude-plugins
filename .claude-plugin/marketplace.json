@@ -305,7 +305,7 @@
     },
     {
       "name": "mcg-ads-agent",
-      "description": "MC Group Ads Agent — วิเคราะห์ผลโฆษณา TikTok Ads (การใช้เงิน, ROAS, โครงสร้างแคมเปญ, audience, pixel) และเชื่อมกับออเดอร์/สต็อกของ MC Group ผ่าน connector MC E-Commerce & Ads. ใช้เมื่อ user ถามเรื่องโฆษณา, ยิงแอด, งบโฆษณา, ROAS, แคมเปญ, แอดกรุ๊ป, หรือผลตอบแทนจากโฆษณา",
+      "description": "MC Group Ads Agent — วิเคราะห์ผลโฆษณา TikTok Ads และ Shopee Ads (การใช้เงิน, ROAS/ROI, ยอดขายจากแอด, โครงสร้างแคมเปญ, audience, pixel) และเชื่อมกับออเดอร์/สต็อกของ MC Group ผ่าน connector MC E-Commerce & Ads. ใช้เมื่อ user ถามเรื่องโฆษณา, ยิงแอด, งบโฆษณา, ROAS, ROI, GMV จากโฆษณา, แคมเปญ, หรือผลตอบแทนจากโฆษณา",
       "author": {
         "name": "MC Group AI Platform",
         "email": "ai-platform@mcjeans.com"
