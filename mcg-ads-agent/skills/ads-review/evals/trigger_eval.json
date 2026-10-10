@@ -16,6 +16,9 @@
   {"query": "ควรยิงแอดสินค้าตัวไหนต่อ", "should_trigger": true},
   {"query": "คำค้นไหนน่ายิงบ้าง ราคาเสนอเท่าไร", "should_trigger": true},
   {"query": "เมื่อวานนี้โฆษณาเผางบช่วงกี่โมง", "should_trigger": true},
+  {"query": "ผลแคมเปญ 10.10 เป็นยังไง", "should_trigger": true},
+  {"query": "11.11 กับ 12.12 ปีนี้ อันไหนคุ้มกว่า", "should_trigger": true},
+  {"query": "งบช่วง Double Day ใช้ไปเท่าไร", "should_trigger": true},
 
   {"query": "ยอดขายรวมเดือนนี้เท่าไร", "should_trigger": false},
   {"query": "เป้ายอดขายเดือนนี้เทียบยอดจริง", "should_trigger": false},
