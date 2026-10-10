@@ -19,6 +19,9 @@
   {"query": "ผลแคมเปญ 10.10 เป็นยังไง", "should_trigger": true},
   {"query": "11.11 กับ 12.12 ปีนี้ อันไหนคุ้มกว่า", "should_trigger": true},
   {"query": "งบช่วง Double Day ใช้ไปเท่าไร", "should_trigger": true},
+  {"query": "แคมเปญ payday กลางเดือนนี้เป็นยังไง", "should_trigger": true},
+  {"query": "เทียบช่วงเงินเดือนออกเดือนนี้กับเดือนก่อน", "should_trigger": true},
+  {"query": "ทำไมงบพุ่งทุกวันที่ 15", "should_trigger": true},
 
   {"query": "ยอดขายรวมเดือนนี้เท่าไร", "should_trigger": false},
   {"query": "เป้ายอดขายเดือนนี้เทียบยอดจริง", "should_trigger": false},
