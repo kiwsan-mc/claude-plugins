@@ -1,0 +1,18 @@
+[
+  {"query": "ผลโฆษณา TikTok เป็นยังไงบ้าง", "should_trigger": true},
+  {"query": "ROAS เดือนนี้เท่าไร", "should_trigger": true},
+  {"query": "งบโฆษณาใช้ไปเท่าไรแล้ว", "should_trigger": true},
+  {"query": "ยิงแอดคุ้มไหม", "should_trigger": true},
+  {"query": "ขอ ads review TikTok", "should_trigger": true},
+  {"query": "แคมเปญ TikTok ตัวไหนใช้เงินเยอะสุด", "should_trigger": true},
+  {"query": "spend เทียบยอดขายจากโฆษณา", "should_trigger": true},
+  {"query": "pixel ทำงานปกติไหม", "should_trigger": true},
+  {"query": "กลุ่มเป้าหมายโฆษณาใกล้หมดอายุหรือยัง", "should_trigger": true},
+  {"query": "โฆษณาเพิ่มออเดอร์จนคลังรับไม่ไหวไหม", "should_trigger": true},
+
+  {"query": "ยอดขายรวมเดือนนี้เท่าไร", "should_trigger": false},
+  {"query": "เป้ายอดขายเดือนนี้เทียบยอดจริง", "should_trigger": false},
+  {"query": "สต็อกสินค้าเหลือเท่าไร", "should_trigger": false},
+  {"query": "ผลโฆษณา Shopee เป็นยังไง", "should_trigger": false},
+  {"query": "ช่วยร่างอีเมลรายงานโฆษณาให้ทีม", "should_trigger": false}
+]

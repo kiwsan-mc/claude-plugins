@@ -57,6 +57,7 @@ MCG_PLUGINS = [
     "mcg-product-agent",
     "mcg-inventory-agent",
     "mcg-executive-agent",
+    "mcg-ads-agent",
 ]
 
 

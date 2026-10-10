@@ -302,6 +302,17 @@
       "category": "productivity",
       "source": "./mcg-crm-agent",
       "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-crm-agent"
+    },
+    {
+      "name": "mcg-ads-agent",
+      "description": "MC Group Ads Agent — วิเคราะห์ผลโฆษณา TikTok Ads (การใช้เงิน, ROAS, โครงสร้างแคมเปญ, audience, pixel) และเชื่อมกับออเดอร์/สต็อกของ MC Group ผ่าน connector MC E-Commerce & Ads. ใช้เมื่อ user ถามเรื่องโฆษณา, ยิงแอด, งบโฆษณา, ROAS, แคมเปญ, แอดกรุ๊ป, หรือผลตอบแทนจากโฆษณา",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-ads-agent",
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-ads-agent"
     }
   ]
 }
