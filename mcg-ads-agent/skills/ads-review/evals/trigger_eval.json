@@ -24,6 +24,7 @@
   {"query": "ทำไมงบพุ่งทุกวันที่ 15", "should_trigger": true},
   {"query": "ช่วงไหนของเดือนควรลดงบ", "should_trigger": true},
   {"query": "ช่วยหารอบแคมเปญของร้านเราจากข้อมูล", "should_trigger": true},
+  {"query": "จังหวะการใช้จ่ายของ TikTok กับ Shopee เหมือนกันไหม", "should_trigger": true},
   {"query": "วันจ่ายเงินเดือนของร้านนี้คือวันที่เท่าไร", "should_trigger": true},
   {"query": "เทียบยอดขายกับงบโฆษณาให้หน่อย", "should_trigger": true},
   {"query": "ยอดขายจากแอด Shopee เป็นเท่าไร", "should_trigger": true},
