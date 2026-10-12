@@ -1,6 +1,6 @@
 {
   "name": "plugins",
-  "description": "MC Group Claude Code plugins — data analyst agents for sales, inventory, sales targets, product master, CRM/member, advertising, and executive overview",
+  "description": "MC Group Claude Code plugins — data analyst agents for sales, inventory, sales targets, product master, CRM/member, advertising, and executive overview, plus an artifact builder for live dashboards",
   "owner": {
     "name": "kiwsan-mc"
   },
@@ -81,6 +81,17 @@
       "category": "productivity",
       "source": "./mcg-ads-agent",
       "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-ads-agent"
+    },
+    {
+      "name": "mcg-artifact",
+      "description": "MC Group Artifact Builder — สร้าง dashboard/monitor เป็น Cowork artifact ที่ดึงข้อมูลผ่าน MCP, cache ใน localStorage และวาดกราฟด้วย Chart.js พร้อมแพตเทิร์นที่ผ่านการใช้งานจริง (กัน permission popup, กัน silent timeout, รูปแบบวันที่/ตัวเลข, CSS มาตรฐาน, checklist 20 ข้อ). ใช้เมื่อ user ขอ dashboard, monitor, artifact, กราฟ, รายงานแบบ interactive หรือหน้าที่ refresh ข้อมูลเองได้",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-artifact",
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-artifact"
     }
   ]
 }
