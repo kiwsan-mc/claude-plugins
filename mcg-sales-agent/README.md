@@ -8,6 +8,11 @@ MC Group Data Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
+**v5.23.0** — เพิ่ม skill `collection-sales` (ยอดขายของ collection ที่ระบุชื่อ)
+- **v5.23.0**: เพิ่ม `skills/collection-sales/` — ตอบ "ยอดขาย collection <ชื่อ>" (คอลแลป/แคปซูล เช่น `MC X ALANLERT M08_FY27`) รายเดือน/ช่องทาง/สาขา/รุ่น-สี พร้อม eval ชุด trigger
+- **v5.23.0**: skill นี้เป็น **skill ข้ามแหล่งตัวแรกของปลั๊กอิน** — ชื่อ collection อยู่ใน**ข้อมูลสินค้า** แต่ยอดขายอยู่ใน **Sales Out** ⇒ บังคับลำดับ **resolve รายชื่อรุ่น-สี ก่อน แล้วค่อยกรองยอดขาย** (ยอดขายไม่มีชื่อ collection ให้กรอง)
+- **v5.23.0**: บันทึกกับดักที่วัดจริง (2026-10-16) — คอลัมน์กลุ่ม collection ในข้อมูลยอดขาย (`collection_group`) **ใช้แทนชื่อ collection ไม่ได้**: collection เดียวกระจายอยู่ 4 กลุ่ม และไม่มีกลุ่มไหนครอบทั้งหมด ⇒ ต้องกรองด้วยรายชื่อรุ่น-สีเท่านั้น · พร้อม fallback §5 เมื่อฝั่งข้อมูลสินค้าเรียกไม่ได้ (ให้ผู้ใช้ส่งรุ่น-สีมาเอง หรือใช้กลุ่มเป็นค่าประมาณพร้อมกำกับ)
+
 **v5.22.2** — บังคับให้ตารางจัดอันดับเรียงจริง + รูปคำตอบตรงกับที่ถาม
 - **v5.22.2**: ผลทดสอบจริงใน Claude Desktop (2026-10-05) พบว่า **ตารางที่ขึ้นต้นว่า "Top 10 ... สูงสุด" เรียงไม่จริง 2 ใน 3 คำตอบ** — ฉบับหนึ่งเรียง 95.1 → 90.6 → 98.1 และสรุปท้ายว่า top 3 คือ 98.1/97.1/95.1 ซึ่งขัดกับตารางตัวเอง ⇒ เพิ่มกฎ: **คอลัมน์อันดับต้องตรงกับลำดับในตาราง ทิศทางต้องตรงกับคำถาม และก่อนส่งให้ไล่สายตาว่าคอลัมน์ตัวชี้วัดลดหลั่นจริง**
 - **v5.22.2**: เพิ่มกฎ **รูปคำตอบต้องตรงกับที่ถาม** — ถามค่าก้อนเดียว (สัดส่วนทั้งบริษัท/ยอดรวม) ห้ามคืนตารางจัดอันดับ และกลับกัน (เคสจริง: ถามสัดส่วนสมาชิกทั้งบริษัทของเดือน ส.ค. แต่ได้ Top 10 รายสาขา ซึ่งยังกรองสาขาออกเองอีกด้วย)
@@ -101,6 +106,7 @@ python -m unittest discover -s answer-guard/tests -v # 16 เคส
 | `member-analysis` | CRM & Sales Strategy Analyst | สัดส่วน Member vs Non-Member, ATV, UPT |
 | `channel-regional` | Supply Chain & Retail Planner | สัดส่วนยอดขายแยก Regional x Channel + Stock Allocation |
 | `abc-analysis` | Inventory & Merchandising Analyst | ABC Analysis + Hero/Slow-moving Articles |
+| `collection-sales` | Collection Performance Analyst | ยอดขายของ collection ที่ระบุชื่อ (คอลแลป/แคปซูล) รายเดือน/ช่องทาง/สาขา/รุ่น-สี |
 
 ## Architecture
 
@@ -112,6 +118,7 @@ skills/
 ├── discount-margin/     ← #[[file:../sales-agent/SKILL.md]] + role prompt
 ├── member-analysis/     ← #[[file:../sales-agent/SKILL.md]] + role prompt
 ├── channel-regional/    ← #[[file:../sales-agent/SKILL.md]] + role prompt
+├── collection-sales/    ← #[[file:../sales-agent/SKILL.md]] + role prompt (ข้ามแหล่ง: ข้อมูลสินค้า + Sales Out)
 └── abc-analysis/        ← #[[file:../sales-agent/SKILL.md]] + role prompt
 ```
 
