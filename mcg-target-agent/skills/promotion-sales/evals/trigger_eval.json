@@ -1,0 +1,106 @@
+[
+  {
+    "query": "โปรโมชันเดือนนี้เป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรโมชันไหนทำยอดได้มากสุด 10 อันดับ",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายตามโปรโมชันเดือนนี้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "FIXPRICE ทำยอดได้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "SD50GP กับ SD400GP อันไหนกินส่วนลดมากกว่า",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรโมชันไหน GP% ต่ำสุด",
+    "should_trigger": true
+  },
+  {
+    "query": "SET1095 ยอดขายเดือนนี้เป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดของโปรโมชันรวมกันคิดเป็นกี่ % ของยอดขายบริษัท",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรส่วนลดรหัส SD25GP ใช้กี่ใบกำกับ",
+    "should_trigger": true
+  },
+  {
+    "query": "ผลตอบแทนโปรโมชันเดือนนี้เป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "เทียบยอดขายตามโปรโมชันเดือนนี้กับเดือนก่อน",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรโมชันรหัส NORMALJ แยกสาขาให้หน่อย",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายของโปรโมชัน CRM Birth Day Privilege รับส่วนลด 450 บาท",
+    "should_trigger": true
+  },
+  {
+    "query": "แคมเปญแลกแม็คพ้อยท์ใช้ไปกี่บิล",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรไหนใช้ส่วนลดมากสุดเดือนนี้",
+    "should_trigger": true
+  },
+  {
+    "query": "แคมเปญ Birth Day Privilege รับส่วนลด 300 บาท ทำได้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "โปรโมชันคูปองสำหรับ BIG C เป็นยังไง",
+    "should_trigger": true
+  },
+  {
+    "query": "แคมเปญ MC CLUB CARE แลกคะแนน ส่วนลดเท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "ส่วนลดโปรโมชันที่ร้านกับที่ใบกำกับ อันไหนมากกว่า",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายบริษัทเดือนนี้เท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "GP เดือนนี้เท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "ทำเป้าได้กี่เปอร์เซ็นต์",
+    "should_trigger": false
+  },
+  {
+    "query": "ส่วนลดรวมทั้งบริษัทเดือนนี้เท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "markdown ลึกแค่ไหน",
+    "should_trigger": false
+  },
+  {
+    "query": "ยอดขายน้ำหอม 3 เดือนล่าสุด",
+    "should_trigger": false
+  },
+  {
+    "query": "สต็อกคงเหลือแยก aging",
+    "should_trigger": false
+  }
+]

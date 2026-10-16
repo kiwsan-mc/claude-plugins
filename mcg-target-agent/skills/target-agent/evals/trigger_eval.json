@@ -6,10 +6,10 @@
   {"query": "เดือนนี้ขายได้กี่", "should_trigger": true},
   {"query": "มีสาขาไหนมีเป้าบ้าง", "should_trigger": true},
   {"query": "เป้าขายรายวันแยกสาขาให้หน่อย", "should_trigger": true},
-  {"query": "โปรโมชันเดือนนี้เป็นยังไง", "should_trigger": true},
-  {"query": "โปรฯ ไหนขายดีที่สุด", "should_trigger": true},
   {"query": "เป้าปีนี้ตั้งไว้เท่าไหร่", "should_trigger": true},
 
+  {"query": "โปรโมชันเดือนนี้เป็นยังไง", "should_trigger": false},
+  {"query": "โปรฯ ไหนขายดีที่สุด", "should_trigger": false},
   {"query": "เป้าขายเทียบยอดขายจริง", "should_trigger": false},
   {"query": "สาขาไหนไม่ถึงเป้า", "should_trigger": false},
   {"query": "ยอดขายบริษัทเดือนนี้เท่าไหร่", "should_trigger": false},
