@@ -40,6 +40,66 @@
     "should_trigger": true
   },
   {
+    "query": "Alanlert EXCLUSIVE ONLINE ขายได้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "ขอยอดขายเฉพาะชุด EXCLUSIVE ONLINE ของ Alanlert",
+    "should_trigger": true
+  },
+  {
+    "query": "ขอดูยอดขาย EXCLUSIVE OUTLET_M04_FY26",
+    "should_trigger": true
+  },
+  {
+    "query": "collection ที่คอลแลปกับ Alanlert ขายเดือน ส.ค. กับ ก.ย. ต่างกันแค่ไหน",
+    "should_trigger": true
+  },
+  {
+    "query": "สาขาไหนขาย collection Alanlert ได้ดีสุด",
+    "should_trigger": true
+  },
+  {
+    "query": "ยอดขายน้ำหอม 3 เดือนล่าสุด",
+    "should_trigger": false
+  },
+  {
+    "query": "ยอดขายกางเกงยีนส์แยกช่องทาง",
+    "should_trigger": false
+  },
+  {
+    "query": "เสื้อยืดกับฮู้ดดี้ อันไหน margin ดีกว่า",
+    "should_trigger": false
+  },
+  {
+    "query": "Light Jacket ขายดีไหม ช่วงนี้",
+    "should_trigger": false
+  },
+  {
+    "query": "หมวกกับกระเป๋า เทียบกัน 3 เดือน",
+    "should_trigger": false
+  },
+  {
+    "query": "สาขาไหนขายน้ำหอมได้มากสุด",
+    "should_trigger": false
+  },
+  {
+    "query": "ยอดขายรองเท้าแยกภาค",
+    "should_trigger": false
+  },
+  {
+    "query": "สต็อกน้ำหอมเหลือเท่าไหร่",
+    "should_trigger": false
+  },
+  {
+    "query": "กางเกงยีนส์มีของค้างเยอะไหม",
+    "should_trigger": false
+  },
+  {
+    "query": "กระเป๋าต้องเติมของไหม",
+    "should_trigger": false
+  },
+  {
     "query": "ยอดขาย collection ทั้งหมดเดือนนี้เป็นเท่าไหร่",
     "should_trigger": false
   },
@@ -49,10 +109,6 @@
   },
   {
     "query": "Top 10 สินค้าขายดีที่สุด",
-    "should_trigger": false
-  },
-  {
-    "query": "สต็อกคงเหลือของ Alanlert มีเท่าไหร่",
     "should_trigger": false
   },
   {

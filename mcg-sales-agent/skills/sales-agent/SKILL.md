@@ -227,8 +227,8 @@ When the user asks a question matching a specialized skill below, recommend it b
 | "Vendor" "Supplier" "Cost by vendor" | **vendor-analysis** | Vendor ranking, cost structure |
 | "District" "Sub-district" "Postal code" "GPS" | **geo-deepdive** | District level, branch density, expansion |
 | "New store" "Closed store" "Store lifecycle" "Cluster" | **store-operations** | New store ramp-up, cluster comparison |
-| "MCL" "Hierarchy" "Product group" "Sub brand" "Assortment" | **category-hierarchy** | MCL drill-down, product group, sub brand mix |
-| "Collection" "New Collection" "Capsule" "MC X <ชื่อคอลแลป>" "ยอดขาย collection <ชื่อ>" | **collection-sales** | รายชื่อรุ่น-สีของ collection + ยอดขายรายเดือน/ช่องทาง/สาขา · ⚠️ ต้องระบุ**ชื่อ collection** ไม่ใช่ "collection ทั้งหมด" |
+| "MCL" "Hierarchy" "Product group" "Sub brand" "Assortment" · **ประเภทสินค้า** ("น้ำหอม" "กางเกงยีนส์" "เสื้อยืด" "กระเป๋า" "รองเท้า" "หมวก" "T SHIRT" "JEANS" "SHOES") | **category-hierarchy** | MCL drill-down, product group, sub brand mix · ⚠️ **ประเภทสินค้าอยู่ที่ระดับเดียวกับ `mcl4_text`** — skill นี้ครอบอยู่แล้ว |
+| "Collection" "New Collection" "Capsule" "MC X <ชื่อคอลแลป>" "ยอดขาย collection <ชื่อ>" | **collection-sales** | รายชื่อรุ่น-สีของ collection + ยอดขายรายเดือน/ช่องทาง/สาขา · ⚠️ ต้องระบุ**ชื่อ collection** ไม่ใช่ "collection ทั้งหมด" และ **ไม่ใช่ประเภทสินค้า** (§6 ของ skill) |
 
 ### Skill Selection Guide (routing summary)
 
@@ -248,8 +248,8 @@ When the user asks a question matching a specialized skill below, recommend it b
 | vendor-analysis | Analyzing vendor/supplier performance and cost structure |
 | geo-deepdive | Analyzing geography at district/sub-district level, branch density, expansion opportunity |
 | store-operations | Analyzing new store ramp-up, store lifecycle, cluster comparison |
-| category-hierarchy | Analyzing MCL hierarchy drill-down, product group, sub brand mix |
-| collection-sales | Analyzing Sales Out of one named collection (คอลแลป/แคปซูล) — resolve รุ่น-สี จากข้อมูลสินค้าแล้วกรองยอดขาย |
+| category-hierarchy | Analyzing MCL hierarchy drill-down, product group, sub brand mix — รวมถึง**ประเภทสินค้า** (น้ำหอม ยีนส์ กระเป๋า รองเท้า) |
+| collection-sales | Analyzing Sales Out of one named collection (คอลแลป/แคปซูล) — resolve รุ่น-สี จากข้อมูลสินค้าแล้วกรองยอดขาย · 🚫 ไม่รับประเภทสินค้า |
 | sales-agent | For general sales questions that don't match any specialized skill above |
 
 📌 ทุก skill ปลายทางใช้กฎการนับเดียวกัน: **"จำนวนรุ่น" = รุ่น-สี (`model_color`)** ไม่ใช่ `model` และไม่ใช่ SKU — และถ้าผู้ใช้ไม่ระบุหน่วยการนับ ต้องถามกลับก่อนตอบ (ดู § กฎการนับจำนวน)
