@@ -1,0 +1,24 @@
+{
+  "title": "Catalogue Demo",
+  "brand": "MC GROUP",
+  "right_label": "ASSORTMENT REVIEW",
+  "footer_left": "MC GROUP  /  PRODUCT CATALOGUE",
+  "footer_right": "OCT 2026",
+  "style": "catalog",
+  "slides": [
+    {
+      "archetype": "catalog",
+      "title": "FY27 HERO ASSORTMENT",
+      "kicker": "SEASON 1  /  BEST SELLERS",
+      "subtitle": "Top six models by net sales",
+      "items": [
+        { "sku": "MCL-1042", "name": "Slim Fit Denim Jacket", "price": "1,890 THB" },
+        { "sku": "MCL-2210", "name": "Cotton Oxford Shirt", "price": "890 THB" },
+        { "sku": "MCL-3388", "name": "Wool Blend Blazer", "price": "3,450 THB" },
+        { "sku": "MCL-4102", "name": "Chino Trousers", "price": "1,290 THB" },
+        { "sku": "MCL-5567", "name": "Leather Belt", "price": "690 THB" },
+        { "sku": "MCL-6021", "name": "Canvas Tote Bag", "price": "590 THB" }
+      ]
+    }
+  ]
+}

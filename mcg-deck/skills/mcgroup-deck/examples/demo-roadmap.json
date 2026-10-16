@@ -1,0 +1,24 @@
+{
+  "title": "Roadmap Demo",
+  "brand": "MC GROUP",
+  "right_label": "ROADMAP  /  MILESTONES",
+  "footer_left": "MC GROUP  /  TIMELINE",
+  "footer_right": "OCT 2026",
+  "style": "roadmap",
+  "slides": [
+    {
+      "archetype": "roadmap-h",
+      "title": "FY27 AI TRAINING",
+      "kicker": "ROADMAP  /  OCT 2026 — APR 2027",
+      "subtitle": "Six milestones from assessment to production",
+      "items": [
+        { "date": "OCT–NOV 2026", "title": "Readiness assessment", "sub": "300 assessed, 100 selected", "milestone": "M1" },
+        { "date": "NOV 2026", "title": "AI Foundation Workshop", "sub": "100 participants, 50+ champions", "milestone": "M2" },
+        { "date": "NOV 2026", "title": "AI Advance Workshop", "sub": "10–12 teams, MVPs", "milestone": "M3" },
+        { "date": "DEC 2026–FEB 2027", "title": "Hackathon preparation", "sub": "Solutions readied", "milestone": "M4" },
+        { "date": "FEB 2027", "title": "Hackathon Day & Demo", "sub": "3 winners selected", "milestone": "M5" },
+        { "date": "25 APR 2027", "title": "Production", "sub": "Transition to live", "milestone": "M6" }
+      ]
+    }
+  ]
+}

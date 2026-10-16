@@ -1,6 +1,6 @@
 {
   "name": "plugins",
-  "description": "MC Group Claude Code plugins — data analyst agents for sales, inventory, sales targets, product master, CRM/member, advertising, and executive overview, plus an artifact builder for live dashboards",
+  "description": "MC Group Claude Code plugins — data analyst agents for sales, inventory, sales targets, product master, CRM/member, advertising, and executive overview, plus builders for live dashboards and MC Group–styled decks",
   "owner": {
     "name": "kiwsan-mc"
   },
@@ -92,6 +92,17 @@
       "category": "productivity",
       "source": "./mcg-artifact",
       "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-artifact"
+    },
+    {
+      "name": "mcg-deck",
+      "description": "MC Group Deck Builder — สร้างไฟล์ .pptx ใหม่ตาม MC Group house style มี 6 deck style (house default, executive, kpi-wall, catalog, roadmap, dark) คงแม่สี MC Group ผ่าน build_deck.js + templates*.json หรือ replicate จาก template .pptx ที่ผู้ใช้แนบมา (Mode B: extract_spec.py) พร้อม QA สองด่าน (audit_layout + validate) ใช้เมื่อ user สั่ง \"สร้าง/ทำ/ออกแบบ presentation, slide, deck, พาวเวอร์พอย เป็นไฟล์ pptx\" ที่ไม่มีไฟล์ต้นฉบับมาแก้ ห้ามใช้ skill นี้กับงานอ่าน/แก้ไฟล์ pptx เดิม",
+      "author": {
+        "name": "MC Group AI Platform",
+        "email": "ai-platform@mcjeans.com"
+      },
+      "category": "productivity",
+      "source": "./mcg-deck",
+      "homepage": "https://github.com/kiwsan-mc/claude-plugins/tree/main/mcg-deck"
     }
   ]
 }

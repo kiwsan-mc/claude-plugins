@@ -1,0 +1,121 @@
+{
+  "title": "MC Group Demo Deck",
+  "brand": "MC GROUP",
+  "right_label": "ROADMAP  /  INVESTMENT  /  DECISION",
+  "footer_left": "FY27  /  AI TRAINING ROADMAP",
+  "footer_right": "EXECUTIVE REVIEW  •  OCT 2026",
+  "slides": [
+    {
+      "archetype": "cover",
+      "eyebrow": "WELCOME",
+      "title": "FY27 AI TRAINING",
+      "subtitle": "Building AI Capability Across MC GROUP",
+      "tagline": "ROADMAP  •  TRAINING INVESTMENT  •  PARTNER PROPOSAL"
+    },
+    {
+      "archetype": "kpi-bar",
+      "title": "FY27 AI TRAINING",
+      "kicker": "OVERVIEW",
+      "subtitle": "Roadmap / Investment / Decision",
+      "kpis": [
+        { "value": "100", "label": "EMPLOYEES TRAINED", "accent": "blue" },
+        { "value": "10–12", "label": "TEAMS ENABLED", "accent": "gold" },
+        { "value": "1+", "label": "POC PROJECT PER TEAM", "accent": "blue" },
+        { "value": "3", "label": "WINNING SOLUTIONS", "accent": "gold" }
+      ]
+    },
+    {
+      "archetype": "timeline",
+      "title": "FY27 AI TRAINING",
+      "kicker": "OVERVIEW",
+      "subtitle": "Roadmap / Investment / Decision",
+      "head": "01 / ROADMAP",
+      "range": "OCT 2026 — APR 2027",
+      "items": [
+        { "date": "OCT–NOV 2026", "title": "Readiness assessment", "sub": "300 assessed → 100 in training", "accent": "blue" },
+        { "date": "NOV 2026", "title": "AI Foundation Workshop", "sub": "100 participants → 50+ champions", "accent": "gold" },
+        { "date": "NOV 2026", "title": "AI Advance Workshop", "sub": "10–12 teams; MVPs across teams", "accent": "blue" },
+        { "date": "DEC 2026–FEB 2027", "title": "Hackathon preparation", "sub": "Solutions prepared for executive demo", "accent": "blue" },
+        { "date": "FEB 2027", "title": "Hackathon Day & Demo", "sub": "3 Winning Solutions", "accent": "gold" }
+      ]
+    },
+    {
+      "archetype": "table",
+      "title": "FY27 AI TRAINING",
+      "kicker": "03 / TRAINING COST & EVENT SETUP",
+      "subtitle": "AI Foundation Workshop (Nov 5)  •  AI Advance Workshop (Nov 12)",
+      "stats": [
+        { "label": "OPTION 1", "value": "404,500 THB" },
+        { "label": "OPTION 2", "value": "4" },
+        { "label": "TOTAL COST SAVINGS", "value": "80,500 THB  ·  16.6%" }
+      ],
+      "blocks": [
+        {
+          "head": "01 / AI FOUNDATION · 6 HOURS",
+          "columns": ["Cost item", "Option 1", "Option 2"],
+          "total_row": 4,
+          "rows": [
+            ["Participants", "10", "30"],
+            ["Training Cost", "16", "31"],
+            ["Light & Sound", "22,000", "—"],
+            ["Projector Rental", "32,000", "—"],
+            ["TOTAL COST", "231", "31"]
+          ]
+        },
+        {
+          "head": "02 / AI ADVANCE · 6 HOURS",
+          "columns": ["Cost item", "Meeting Room"],
+          "total_row": 2,
+          "rows": [
+            ["Participants", "50 people"],
+            ["Training Cost", "120,000"],
+            ["Refreshments & Drinks", "3,000"]
+          ]
+        }
+      ]
+    },
+    {
+      "archetype": "section",
+      "eyebrow": "TRAINING PARTNER PROPOSAL",
+      "title": "FELLOW INT. PROPOSAL",
+      "subtitle": "AI TRAINING  /  FY27"
+    },
+    {
+      "archetype": "two-col",
+      "title": "FY27 AI TRAINING",
+      "kicker": "SCOPE",
+      "subtitle": "What we do, and what it costs",
+      "left": { "head": "01 / What we do", "body": "Assess 300 employees, train 100, enable 10–12 teams, and ship a POC project per team." },
+      "right": { "head": "02 / What it costs", "body": "Three vendor candidates evaluated. Recommended option saves 80,500 THB (16.6%) against the base proposal." }
+    },
+    {
+      "archetype": "bullets",
+      "title": "FY27 AI TRAINING",
+      "kicker": "DECISION",
+      "subtitle": "What we need from the executive",
+      "items": [
+        "Approve the FY27 AI training roadmap",
+        "Confirm the training budget envelope",
+        "Name one executive sponsor per function"
+      ]
+    },
+    {
+      "archetype": "chart",
+      "title": "FY27 AI TRAINING",
+      "kicker": "04 / FUNCTIONAL COVERAGE",
+      "subtitle": "Employees in scope by function",
+      "chart": {
+        "type": "bar",
+        "categories": ["Finance", "IT", "E-Commerce", "Product", "Sales", "Ops"],
+        "series": [{ "name": "Employees", "values": [57, 28, 30, 37, 36, 21] }]
+      }
+    },
+    {
+      "archetype": "closing",
+      "eyebrow": "FY27 AI TRAINING",
+      "title": "THANK YOU",
+      "subtitle": "Questions & Discussion",
+      "tagline": "ROADMAP  •  INVESTMENT  •  DECISION"
+    }
+  ]
+}

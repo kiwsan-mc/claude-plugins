@@ -1,0 +1,867 @@
+{
+  "_meta": {
+    "name": "MC Group — Dark Premium",
+    "derived_from": "AI_Training_Roadmap_FY27_Final.pptx",
+    "canvas": "16:9 (13.333 x 7.5 in)",
+    "units": "inches",
+    "style": "dark",
+    "how_to_use": "build_deck.js picks this spec when content.style === \"dark\" or the content filename contains \"dark\".",
+    "note_layers": "navy cover/section/closing + white content slides. Use archetype dark-cover; add slide.dark=true for other dark slides."
+  },
+  "canvas": {
+    "w_in": 13.333,
+    "h_in": 7.5,
+    "pptxgenjs_layout": "LAYOUT_WIDE"
+  },
+  "palette": {
+    "navy": "001245",
+    "navy_band": "142A60",
+    "blue": "003DA5",
+    "gold": "E6A82D",
+    "slate": "667085",
+    "slate2": "677794",
+    "ink": "151922",
+    "bg_soft": "F7F9FC",
+    "bg_soft2": "F2F6FB",
+    "line": "E8ECF3",
+    "line_footer": "DCE2EC",
+    "gold_tint": "FFF8EA",
+    "white": "FFFFFF",
+    "red": "C00000"
+  },
+  "fonts": {
+    "heading": "Aptos",
+    "body": "Aptos",
+    "fallback": "Arial",
+    "chart": "+mn-lt"
+  },
+  "grid": {
+    "margin_x_in": 0.5,
+    "margin_x_deep_in": 0.82,
+    "top_band": {
+      "x": 0,
+      "y": 0,
+      "w": 13.333,
+      "h": 0.09,
+      "fill": "navy"
+    },
+    "footer_rule": {
+      "x": 0.49,
+      "y": 6.86,
+      "w": 12.35,
+      "h": 0.01,
+      "fill": "line_footer"
+    },
+    "footer_left": {
+      "x": 0.5,
+      "y": 6.98,
+      "w": 4,
+      "h": 0.16,
+      "sz": 7,
+      "color": "slate2"
+    },
+    "footer_right": {
+      "x": 10,
+      "y": 6.98,
+      "w": 2.8,
+      "h": 0.16,
+      "sz": 7,
+      "color": "slate2",
+      "align": "right"
+    },
+    "header_left": {
+      "x": 0.5,
+      "y": 0.24,
+      "w": 2.2,
+      "h": 0.22,
+      "sz": 8,
+      "bold": true,
+      "color": "navy"
+    },
+    "header_right": {
+      "x": 9,
+      "y": 0.56,
+      "w": 3.8,
+      "h": 0.22,
+      "sz": 7,
+      "bold": true,
+      "color": "navy",
+      "align": "right"
+    }
+  },
+  "header_defaults": {
+    "brand": "MC GROUP",
+    "right_label": "ROADMAP  /  INVESTMENT  /  DECISION",
+    "footer_left": "FY27  /  AI TRAINING ROADMAP",
+    "footer_right": "EXECUTIVE REVIEW  •  OCT 2026"
+  },
+  "archetypes": {
+    "_meta_base": {
+      "name": "MC Group house deck style",
+      "derived_from": "AI_Training_Roadmap_FY27_Final.pptx",
+      "canvas": "16:9 (13.333 x 7.5 in)",
+      "units": "inches",
+      "how_to_use": "build_deck.js reads this file. Override any block by passing a custom spec with --spec. Mode B: run scripts/extract_spec.py on another deck to regenerate a spec in this shape.",
+      "note_layers": "cover + closing print on a dark slide background; all other slides sit on white with a top accent band + footer rule."
+    },
+    "canvas": {
+      "w_in": 13.333,
+      "h_in": 7.5,
+      "pptxgenjs_layout": "LAYOUT_WIDE"
+    },
+    "palette": {
+      "navy": "001245",
+      "navy_band": "142A60",
+      "blue": "003DA5",
+      "gold": "E6A82D",
+      "slate": "667085",
+      "slate2": "677794",
+      "ink": "151922",
+      "bg_soft": "F7F9FC",
+      "bg_soft2": "F2F6FB",
+      "line": "E8ECF3",
+      "line_footer": "DCE2EC",
+      "gold_tint": "FFF8EA",
+      "white": "FFFFFF",
+      "red": "C00000"
+    },
+    "fonts": {
+      "heading": "Aptos",
+      "body": "Aptos",
+      "fallback": "Arial",
+      "chart": "+mn-lt"
+    },
+    "grid": {
+      "margin_x_in": 0.5,
+      "margin_x_deep_in": 0.82,
+      "top_band": {
+        "x": 0,
+        "y": 0,
+        "w": 13.333,
+        "h": 0.09,
+        "fill": "navy"
+      },
+      "footer_rule": {
+        "x": 0.49,
+        "y": 6.86,
+        "w": 12.35,
+        "h": 0.01,
+        "fill": "line_footer"
+      },
+      "footer_left": {
+        "x": 0.5,
+        "y": 6.98,
+        "w": 4,
+        "h": 0.16,
+        "sz": 7,
+        "color": "slate2"
+      },
+      "footer_right": {
+        "x": 10,
+        "y": 6.98,
+        "w": 2.8,
+        "h": 0.16,
+        "sz": 7,
+        "color": "slate2",
+        "align": "right"
+      },
+      "header_left": {
+        "x": 0.5,
+        "y": 0.24,
+        "w": 2.2,
+        "h": 0.22,
+        "sz": 8,
+        "bold": true,
+        "color": "navy"
+      },
+      "header_right": {
+        "x": 9,
+        "y": 0.56,
+        "w": 3.8,
+        "h": 0.22,
+        "sz": 7,
+        "bold": true,
+        "color": "navy",
+        "align": "right"
+      }
+    },
+    "header_defaults": {
+      "brand": "MC GROUP",
+      "right_label": "ROADMAP  /  INVESTMENT  /  DECISION",
+      "footer_left": "FY27  /  AI TRAINING ROADMAP",
+      "footer_right": "EXECUTIVE REVIEW  •  OCT 2026"
+    },
+    "title": {
+      "_note": "standard content-slide header block; other content archetypes compose on top of it",
+      "bg": "white",
+      "elements": [
+        {
+          "role": "title",
+          "x": 0.49,
+          "y": 0.48,
+          "w": 8.5,
+          "h": 0.45,
+          "sz": 25,
+          "bold": true,
+          "color": "navy"
+        },
+        {
+          "role": "rule_under",
+          "x": 0.49,
+          "y": 1.02,
+          "w": 0.55,
+          "h": 0.05,
+          "fill": "gold"
+        },
+        {
+          "role": "kicker",
+          "x": 0.49,
+          "y": 1.13,
+          "w": 8.5,
+          "h": 0.26,
+          "sz": 12,
+          "bold": true,
+          "color": "navy"
+        },
+        {
+          "role": "subtitle",
+          "x": 0.49,
+          "y": 1.43,
+          "w": 9.5,
+          "h": 0.22,
+          "sz": 9,
+          "color": "slate2"
+        }
+      ]
+    },
+    "section": {
+      "bg": "white",
+      "footer_style": "dark_on_light",
+      "accent_rule": {
+        "x": 0.5,
+        "y": 2.25,
+        "w": 0.09,
+        "h": 2.25,
+        "fill": "gold"
+      },
+      "elements": [
+        {
+          "role": "eyebrow",
+          "x": 0.82,
+          "y": 2.42,
+          "w": 8.9,
+          "h": 0.28,
+          "sz": 12,
+          "bold": true,
+          "color": "blue",
+          "charSpacing": 1
+        },
+        {
+          "role": "title",
+          "x": 0.82,
+          "y": 2.92,
+          "w": 11.2,
+          "h": 0.85,
+          "sz": 34,
+          "bold": true,
+          "color": "navy"
+        },
+        {
+          "role": "subtitle",
+          "x": 0.84,
+          "y": 3.88,
+          "w": 7.5,
+          "h": 0.32,
+          "sz": 12,
+          "color": "slate2",
+          "charSpacing": 1
+        },
+        {
+          "role": "rule_under",
+          "x": 0.82,
+          "y": 4.48,
+          "w": 1.15,
+          "h": 0.06,
+          "fill": "gold"
+        }
+      ]
+    },
+    "closing": {
+      "bg": "navy",
+      "footer_style": "light_on_dark",
+      "accent_rule": {
+        "x": 0.65,
+        "y": 2.18,
+        "w": 0.09,
+        "h": 2.25,
+        "fill": "gold"
+      },
+      "elements": [
+        {
+          "role": "eyebrow",
+          "x": 0.98,
+          "y": 2.5,
+          "w": 9.7,
+          "h": 0.3,
+          "sz": 12,
+          "bold": true,
+          "color": "white"
+        },
+        {
+          "role": "title",
+          "x": 0.98,
+          "y": 2.95,
+          "w": 11.2,
+          "h": 0.9,
+          "sz": 38,
+          "bold": true,
+          "color": "gold",
+          "default_text": "THANK YOU"
+        },
+        {
+          "role": "subtitle",
+          "x": 1,
+          "y": 3.88,
+          "w": 9.6,
+          "h": 0.42,
+          "sz": 18,
+          "color": "white",
+          "default_text": "Questions & Discussion"
+        },
+        {
+          "role": "rule_under",
+          "x": 0.98,
+          "y": 4.54,
+          "w": 1.15,
+          "h": 0.06,
+          "fill": "gold"
+        },
+        {
+          "role": "tagline",
+          "x": 1,
+          "y": 4.83,
+          "w": 8.8,
+          "h": 0.32,
+          "sz": 10,
+          "bold": true,
+          "color": "white",
+          "charSpacing": 3
+        }
+      ]
+    },
+    "image": {
+      "_note": "full-bleed picture, no text and no header/footer",
+      "x": 0,
+      "y": 0,
+      "w": 13.333,
+      "h": 7.5,
+      "caption_x": 0.5,
+      "caption_y": 6.98,
+      "caption_sz": 7,
+      "caption_color": "white"
+    },
+    "two-col": {
+      "_note": "generic 2-column text block; columns at the table x positions",
+      "cols_2": {
+        "x": [
+          0.5,
+          6.82
+        ],
+        "w": [
+          6.1,
+          5.99
+        ]
+      },
+      "head": {
+        "sz": 12,
+        "bold": true,
+        "color": "navy"
+      },
+      "body": {
+        "sz": 10,
+        "color": "ink"
+      }
+    },
+    "bullets": {
+      "_note": "bullet list; each item gets a small square marker + text row, evenly spaced to fill the body",
+      "head": {
+        "sz": 12,
+        "bold": true,
+        "color": "navy"
+      },
+      "item": {
+        "sz": 12,
+        "color": "ink",
+        "paraSpaceAfter": 10
+      }
+    },
+    "table": {
+      "_note": "zebra table. Two flavours seen: 2-col wide (col w 6.10/5.99) and 3-col narrow inside a card (4.27 total).",
+      "bg": "white",
+      "block_head": {
+        "sz": 10,
+        "bold": true,
+        "color": "navy"
+      },
+      "row": {
+        "h": 0.28,
+        "h_wide": 0.34,
+        "zebra": [
+          "white",
+          "bg_soft"
+        ],
+        "total_fill": "gold_tint",
+        "label": {
+          "dx": 0.08,
+          "sz": 7.4,
+          "bold": true,
+          "color": "navy"
+        },
+        "value": {
+          "sz": 7.4,
+          "color": "slate2"
+        },
+        "total_label_color": "gold",
+        "total_value_color": "gold",
+        "warn_color": "red"
+      },
+      "cols_2": {
+        "x": [
+          0.5,
+          6.82
+        ],
+        "w": [
+          6.1,
+          5.99
+        ]
+      },
+      "cols_3": {
+        "x": [
+          0.5,
+          3.58,
+          5.13
+        ],
+        "w": [
+          2.84,
+          1.39,
+          1.39
+        ]
+      }
+    },
+    "timeline": {
+      "bg": "white",
+      "plate": {
+        "x": 0.49,
+        "y": 2.86,
+        "w": 7.44,
+        "h": 3.98,
+        "fill": "bg_soft"
+      },
+      "head": {
+        "x": 0.75,
+        "y": 3.04,
+        "w": 4.6,
+        "h": 0.24,
+        "sz": 14,
+        "bold": true,
+        "color": "navy"
+      },
+      "range": {
+        "x": 5.48,
+        "y": 3.08,
+        "w": 2.12,
+        "h": 0.16,
+        "sz": 9.5,
+        "bold": true,
+        "color": "gold",
+        "align": "right"
+      },
+      "spine": {
+        "x": 1.02,
+        "w": 0,
+        "fill": "blue",
+        "role": "vertical_line"
+      },
+      "dot": {
+        "outer": 0.2,
+        "inner": 0.08,
+        "outer_fill": "white",
+        "inner_fills": [
+          "blue",
+          "gold"
+        ]
+      },
+      "rows": {
+        "y_start": 3.6,
+        "row_pitch": 0.51,
+        "date": {
+          "x": 1.25,
+          "w": 1.48,
+          "h": 0.18,
+          "sz": 9.5,
+          "bold": true,
+          "color": "navy",
+          "color_alt": "gold"
+        },
+        "title": {
+          "x": 2.84,
+          "w": 4.5,
+          "h": 0.21,
+          "sz": 11.5,
+          "color": "ink"
+        },
+        "sub": {
+          "x": 2.84,
+          "w": 4.65,
+          "h": 0.15,
+          "sz": 9.5,
+          "color": "slate"
+        }
+      }
+    },
+    "kpi-bar": {
+      "bg": "white",
+      "card": {
+        "w": 2.96,
+        "h": 1,
+        "gap": 0.17,
+        "y": 1.63,
+        "x_start": 0.49,
+        "fill": "white",
+        "accent_bar": {
+          "w": 0.07,
+          "fills": [
+            "blue",
+            "gold"
+          ]
+        },
+        "value": {
+          "dx": 0.22,
+          "dy": 0.09,
+          "w": 2.5,
+          "h": 0.48,
+          "sz": 32,
+          "bold": true
+        },
+        "label": {
+          "dx": 0.23,
+          "dy": 0.61,
+          "w": 2.56,
+          "h": 0.18,
+          "sz": 9.5,
+          "bold": true,
+          "color": "slate"
+        },
+        "value_color_alternates": [
+          "navy",
+          "gold"
+        ]
+      }
+    },
+    "stat-row": {
+      "_note": "KPI pill row used at top of a content slide (slide 4): up to 3 rounded cards",
+      "row": {
+        "y": 1.78,
+        "h": 0.67,
+        "radius": 0.08
+      },
+      "cells": [
+        {
+          "x": 0.51,
+          "w": 3.83,
+          "fill": "bg_soft2",
+          "value_color": "blue"
+        },
+        {
+          "x": 4.5,
+          "w": 3.83,
+          "fill": "bg_soft",
+          "value_color": "navy"
+        },
+        {
+          "x": 8.52,
+          "w": 4.3,
+          "fill": "gold_tint",
+          "value_color": "gold"
+        }
+      ],
+      "label": {
+        "dx": 0.15,
+        "dy": 0.07,
+        "sz": 7.5,
+        "bold": true,
+        "color": "slate2"
+      },
+      "value": {
+        "dx": 0.15,
+        "dy": 0.27,
+        "sz": 16,
+        "bold": true
+      }
+    },
+    "card-panel": {
+      "_note": "soft rounded panel used beside a sidebar in the original",
+      "plate": {
+        "x": 8.08,
+        "y": 2.86,
+        "w": 4.77,
+        "h": 3.98,
+        "fill": "bg_soft"
+      },
+      "head": {
+        "dx": 0.26,
+        "dy": 0.18,
+        "w": 4.1,
+        "h": 0.24,
+        "sz": 14,
+        "bold": true,
+        "color": "navy"
+      },
+      "subhead": {
+        "dx": 0.27,
+        "dy": 0.46,
+        "w": 3.9,
+        "h": 0.16,
+        "sz": 9,
+        "color": "slate"
+      },
+      "table": {
+        "head_row": {
+          "fill": "navy",
+          "h": 0.34,
+          "text_color": "white",
+          "sz": 7.8,
+          "bold": true
+        },
+        "data_row": {
+          "h": 0.37,
+          "sz": 8,
+          "zebra": [
+            "bg_soft2",
+            "white"
+          ],
+          "line": "line"
+        }
+      }
+    },
+    "chart": {
+      "_note": "native pptxgenjs addChart; palette cycles through these fills",
+      "series_colors": [
+        "navy",
+        "gold",
+        "blue",
+        "slate"
+      ],
+      "axis_label_color": "slate",
+      "gridline_color": "line",
+      "plot_x": 0.5,
+      "plot_y": 1.9,
+      "plot_w": 12.3,
+      "plot_h": 4.7,
+      "title": {
+        "sz": 12,
+        "bold": true,
+        "color": "navy"
+      }
+    },
+    "dark-cover": {
+      "_note": "navy full-bleed cover with larger type and gold rule",
+      "bg": "navy",
+      "footer_style": "light_on_dark"
+    },
+    "cover": {
+      "bg": "navy",
+      "footer_style": "light_on_dark",
+      "accent_rule": {
+        "x": 0.65,
+        "y": 2.18,
+        "w": 0.09,
+        "h": 2.25,
+        "fill": "gold",
+        "role": "left_gold_bar"
+      },
+      "elements": [
+        {
+          "role": "eyebrow",
+          "x": 0.98,
+          "y": 2.25,
+          "w": 9.7,
+          "h": 0.3,
+          "sz": 13,
+          "bold": true,
+          "color": "gold",
+          "charSpacing": 2
+        },
+        {
+          "role": "title",
+          "x": 0.98,
+          "y": 2.72,
+          "w": 11.2,
+          "h": 0.9,
+          "sz": 36,
+          "bold": true,
+          "color": "white"
+        },
+        {
+          "role": "subtitle",
+          "x": 1,
+          "y": 3.7,
+          "w": 9.6,
+          "h": 0.42,
+          "sz": 18,
+          "color": "white"
+        },
+        {
+          "role": "rule_under",
+          "x": 0.98,
+          "y": 4.38,
+          "w": 1.15,
+          "h": 0.06,
+          "fill": "gold"
+        },
+        {
+          "role": "tagline",
+          "x": 1,
+          "y": 4.68,
+          "w": 8.8,
+          "h": 0.32,
+          "sz": 10,
+          "bold": true,
+          "color": "white",
+          "charSpacing": 3
+        }
+      ]
+    }
+  },
+  "content_contract": {
+    "_note": "supports archetypes: dark-cover (primary), cover, closing, section, kpi-bar, table, chart, bullets",
+    "deck": {
+      "title": "string",
+      "brand": "MC GROUP",
+      "right_label": "string (default from header_defaults)",
+      "footer_left": "string",
+      "footer_right": "string",
+      "slides": [
+        {
+          "archetype": "cover",
+          "eyebrow": "",
+          "title": "",
+          "subtitle": "",
+          "tagline": ""
+        },
+        {
+          "archetype": "kpi-bar",
+          "title": "",
+          "kicker": "",
+          "subtitle": "",
+          "kpis": [
+            {
+              "value": "",
+              "label": "",
+              "accent": "blue"
+            }
+          ]
+        },
+        {
+          "archetype": "timeline",
+          "title": "",
+          "kicker": "",
+          "subtitle": "",
+          "range": "",
+          "items": [
+            {
+              "date": "",
+              "title": "",
+              "sub": "",
+              "accent": "blue"
+            }
+          ]
+        },
+        {
+          "archetype": "table",
+          "title": "",
+          "kicker": "",
+          "subtitle": "",
+          "stats": [
+            {
+              "label": "",
+              "value": ""
+            }
+          ],
+          "blocks": [
+            {
+              "head": "",
+              "columns": [
+                "",
+                ""
+              ],
+              "rows": [
+                [
+                  "",
+                  "",
+                  ""
+                ]
+              ],
+              "total_row": 0
+            }
+          ]
+        },
+        {
+          "archetype": "section",
+          "eyebrow": "",
+          "title": "",
+          "subtitle": ""
+        },
+        {
+          "archetype": "closing",
+          "eyebrow": "",
+          "title": "THANK YOU",
+          "subtitle": "Questions & Discussion",
+          "tagline": ""
+        },
+        {
+          "archetype": "two-col",
+          "title": "",
+          "kicker": "",
+          "left": {
+            "head": "",
+            "body": ""
+          },
+          "right": {
+            "head": "",
+            "body": ""
+          }
+        },
+        {
+          "archetype": "bullets",
+          "title": "",
+          "kicker": "",
+          "subtitle": "",
+          "items": [
+            ""
+          ]
+        },
+        {
+          "archetype": "chart",
+          "title": "",
+          "kicker": "",
+          "chart": {
+            "type": "bar",
+            "categories": [],
+            "series": [
+              {
+                "name": "",
+                "values": []
+              }
+            ]
+          }
+        },
+        {
+          "archetype": "image",
+          "path": "",
+          "caption": ""
+        }
+      ]
+    }
+  }
+}

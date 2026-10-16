@@ -1,0 +1,29 @@
+{
+  "title": "KPI Wall Demo",
+  "brand": "MC GROUP",
+  "right_label": "SALES DASHBOARD",
+  "footer_left": "MC GROUP  /  KPI WALL",
+  "footer_right": "OCT 2026",
+  "style": "kpi-wall",
+  "slides": [
+    {
+      "archetype": "kpi-wall",
+      "title": "FY27 AI TRAINING",
+      "kicker": "PERFORMANCE BOARD",
+      "subtitle": "All key metrics at a glance",
+      "kpis": [
+        { "value": "100", "label": "EMPLOYEES TRAINED" },
+        { "value": "12", "label": "TEAMS ENABLED" },
+        { "value": "104%", "label": "TARGET ACHIEVED" },
+        { "value": "3", "label": "WINNING SOLUTIONS" },
+        { "value": "80,500", "label": "THB SAVED" },
+        { "value": "25 APR", "label": "PRODUCTION DATE" }
+      ],
+      "chart": {
+        "type": "bar",
+        "categories": ["Finance", "IT", "E-Comm", "Product", "Sales", "Ops"],
+        "series": [{ "name": "Employees", "values": [57, 28, 30, 37, 36, 21] }]
+      }
+    }
+  ]
+}

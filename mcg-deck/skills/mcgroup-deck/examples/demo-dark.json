@@ -1,0 +1,53 @@
+{
+  "title": "Dark Premium Demo",
+  "brand": "MC GROUP",
+  "right_label": "PARTNER PROPOSAL",
+  "footer_left": "MC GROUP  /  PARTNER PROPOSAL",
+  "footer_right": "EXECUTIVE REVIEW  •  OCT 2026",
+  "style": "dark",
+  "slides": [
+    {
+      "archetype": "dark-cover",
+      "eyebrow": "PARTNER PROPOSAL",
+      "title": "AI TRAINING  FY27",
+      "subtitle": "Building capability across 12 functions",
+      "tagline": "ROADMAP  •  INVESTMENT  •  DECISION"
+    },
+    {
+      "archetype": "kpi-bar",
+      "title": "FY27 AI TRAINING",
+      "kicker": "OVERVIEW",
+      "subtitle": "Roadmap / Investment / Decision",
+      "kpis": [
+        { "value": "100", "label": "EMPLOYEES TRAINED", "accent": "blue" },
+        { "value": "10–12", "label": "TEAMS ENABLED", "accent": "gold" },
+        { "value": "1+", "label": "POC PROJECT PER TEAM", "accent": "blue" },
+        { "value": "3", "label": "WINNING SOLUTIONS", "accent": "gold" }
+      ]
+    },
+    {
+      "archetype": "section",
+      "eyebrow": "INVESTMENT",
+      "title": "THREE CANDIDATES",
+      "subtitle": "FELLOW INT.  /  PiR  /  FUTURE SKILLS"
+    },
+    {
+      "archetype": "chart",
+      "title": "FY27 AI TRAINING",
+      "kicker": "COST COMPARISON",
+      "subtitle": "THB per vendor, foundation workshop",
+      "chart": {
+        "type": "bar",
+        "categories": ["FELLOW INT.", "PiR", "FUTURE SKILLS"],
+        "series": [{ "name": "Cost (THB)", "values": [160000, 231000, 120000] }]
+      }
+    },
+    {
+      "archetype": "closing",
+      "eyebrow": "FY27 AI TRAINING",
+      "title": "THANK YOU",
+      "subtitle": "Questions & Discussion",
+      "tagline": "ROADMAP  •  INVESTMENT  •  DECISION"
+    }
+  ]
+}

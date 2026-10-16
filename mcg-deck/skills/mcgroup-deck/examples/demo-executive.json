@@ -1,0 +1,43 @@
+{
+  "title": "Executive Brief Demo",
+  "brand": "MC GROUP",
+  "right_label": "STRATEGY REVIEW",
+  "footer_left": "MC GROUP  /  EXECUTIVE BRIEF",
+  "footer_right": "OCT 2026",
+  "style": "executive",
+  "slides": [
+    {
+      "archetype": "exec-brief",
+      "eyebrow": "STRATEGY REVIEW",
+      "title": "FY27 Performance Snapshot",
+      "body": "Retail sales tracking ahead of plan through the first quarter. Trained 100 employees across 12 teams, with one proof-of-concept project per team and three winning solutions selected for production. The recommendation is to hold the current roadmap and release the second tranche of budget in November.",
+      "kpis": [
+        { "value": "104%", "label": "TARGET ACHIEVED" },
+        { "value": "100", "label": "EMPLOYEES TRAINED" },
+        { "value": "12", "label": "TEAMS ENABLED" },
+        { "value": "3", "label": "WINNING SOLUTIONS" }
+      ]
+    },
+    {
+      "archetype": "exec-brief",
+      "eyebrow": "RISKS",
+      "title": "What Could Move the Number",
+      "body": "Three items sit on the critical path. First, vendor capacity for the Advance workshop must be confirmed by 1 November. Second, the e-commerce channel mix shifted toward marketplace, which carries a higher commission and compresses margin. Third, two functions have not yet named their executive sponsor, which delays their proof-of-concept kickoff into the next quarter.",
+      "kpis": [
+        { "value": "1 Nov", "label": "VENDOR DEADLINE" },
+        { "value": "2", "label": "FUNCTIONS UNSPONSORED" }
+      ]
+    },
+    {
+      "archetype": "exec-brief",
+      "eyebrow": "DECISION REQUESTED",
+      "title": "Approve the Second Tranche",
+      "body": "The executive is asked to approve the second budget tranche and to confirm one sponsor per function. Approval this week keeps the Advance workshop on schedule and holds the savings captured in the vendor comparison.",
+      "dark": true,
+      "kpis": [
+        { "value": "80,500", "label": "THB SAVED" },
+        { "value": "16.6%", "label": "BELOW BASE PROPOSAL" }
+      ]
+    }
+  ]
+}
