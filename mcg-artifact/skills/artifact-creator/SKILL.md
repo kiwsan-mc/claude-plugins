@@ -757,9 +757,9 @@ https://omscdn.mcgroupnet.com/api/images/plm/product-images/{ModelCode}/{categor
 
 - `{category}` is `packshot` or `modelshot`.
 - `{ImageNo}` is usually zero-padded, e.g. `01`.
-- `{ext}` is the stored original extension, e.g. `png`.
+- `{ext}` is the stored original extension, e.g. `png` or `jpg`.
 - `{width}` is a resize parameter; the proxy clamps it to 800.
-- Example: `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XBA10001910/packshot/original/01.png?width=400`
+- Examples, both verified: `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XBA10001910/packshot/original/01.png?width=400` (model folder) and `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XXMSSZ28420/packshot/original/01.jpg?width=400` (colour-base folder, `200 image/webp` on 2026-10-28).
 
 Rules:
 

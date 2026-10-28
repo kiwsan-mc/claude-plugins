@@ -246,9 +246,9 @@ https://omscdn.mcgroupnet.com/api/images/plm/product-images/{ModelCode}/{categor
 
 - `category` = `packshot` หรือ `modelshot`
 - `ImageNo` = เลขที่มีศูนย์นำ เช่น `01`
-- `ext` = นามสกุลไฟล์เดิม เช่น `png`
+- `ext` = นามสกุลไฟล์เดิม เช่น `png` หรือ `jpg`
 - `width` = พารามิเตอร์ย่อรูป สูงสุด 800
-- ตัวอย่าง: `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XBA10001910/packshot/original/01.png?width=400`
+- ตัวอย่างที่ยืนยันแล้ว: `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XBA10001910/packshot/original/01.png?width=400` (โฟลเดอร์รุ่น) และ `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XXMSSZ28420/packshot/original/01.jpg?width=400` (โฟลเดอร์สี `XX…`, ได้ `200 image/webp` วันที่ 2026-10-28)
 
 ⚠️ 404 เป็นเรื่องปกติ (รุ่นอาจมีรูปเดียว) — ต้องมี placeholder ไม่ใช่ไอคอนรูปแตก · ใช้ `width=200–400` ในตาราง · URL ต้องใช้รหัสรุ่น ไม่ใช่ชื่อสินค้า · ถ้าข้อมูลที่ query ได้มี URL รูปอยู่แล้ว ให้ใช้ค่านั้นตรง ๆ (เป็น OMS CDN อยู่แล้ว) · สร้าง URL เองเฉพาะเมื่อมีรหัสรุ่น และห้ามเดานามสกุลไฟล์ · โฟลเดอร์มีหลายแบบ (SKU ตรง, สี `XX…`, รุ่น) ถ้า 404 ห้ามเดา pattern อื่น ให้บอกว่าไม่มีรูป
 
