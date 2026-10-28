@@ -40,6 +40,11 @@ Plugin นี้ **ไม่ประกาศ MCP server ของตัวเ�
 
 ## Version
 
+**v1.1.0** — เพิ่มหัวข้อ 9B รูปสินค้าจาก OMS CDN
+- dashboard แสดงรูป SKU/รุ่นได้ด้วย `https://omscdn.mcgroupnet.com/api/images/plm/product-images/{ModelCode}/{category}/original/{ImageNo}.{ext}?width={width}`
+- ใช้ OMS CDN เท่านั้น (ไม่ hotlink CDN ของ marketplace ที่หมดอายุ) · `width` สูงสุด 800 · ใช้ 200–400 ในตาราง
+- 404 เป็นเรื่องปกติ (รุ่นอาจมีรูปเดียว) ต้องมี placeholder ไม่ให้ไอคอนรูปแตก · ห้ามเดา URL pattern อื่นใน artifact
+
 **v1.0.0** — เปิดตัว พร้อม skill `artifact-creator` v3
 - รวม 12 หัวข้อ: ขั้นตอนถาม/คัดกรอง 4 ขั้น, แพตเทิร์นเทคนิค 8 หัวข้อ, ตารางปัญหาที่พบบ่อยและวิธีแก้, checklist 20 ข้อ, E2E validation
 - cache + auto-invalidation เป็นข้อบังคับ ไม่ใช่ตัวเลือก — เพราะเป็นตัวกัน permission popup โดยตรง

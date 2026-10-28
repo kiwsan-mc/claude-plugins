@@ -8,6 +8,10 @@ MC Group Product Master Analyst Agent plugin for Claude Code / Cowork.
 
 ## Version
 
+**v1.2.20** — เพิ่มหัวข้อ 6.1 รูปสินค้าจาก OMS CDN
+- ใช้ `https://omscdn.mcgroupnet.com/api/images/plm/product-images/{ModelCode}/{category}/original/{ImageNo}.{ext}?width={width}` (`packshot`/`modelshot`, `width` สูงสุด 800)
+- ห้าม hotlink CDN ของ marketplace · 404 เป็นปกติ ต้องมี placeholder และห้ามเดา pattern อื่น
+
 **v1.2.19** — แหล่งมาตรฐานของยอดขาย = Sales Out (mcg-sales)
 - **v1.2.19**: ปิดเคส "ยอดหาย 2.9M" ตามที่ธุรกิจสั่ง: กำหนด **แหล่งมาตรฐานของยอดขาย = "Sales Out" จาก mcg-sales** ในกฎของทุกสกิล (38 ไฟล์) — ถ้าใช้หลายแหล่งต้องเรียกชื่อเป็นภาษาธุรกิจ ("Sales Out (mcg-sales)" · "ยอดขายบริษัท (invoice)") และ **ห้ามพิมพ์ชื่อตาราง/ระบบในคำตอบหรือ footer** (เคสจริง: footer หลุด `mcg_aiplatform_sales` และคำตอบสลับระหว่างฝั่ง invoice 294.02M กับ Sales Out 296.94M) · `target-achievement` เพิ่มกฎ: ยอดขายจริงสำหรับเทียบเป้าใช้ Sales Out + กฎ VAT (เป้า incl VAT vs Sales Out excl VAT ต้องกำกับฐาน) + ห้ามสลับแหล่งกลางคำตอบ + ทุกตารางใช้ช่วงวันที่เดียวกับ Headline
 - **v1.2.18**: ใช้ข้อเสนอ P6: เพิ่ม **trigger eval ให้ครบ 38/38 สกิล** (เดิมมีแค่ 5 ของ inventory) — รวม **655 เคส** (positive 427 · negative 228) · ตรวจแล้ว: JSON ถูกต้องทุกไฟล์ · ไม่มีคำถามซ้ำในไฟล์ · **ไม่มีวลีใดเป็น positive ของมากกว่า 1 สกิล** (ข้อกำหนดสำคัญของการทดสอบ routing) · วลี negatives อ้างสกิลพี่น้อง/ข้ามโดเมนตามจริง · ไม่มีชื่อคอลัมน์/ตาราง/SQL/ตัวเลขสมมติในคำถาม

@@ -1,7 +1,7 @@
 {
   "name": "mcg-artifact",
   "description": "MC Group Artifact Builder — สร้าง dashboard/monitor เป็น Cowork artifact ที่ดึงข้อมูลผ่าน MCP, cache ใน localStorage และวาดกราฟด้วย Chart.js พร้อมแพตเทิร์นที่ผ่านการใช้งานจริง (กัน permission popup, กัน silent timeout, รูปแบบวันที่/ตัวเลข, CSS มาตรฐาน, checklist 20 ข้อ). ใช้เมื่อ user ขอ dashboard, monitor, artifact, กราฟ, รายงานแบบ interactive หรือหน้าที่ refresh ข้อมูลเองได้",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "MC Group AI Platform",
     "email": "ai-platform@mcjeans.com"

@@ -747,6 +747,31 @@ tr:hover td { background: #fafafa; }
  
 ---
  
+## 9B. Product Images (OMSCDN)
+
+When the dashboard shows a SKU or a model, take the image from the OMS CDN. Never hotlink a marketplace CDN (TikTok/Shopee/Lazada): those URLs expire and are not stable enough for a cached artifact.
+
+```text
+https://omscdn.mcgroupnet.com/api/images/plm/product-images/{ModelCode}/{category}/original/{ImageNo}.{ext}?width={width}
+```
+
+- `{category}` is `packshot` or `modelshot`.
+- `{ImageNo}` is usually zero-padded, e.g. `01`.
+- `{ext}` is the stored original extension, e.g. `png`.
+- `{width}` is a resize parameter; the proxy clamps it to 800.
+- Example: `https://omscdn.mcgroupnet.com/api/images/plm/product-images/XBA10001910/packshot/original/01.png?width=400`
+
+Rules:
+
+- A 404 is normal — a model can carry only one image. Render with `loading="lazy"` and `onerror="this.style.display='none'"`, or swap in a placeholder, so a broken-image icon never appears.
+- Use `width=200`–`400` for table thumbnails; `800` is the cap.
+- The URL needs the model code, not the product name.
+- If the query already returns an image URL, use it as-is — it is already an OMS CDN URL. Build the URL from the rule only when you have the model code, and do not guess the extension.
+- The path is case-sensitive and the folder shape varies (exact SKU, colour base `XX…`, or model). If one URL 404s, do not invent another pattern inside the artifact; show the placeholder and report that the image is missing.
+- The proxy answers WebP. That is fine for `<img>`; it is not fine as an upload source for a channel.
+
+---
+
 ## 10. Known Issues and Troubleshooting Flow
  
 | Symptom | Likely Cause | Fix |
