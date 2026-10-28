@@ -23,6 +23,10 @@ tools:
   - mcp__e-commerce-mcp__tiktok_ads_list_advertisers
   - mcp__e-commerce-mcp__tiktok_ads_get_advertiser
   - mcp__e-commerce-mcp__tiktok_ads_get_report
+  - mcp__e-commerce-mcp__tiktok_ads_get_sales_performance
+  - mcp__e-commerce-mcp__tiktok_ads_get_gmv_max_performance
+  - mcp__e-commerce-mcp__tiktok_ads_get_shop_orders_overview
+  - mcp__e-commerce-mcp__tiktok_ads_get_daily_history
   - mcp__e-commerce-mcp__tiktok_ads_search_campaigns
   - mcp__e-commerce-mcp__tiktok_ads_search_adgroups
   - mcp__e-commerce-mcp__tiktok_ads_search_ads
@@ -63,11 +67,11 @@ tools:
 
 | | TikTok Ads | Shopee Ads |
 |---|---|---|
-| ยอดขายจากแอด (GMV) | ⚠️ **มีเฉพาะแคมเปญ GMV Max** และเป็นมุมเดียว ไม่มี direct/broad | ✅ **มี** (`direct_gmv` / `broad_gmv`) |
-| ROAS | ⚠️ มีเฉพาะระดับบัญชี · ต่ำกว่านั้นเป็น "ไม่มีข้อมูล" | ✅ **มี** ทั้ง `direct_roas` และ `broad_roas` |
-| จำนวนออเดอร์จากแอด | ❌ | ✅ `direct_order` / `broad_order` |
+| ยอดขายจากแอด (GMV) | ⚠️ **มีเฉพาะแคมเปญ GMV Max** (`tiktok_ads_get_gmv_max_performance`) และเป็นมุมเดียว ไม่มี direct/broad | ✅ **มี** (`direct_gmv` / `broad_gmv`) |
+| ROAS | ⚠️ ระดับบัญชีจาก AUCTION report · GMV Max คำนวณจาก GMV/cost เอง | ✅ **มี** ทั้ง `direct_roas` และ `broad_roas` |
+| จำนวนออเดอร์จากแอด | ⚠️ **GMV Max เท่านั้น** (`orders`) — แคมเปญ AUCTION ไม่มี metric นี้ | ✅ `direct_order` / `broad_order` |
 | หน่วยที่ขายได้จากแอด | ❌ | ✅ `direct_item_sold` / `broad_item_sold` |
-| ค่าโฆษณาต่อออเดอร์ | ⚠️ metric ถูกปฏิเสธ | ✅ `cost_per_conversion` |
+| ค่าโฆษณาต่อออเดอร์ | ⚠️ GMV Max: คำนวณจาก cost/orders · metric ตรง ๆ ถูกปฏิเสธ | ✅ `cost_per_conversion` |
 | การแยก direct / broad | ❌ | ✅ ทุกตัวเลขมีสองมุม |
 | การแสดงผลรายชั่วโมง | ❌ มีแค่วัน | ✅ ทั้งระดับร้านและระดับแคมเปญ |
 | ชื่อแคมเปญ | ✅ | ✅ (ผ่านการตั้งค่าแคมเปญ) |
@@ -101,7 +105,7 @@ tools:
 
 ▸ ✅ **ยอดขายที่ใช้คู่กับงบโฆษณา ให้ใช้ยอดที่แพลตฟอร์มโฆษณา attribut ให้เอง**
 - **Shopee** — `direct_gmv` หรือ `broad_gmv` พร้อมบอกว่าใช้ตัวไหน
-- **TikTok แคมเปญ GMV Max** — มี GMV ของตัวเองจากรายงาน GMV Max ให้ใช้ตัวนั้น และบอกว่าเป็น **GMV ของ GMV Max ไม่ใช่ของทั้งบัญชี**
+- **TikTok แคมเปญ GMV Max** — ใช้ `tiktok_ads_get_gmv_max_performance` (GMV และจำนวนออเดอร์ของแคมเปญ) และบอกว่าเป็น **GMV ของ GMV Max ไม่ใช่ของทั้งบัญชี**
 - **TikTok แคมเปญอื่น** — ไม่มี GMV ให้ใช้ **ROAS × งบ** เป็นการประมาณ และ**ต้องติดป้ายว่าประมาณ**
 
 ▸ ✅ **ยอดขายระดับบริษัท** ให้ใช้แหล่งยอดขายบริษัท — skill นี้**ไม่ใช่ที่ตอบคำถามนั้น** ถ้าถูกถามยอดขายรวม/ยอดขายบริษัท ให้ส่งต่อ `mcg-sales-agent` 🚫 ห้ามประกอบเองจากออเดอร์ที่นี่
@@ -252,19 +256,21 @@ tools:
 
 1. `tiktok_ads_list_advertisers` → advertiser id (ว่าง = ยังไม่มีใคร authorize)
 2. `tiktok_ads_get_advertiser` → ชื่อบัญชี, **สกุลเงิน**, timezone, สถานะ — ต้องรู้สกุลเงินก่อนพูดถึงเงิน
-3. `tiktok_ads_get_report` → ตัวเลขหลัก (ดูข้อควรระวังด้านล่าง)
-4. `tiktok_ads_search_campaigns` / `search_adgroups` → โครงสร้างและสถานะ
-5. `tiktok_ads_list_pixels` / `search_audiences` → สุขภาพการวัดผล
+3. `tiktok_ads_get_sales_performance` → ภาพรวมแคมเปญ AUCTION: spend, impressions, clicks, CTR, CPC, CPM, GMV, ROAS, paid orders, conversions พร้อม totals และรายวัน
+4. `tiktok_ads_get_gmv_max_performance` → **GMV Max**: cost, GMV และ **จำนวนออเดอร์** ต่อแคมเปญ พร้อม totals — นี่คือกลุ่มที่มี spend ส่วนใหญ่ของบัญชี
+5. `tiktok_ads_get_shop_orders_overview` → GMV Max เทียบออเดอร์จริงของร้านตาม (ร้าน, วัน) พร้อมสัดส่วนที่แอดได้เครดิต
+6. `tiktok_ads_get_daily_history` → ประวัติรายวันจาก snapshot — เร็วและไม่ติด rate limit ใช้เมื่อดูหลายวันหรือเทียบย้อนหลัง
+7. `tiktok_ads_get_report` → เมื่อต้องการ dimension/metric ที่ไม่อยู่ในชุดสำเร็จ (คืน `campaignNames` เมื่อมี `campaign_id`)
+8. `tiktok_ads_search_campaigns` / `search_adgroups` / `search_ads` → โครงสร้าง สถานะ และชื่อ
+9. `tiktok_ads_list_pixels` / `search_audiences` → สุขภาพการวัดผล
 
-**เพิ่มเติมผ่าน `tiktok_ads_read`** — อีก 100 กว่ารายการที่ต่อไว้ แต่ **ใช้แค่ห้าตัวนี้** ที่เกี่ยวกับงานรีวิวโฆษณา
+**เพิ่มเติมผ่าน `tiktok_ads_read`** — เฉพาะที่ยังไม่มี tool เฉพาะ
 
-6. `gmv_max/report/get` → **GMV ของ TikTok Shop** ต่อแคมเปญ พร้อมค่าโฆษณาและจำนวนออเดอร์ — ต้องมี store id จาก `gmv_max/store/list` ก่อน
-7. `gmv_max/store/list` → ร้านที่ยิง GMV Max ได้ พร้อม store id
-8. `gmv_max/store/shop_ad_usage_check` → ร้านนี้กำลังใช้โฆษณาแบบ custom shop ads อยู่ไหม และเปิดให้โปรโมทสินค้าทั้งร้านหรือไม่
-9. `pixel/event/stats` → **pixel ยังยิง event เข้ามาไหม** ไม่ใช่แค่ว่ามี pixel — คนละคำถามกับ `list_pixels`
-10. `dmp/saved_audience/list` → กลุ่มเป้าหมายที่บันทึกไว้ พร้อมเงื่อนไขที่ใช้สร้าง
+10. `gmv_max/store/shop_ad_usage_check` → ร้านนี้กำลังใช้โฆษณาแบบ custom shop ads อยู่ไหม และเปิดให้โปรโมทสินค้าทั้งร้านหรือไม่
+11. `pixel/event/stats` → **pixel ยังยิง event เข้ามาไหม** ไม่ใช่แค่ว่ามี pixel — คนละคำถามกับ `list_pixels`
+12. `dmp/saved_audience/list` → กลุ่มเป้าหมายที่บันทึกไว้ พร้อมเงื่อนไขที่ใช้สร้าง
 
-🚫 **อย่าใช้ `tiktok_ads_read` เปิดกว้างทั้งชุด** — 100 กว่ารายการที่เหลือเป็นตารางอ้างอิง ข้อมูลบัญชี และของที่บัญชีนี้ไม่มี ถ้าถูกถามสิ่งที่ไม่อยู่ในห้าข้อนี้ ให้บอกว่าไม่มีข้อมูล ดีกว่าไปควานหา
+🚫 **อย่าใช้ `tiktok_ads_read` เปิดกว้างทั้งชุด** — 100 กว่ารายการที่เหลือเป็นตารางอ้างอิง ข้อมูลบัญชี และของที่บัญชีนี้ไม่มี ถ้าถูกถามสิ่งที่ไม่อยู่ในรายการนี้ ให้บอกว่าไม่มีข้อมูล ดีกว่าไปควานหา
 
 ## ข้อควรระวังเวลายิง (วัดมาแล้ว ไม่ใช่เดา)
 
@@ -279,19 +285,23 @@ tools:
 - ร้าน Mc Jeans มีแคมเปญหลายพันรายการ ส่วนใหญ่ไม่มีการใช้เงิน — **ต้องดู spend ก่อน**
 
 **TikTok:**
+- ⚠️ **สองรายงานไม่ใช่ชุดเดียวกัน** — `tiktok_ads_get_sales_performance` (AUCTION) กับ `tiktok_ads_get_gmv_max_performance` (GMV Max) คนละ population. วัด 2026-10-20..27: AUCTION เห็น spend 5,215.52 ขณะ GMV Max มี 181,382.27 — **97% ของ spend อยู่ใน GMV Max** 🚫 ห้ามใช้ตัวใดตัวหนึ่งแทน "spend ทั้งบัญชี" และห้ามบวกสองตัวโดยไม่ยืนยันว่าแต่ละแคมเปญนับครั้งเดียว
 - `metrics` ที่ไม่รู้จักถูกปฏิเสธทั้งคำขอ (ไม่ใช่ข้าม) — error จะบอกชื่อที่ผิด ตัดออกแล้วยิงใหม่
-- ชุดที่ใช้ได้: `spend` `impressions` `clicks` `ctr` `cpc` `cpm` `reach` `frequency` `onsite_shopping_roas`
-- ชุดที่ถูกปฏิเสธ — 🚫 อย่าเสียเทิร์นลอง: `onsite_gmv` `onsite_complete_payment`
-- `conversion` `complete_payment` ผ่านแต่คืน 0 เพราะ pixel ไม่มี event การซื้อ
+- ชุดที่ใช้ได้ใน AUCTION: `spend` `impressions` `clicks` `ctr` `cpc` `cpm` `reach` `frequency` `onsite_shopping_roas` `total_onsite_shopping_value` `total_purchase_value` `conversion` `complete_payment`
+- ชุดที่ถูกปฏิเสธ — 🚫 อย่าเสียเทิร์นลอง: `onsite_gmv` `onsite_complete_payment` `gross_revenue` `onsite_shopping_order`
+- `conversion` `complete_payment` ผ่านแต่คืน 0 เพราะ pixel ไม่มี event การซื้อ — จำนวนออเดอร์ที่เชื่อได้คือ `orders` จาก GMV Max
 - `data_level` ต้องคู่กับ `dimensions`: `AUCTION_ADVERTISER`+`stat_time_day` · `AUCTION_CAMPAIGN`+`campaign_id` · `AUCTION_ADGROUP`+`adgroup_id`
 - **ผลลัพธ์เรียงไม่ตามวันที่** — ต้องเรียงเองก่อนทำตาราง
 - ช่วงเกิน 30 วัน tool แบ่งให้อัตโนมัติ
+- **GMV Max**: metric ที่ใช้ได้ `cost` `gross_revenue` `orders` · dimension หลัก `campaign_id` (1 ตัว) · `ad_id` และ `store_id` ถูกปฏิเสธ
+- GMV Max เรียกถี่แล้วได้ `40000` หรือ `40100` มาใน HTTP 200 — tool retry ให้เอง แต่การยิงรัวในไม่กี่วินาทีจะช้า
+- `tiktok_ads_get_daily_history` อ่านจาก snapshot รายคืน — ข้อมูลเมื่อวานจะยังไม่ครบถ้ารอบ sync ยังไม่ทำงาน
 
 **`tiktok_ads_read` (วัดมาแล้ว):**
 - เส้นทางที่ส่งได้มี **ลิสต์ตายตัว** — ส่งเส้นทางที่ไม่อยู่ในลิสต์จะถูกปฏิเสธ ถ้าไม่แน่ใจให้เรียก `tiktok_ads_list_read_endpoints` ดูรายการ ไม่ใช่เดาชื่อ
 - ค่าที่ส่งไปเป็น **JSON object** เช่น `{"store_id":"..."}` — ค่าเป็นตัวเลขล้วนได้ แต่ id ต้องเป็นข้อความในเครื่องหมายคำพูด
 - ค่าที่หายไปจากคำตอบ **ไม่เท่ากับศูนย์** — เช่นเดียวกับกฎทั่วไป
-- `gmv_max/report/get` รับมิติหลักได้ **1 ตัว** — ส่งสองตัวพร้อมกันถูกปฏิเสธ
+- `gmv_max/report/get` รับมิติหลักได้ **1 ตัว** — ส่งสองตัวพร้อมกันถูกปฏิเสธ (ปกติใช้ `tiktok_ads_get_gmv_max_performance` แทน ไม่ต้องเรียกเอง)
 - ยอดคงเหลือของ TikTok **อ่านไม่ได้** — ถูกปฏิเสธที่ชั้นบัญชี ไม่ใช่ที่ tool และไม่ใช่เพราะ authorization → 🚫 ห้ามรายงานว่า "ยอดคงเหลือเป็น 0" ให้บอกว่าดูไม่ได้
 - คำตอบเป็น JSON ดิบที่ **มีชื่อ field ติดมาทั้งก้อน** — ต้องแปลงเป็นคำธุรกิจก่อนเขียน 🚫 ห้ามยกก้อน JSON หรือชื่อ field ลงในคำตอบ
 
@@ -400,7 +410,7 @@ tools:
 | ที่เชื่อม ad ↔ SKU | ❌ ยังไม่มีทั้งสองช่องทาง |
 | ROAS รายแคมเปญบน TikTok | ⚠️ มักไม่มี — มีค่าเฉพาะบางแคมเปญ ต้องอ่านค่าจริง |
 | ยอดคงเหลือบัญชีโฆษณา TikTok | ❌ ดูไม่ได้ — ถูกปฏิเสธที่ชั้นบัญชี (ชนิดบัญชีไม่รองรับ) ไม่ใช่ปัญหาสิทธิ์ |
-| GMV ของ TikTok | ⚠️ มีเฉพาะแคมเปญ GMV Max · แคมเปญอื่นยังต้องประมาณจาก ROAS × งบ |
+| GMV ของ TikTok | ⚠️ มีเฉพาะแคมเปญ GMV Max (tool เฉพาะ) · แคมเปญ AUCTION ยังต้องประมาณจาก ROAS × งบ |
 | ผลรายแคมเปญของ Shopee | ⚠️ แคมเปญที่ดูมายังไม่พบที่มียอด — ถ้าทุกแถวเป็นศูนย์ ให้รายงานว่า "ยังไม่พบแคมเปญที่มียอด" ไม่ใช่ "ไม่มีผลงาน" |
 | แคมเปญแบบ GMS ของ Shopee | ❌ ถูกจำกัดการเรียกไว้ ยังอ่านไม่ได้ |
 | ความสดของข้อมูล | ⚠️ ฝั่งออเดอร์เป็น snapshot ที่ sync มา อาจตามหลังไม่กี่นาที |
