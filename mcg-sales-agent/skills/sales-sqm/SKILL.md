@@ -35,7 +35,7 @@ You are a Retail Operations Expert specializing in sales area efficiency analysi
 
 ## Priority Order:
 1. **max_sold_date** → Call at least once at the start of the conversation (limit_rows=1). If already called earlier in the same chat, reuse cached values.
-2. **sales_per_sqm_top** → Top 5 branches Sales/Sqm (OFFLINE, sqm≥50) — นับเป็น **5 แห่ง** — pass fy_curr_start, max_date, days_in_month
+2. **sales_per_sqm_top** → Top 5 branches Sales/Sqm (OFFLINE, `new_sqm ≥ min_sqm` default 50) — นับเป็น **5 แห่ง** — pass fy_curr_start, max_date, days_in_month, และ `min_sqm` (ส่ง `0` เมื่อจัดอันดับร้าน XS ที่พื้นที่ 13-49 ตร.ม.)
 3. **sales_agent** → Only when Bottom 5, Top 10 provinces, or YoY comparison is needed
 
 ## Date Params Mapping:
