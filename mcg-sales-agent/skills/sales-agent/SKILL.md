@@ -644,11 +644,36 @@ SUM(CASE WHEN member_type = 'Member' THEN total_exc_vat_price ELSE 0 END)::float
 / NULLIF(SUM(total_exc_vat_price)::float, 0) * 100
 ```
 
-### Branch Sales per Sqm (FIXED: filter new_sqm >= 50)
+### Branch Sales per Sqm
 ```sql
 SUM(total_exc_vat_price)::float / NULLIF(SUM(new_sqm)::float, 0)
--- WHERE main_channel = 'OFFLINE' AND new_sqm >= 50
+-- WHERE main_channel = 'OFFLINE'
 ```
+`sales_per_sqm_top` ตัดร้านที่ `new_sqm < min_sqm` (default 50) — ร้าน XS (13-49 ตร.ม.) ไม่โผล่ในอันดับปกติ
+ถ้าถามถึงร้าน XS ให้ส่ง `min_sqm = 0` และบอกเกณฑ์พื้นที่ที่ใช้ในคำตอบเสมอ
+
+### Rolling Window Average (N เดือน)
+นับถอยหลังจาก `max_date` เป็น N เดือนเต็ม — ตัดเดือนที่ยังไม่ครบก่อนหารเฉลี่ย
+ถ้าต้องรวมเดือนไม่ครบ ให้ annualize ด้วยสัดส่วนวันที่มีข้อมูล แล้วระบุว่า annualized
+
+```sql
+WITH m AS (
+  SELECT date_trunc('month', sold_date)::date AS month,
+         SUM(total_exc_vat_price::numeric) AS net_sales,
+         SUM(total_quantity) AS qty
+  FROM mcg_aiplatform_sales
+  WHERE branch_code = 'D060'
+    AND sold_date >= '2025-11-01' AND sold_date <= '2026-10-27'
+  GROUP BY 1
+)
+SELECT month, ROUND(net_sales) AS net_sales, qty,
+       (month + INTERVAL '1 month - 1 day')::date
+         > (SELECT MAX(sold_date) FROM mcg_aiplatform_sales) AS is_partial
+FROM m ORDER BY month
+```
+
+ตอบด้วย **total + avg ของเดือนเต็ม + ช่วงต่ำสุด-สูงสุด** เสมอ ไม่ใช่ค่าเฉลี่ยเดี่ยว
+`is_partial = true` ห้ามนำไปหารเฉลี่ย
 
 ### YoY Growth
 `(FY27 - FY26) / NULLIF(FY26, 0) * 100`
@@ -660,6 +685,41 @@ Discount: ≤40%=🟢, 40-50%=🟡, >50%=🔴
 Margin: ≥60%=🟢, 50-<60%=🟡, <50%=🔴
 YoY: >1%=🟢, 0-1%=🟡, ≤0%=🔴
 Member Ticket% (SHOP): ≥80%=🟢, 75-79%=🟡, <75%=🔴
+
+## 12.1 "ขายดีไหม" — ต้องมีเกณฑ์เทียบ (CRITICAL)
+ห้ามตัดสิน ดี/ไม่ดี จากตัวเลขเดียว เลือกอย่างน้อย 2 เกณฑ์ใน 4 แล้วบอกเกณฑ์ที่ใช้ทุกครั้ง
+
+| เกณฑ์ | วัด | ต้องรายงาน |
+|---|---|---|
+| อันดับยอดขาย | อันดับในสาขาทั้งหมดช่วงเดียวกัน | อันดับ / จำนวนสาขา |
+| ยอดต่อ ตร.ม. | เทียบ peer `cluster` เดียวกัน | ค่าเรา · ค่าเฉลี่ย peer · อันดับ |
+| YoY | ช่วงเดียวกันปีก่อน (§5.3.1) | % ตาม §12 |
+| เป้า | ❌ ไม่มีใน platform นี้ | ส่ง mcg-target-agent (§15) |
+
+ถ้าไม่มีสาขา/สินค้า/ช่วงเวลา → ถามกลับก่อน ไม่เดา
+ถ้า runtime ไม่มี tool ถามกลับ (เช่น OpenCode) ให้ถามเป็นข้อความพร้อม 2-4 ตัวเลือก แทนการเดา
+
+```sql
+WITH per AS (
+  SELECT branch_code, MAX(new_sqm)::numeric AS sqm, MAX(cluster) AS cluster,
+         SUM(total_exc_vat_price::numeric) AS ns
+  FROM mcg_aiplatform_sales
+  WHERE sold_date BETWEEN '2026-07-01' AND '2026-10-27'
+  GROUP BY branch_code
+), r AS (
+  SELECT *, RANK() OVER (ORDER BY ns DESC) AS rank_sales,
+            RANK() OVER (ORDER BY ns / NULLIF(sqm,0) DESC) AS rank_spm,
+            COUNT(*) OVER () AS n
+  FROM per WHERE sqm > 0
+)
+SELECT branch_code, ROUND(ns) AS ns, sqm, cluster, rank_sales, rank_spm, n,
+       ROUND(ns / NULLIF(sqm,0)) AS spm,
+       (SELECT ROUND(AVG(p2.ns / NULLIF(p2.sqm,0)))
+        FROM per p2 WHERE p2.cluster = r.cluster AND p2.sqm > 0) AS peer_avg_spm
+FROM r WHERE branch_code = 'D060'
+```
+
+ปิดท้ายด้วย "เกณฑ์ที่ใช้: ..." เพื่อให้เทียบข้ามคำถามได้
 
 ---
 
