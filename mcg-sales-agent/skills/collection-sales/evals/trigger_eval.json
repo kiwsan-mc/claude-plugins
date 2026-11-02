@@ -60,6 +60,26 @@
     "should_trigger": true
   },
   {
+    "query": "collection MT ขายดีมั้ย",
+    "should_trigger": true
+  },
+  {
+    "query": "collection MT ขายดีไหม",
+    "should_trigger": true
+  },
+  {
+    "query": "MT ขายได้เท่าไหร่",
+    "should_trigger": true
+  },
+  {
+    "query": "คอลเลคชั่น MT เป็นไงบ้าง",
+    "should_trigger": true
+  },
+  {
+    "query": "MT collection sales performance in the last 3 months",
+    "should_trigger": true
+  },
+  {
     "query": "ยอดขายน้ำหอม 3 เดือนล่าสุด",
     "should_trigger": false
   },
